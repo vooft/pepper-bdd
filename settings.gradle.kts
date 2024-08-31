@@ -1,9 +1,9 @@
 rootProject.name = "pepper-bdd"
 
 include(
-    ":pepper-bdd-core"
+    ":pepper-bdd-core",
+    ":pepper-bdd-sample"
 )
-
 
 includeBuild("pepper-bdd-gradle") {
     dependencySubstitution {

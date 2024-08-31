@@ -13,6 +13,9 @@ plugins {
     id("org.jmailen.kotlinter")
 }
 
+group = "io.github.vooft"
+version = System.getenv("TAG") ?: "1.0-SNAPSHOT"
+
 dependencies {
     addPlatform(project, platform("org.jetbrains.kotlin:kotlin-bom:${getKotlinPluginVersion()}"))
 }
@@ -28,8 +31,8 @@ tasks.withType<Detekt> {
 }
 
 tasks.withType<JavaCompile> {
-    sourceCompatibility = "21"
-    targetCompatibility = "21"
+    sourceCompatibility = "11"
+    targetCompatibility = "11"
 }
 
 tasks.withType<Test> {
@@ -61,7 +64,7 @@ tasks.withType<KotlinCompile> {
     compilerOptions {
         freeCompilerArgs.addAll("-Xjsr305=strict", "-Xcontext-receivers")
         allWarningsAsErrors = true
-        jvmTarget.set(JvmTarget.JVM_21)
+        jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 

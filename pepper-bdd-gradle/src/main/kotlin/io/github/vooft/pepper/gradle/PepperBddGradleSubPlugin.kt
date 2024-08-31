@@ -24,12 +24,12 @@ class PepperBddGradleSubPlugin : KotlinCompilerPluginSupportPlugin {
         target.extensions.create("pepper", PepperBddExtension::class.java)
     }
 
-    override fun getCompilerPluginId(): String = "io.github.vooft.pepper-bdd"
+    override fun getCompilerPluginId(): String = "io.github.vooft.pepper-bdd-compiler"
 
     override fun isApplicable(kotlinCompilation: KotlinCompilation<*>) = true
 
     override fun getPluginArtifact(): SubpluginArtifact = SubpluginArtifact(
-        groupId = "io.github.vooft.pepper-bdd",
+        groupId = "io.github.vooft",
         artifactId = "pepper-bdd-compiler-plugin",
         version = "1.0-SNAPSHOT",
     )

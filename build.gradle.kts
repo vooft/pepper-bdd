@@ -1,9 +1,18 @@
-allprojects {
-    group = "io.github.vooft"
-    version = System.getenv("TAG") ?: "1.0-SNAPSHOT"
+plugins {
+    `pepper-bdd-base`
+}
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("io.github.vooft:pepper-bdd-gradle")
+    }
+}
+
+allprojects {
     repositories {
         mavenCentral()
     }
 }
-

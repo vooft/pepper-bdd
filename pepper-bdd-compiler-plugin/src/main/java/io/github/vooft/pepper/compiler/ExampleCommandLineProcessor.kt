@@ -1,16 +1,14 @@
-package de.jensklingenberg
+package io.github.vooft.pepper.compiler
 
-import com.google.auto.service.AutoService
 import org.jetbrains.kotlin.compiler.plugin.AbstractCliOption
 import org.jetbrains.kotlin.compiler.plugin.CliOption
 import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.CompilerConfigurationKey
 
-@AutoService(CommandLineProcessor::class) // don't forget!
 class ExampleCommandLineProcessor : CommandLineProcessor {
 
-    override val pluginId: String = "helloWorldPlugin"
+    override val pluginId: String = "io.github.vooft.pepper-bdd-compiler"
 
     override val pluginOptions: Collection<CliOption> = listOf(
         CliOption(
