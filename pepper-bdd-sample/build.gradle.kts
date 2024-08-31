@@ -8,3 +8,7 @@ plugins {
 
 pepper {
 }
+
+dependencies {
+    testImplementation(libs.kotest.runner)
+}
