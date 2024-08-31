@@ -6,6 +6,9 @@ kotest = "5.9.1"
 
 kotest-framework-api = { module = "io.kotest:kotest-framework-api", version.ref = "kotest" }
 
+kotlin-gradle-plugin-api = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlin" }
+kotlin-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
+
 kotlin-logging = { module = "io.github.oshai:kotlin-logging-jvm", version = "7.0.0" }
 slf4j-simple = { module = "org.slf4j:slf4j-simple", version = "2.0.16" }
 
