@@ -6,7 +6,7 @@ import org.jetbrains.kotlin.compiler.plugin.CommandLineProcessor
 import org.jetbrains.kotlin.config.CompilerConfiguration
 import org.jetbrains.kotlin.config.CompilerConfigurationKey
 
-class ExampleCommandLineProcessor : CommandLineProcessor {
+class PepperBddCommandLineProcessor : CommandLineProcessor {
 
     override val pluginId: String = "io.github.vooft.pepper-bdd-compiler"
 

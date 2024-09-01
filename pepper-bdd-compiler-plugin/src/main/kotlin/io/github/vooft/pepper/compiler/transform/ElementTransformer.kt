@@ -61,7 +61,6 @@ internal class ElementTransformer(
 //            +irReturn(irCall)
 //        }
 
-        expression.transform(CreateFuncTransformer(pluginContext, debugLogger), null)
         return super.visitCall(expression)
     }
 }

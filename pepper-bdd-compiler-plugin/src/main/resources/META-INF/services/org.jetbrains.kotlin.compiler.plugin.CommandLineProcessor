@@ -1,1 +1,1 @@
-io.github.vooft.pepper.compiler.ExampleCommandLineProcessor
+io.github.vooft.pepper.compiler.PepperBddCommandLineProcessor

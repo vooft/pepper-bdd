@@ -1,6 +1,6 @@
 package io.github.vooft.pepper.compiler
 
-import io.github.vooft.pepper.compiler.transform.ExampleIrGenerationExtension
+import io.github.vooft.pepper.compiler.transform.PepperBddIrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.cli.common.config.kotlinSourceRoots
 import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
@@ -29,7 +29,7 @@ class PepperBddComponentRegistrar : CompilerPluginRegistrar() {
 
         val logging = true
         IrGenerationExtension.registerExtension(
-            ExampleIrGenerationExtension(DebugLogger(debug = logging, messageCollector = messageCollector))
+            PepperBddIrGenerationExtension(DebugLogger(debug = logging, messageCollector = messageCollector))
         )
     }
 }
