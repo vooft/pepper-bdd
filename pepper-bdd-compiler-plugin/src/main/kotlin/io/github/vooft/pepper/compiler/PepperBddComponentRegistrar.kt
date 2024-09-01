@@ -9,7 +9,7 @@ import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.jetbrains.kotlin.config.CommonConfigurationKeys
 import org.jetbrains.kotlin.config.CompilerConfiguration
 
-class CommonComponentRegistrar : CompilerPluginRegistrar() {
+class PepperBddComponentRegistrar : CompilerPluginRegistrar() {
 
     override val supportsK2: Boolean
         get() = true
@@ -29,7 +29,7 @@ class CommonComponentRegistrar : CompilerPluginRegistrar() {
 
         val logging = true
         IrGenerationExtension.registerExtension(
-            ExampleIrGenerationExtension(DebugLogger(logging, messageCollector))
+            ExampleIrGenerationExtension(DebugLogger(debug = logging, messageCollector = messageCollector))
         )
     }
 }

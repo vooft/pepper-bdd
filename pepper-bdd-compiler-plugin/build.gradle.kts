@@ -9,6 +9,9 @@ repositories {
 
 dependencies {
     implementation(libs.kotlin.compiler.embeddable)
+
+    testImplementation(libs.kotest.runner)
+    testImplementation(libs.kotlin.compile.testing)
 }
 
 kotlin {
