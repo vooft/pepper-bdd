@@ -1,27 +1,13 @@
 package io.github.vooft.pepper.sample
 
-import kotlin.annotation.AnnotationTarget.FUNCTION
+import io.github.vooft.pepper.Given
+import io.github.vooft.pepper.PepperSpec
 
-@Target(FUNCTION)
-annotation class Test
-
-@Test
-fun testA() {
-    println("a")
-}
-
-@Test
-fun testB() {
-    println("b")
-}
-
-class PepperSampleSpec {
-    fun test() {
-        testA()
-        testB()
-    }
-}
+class PepperSampleSpec : PepperSpec({
+    Given
+    println("hello")
+})
 
 fun main() {
-    PepperSampleSpec().test()
+    PepperSampleSpec()
 }

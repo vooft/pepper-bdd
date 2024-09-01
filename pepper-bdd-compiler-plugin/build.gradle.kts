@@ -4,7 +4,6 @@ plugins {
 }
 
 dependencies {
-    implementation(project(":pepper-bdd-api"))
     implementation(libs.kotlin.compiler.embeddable)
 
     testImplementation(libs.kotest.runner)

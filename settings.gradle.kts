@@ -1,7 +1,6 @@
 rootProject.name = "pepper-bdd"
 
 include(
-    ":pepper-bdd-api",
     ":pepper-bdd-core",
     ":pepper-bdd-sample",
     ":pepper-bdd-compiler-plugin"

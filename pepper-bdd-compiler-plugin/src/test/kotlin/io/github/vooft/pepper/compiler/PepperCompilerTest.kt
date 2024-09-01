@@ -10,42 +10,38 @@ import org.junit.jupiter.api.Assertions.assertEquals
 class PepperCompilerTest : FunSpec({
     test("test") {
         // language=kotlin
-        val target = """
-            fun main() {
-                val valGiven = kotlin.run {
-                    println("given")
-                    testGiven()
-                }
-            
-                val valWhen = kotlin.run {
-                    println("when")
-                    testWhen(valGiven)
-                }
-            }
-            
-            fun testGiven() = 1
-            fun testWhen(param: Int)= param + 1
+        val spec = """
+            package io.github.vooft.pepper.dsl
+
+            interface PepperSpecDsl
         """.trimIndent()
 
         // language=kotlin
-        val source = """
-            fun main() {
-                Given@ val valGiven = testGiven()
-           
-                When@ val valWhen = testWhen(valGiven)
-    
-                Then@ testThen(valGiven, valWhen)
+        val dsl = """
+            package io.github.vooft.pepper
+
+            open class PepperSpec : io.github.vooft.pepper.dsl.PepperSpecDsl {
+                init {
+                    Given
+                    println("hello")
+                }
             }
-            
-            fun testGiven() = 1
-            fun testWhen(param: Int)= param + 1
-            fun testThen(before: Int, after: Int) = require(before < after)
+
+            val io.github.vooft.pepper.dsl.PepperSpecDsl.Given: Unit get() = error("bla")
+            val io.github.vooft.pepper.dsl.PepperSpecDsl.When: Unit get() = error("bla")
+            val io.github.vooft.pepper.dsl.PepperSpecDsl.Then: Unit get() = error("bla")
         """.trimIndent()
 
         val result = compile(
-            sourceFile = SourceFile.kotlin(
-                name = "main.kt",
-                contents = source
+            sourceFiles = listOf(
+                SourceFile.kotlin(
+                    name = "spec.kt",
+                    contents = spec
+                ),
+                SourceFile.kotlin(
+                    name = "dsl.kt",
+                    contents = dsl
+                )
             )
         )
 

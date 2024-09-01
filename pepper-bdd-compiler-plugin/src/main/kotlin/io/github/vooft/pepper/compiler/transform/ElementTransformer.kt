@@ -12,7 +12,6 @@ import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.util.dump
-import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
@@ -21,6 +20,15 @@ internal class ElementTransformer(
     private val pluginContext: IrPluginContext,
     private val debugLogger: DebugLogger
 ) : IrElementTransformerVoidWithContext() {
+
+    private val SYMBOL_GIVEN = pluginContext.referenceProperties(CallableId(FqName("io.github.vooft.pepper"), Name.identifier("Given")))
+        .single().owner.getter!!.symbol
+
+    private val SYMBOL_WHEN = pluginContext.referenceProperties(CallableId(FqName("io.github.vooft.pepper"), Name.identifier("When")))
+        .single().owner.getter!!.symbol
+
+    private val SYMBOL_THEN = pluginContext.referenceProperties(CallableId(FqName("io.github.vooft.pepper"), Name.identifier("Then")))
+        .single().owner.getter!!.symbol
 
     fun IrBlockBuilder.createLambdaBody(irCall: IrCall) {
         val printlnFunction = pluginContext.referenceFunctions(CallableId(FqName("kotlin.io"), Name.identifier("println")))
@@ -33,7 +41,6 @@ internal class ElementTransformer(
         +irCall
     }
 
-    @OptIn(ObsoleteDescriptorBasedAPI::class)
     fun IrBlockBuilder.wrapIrCallWithRunBlock(irCall: IrCall) {
         val runFunction = pluginContext.referenceFunctions(CallableId(FqName("kotlin"), Name.identifier("run")))
             .single { it.owner.extensionReceiverParameter == null }
@@ -45,8 +52,18 @@ internal class ElementTransformer(
     @OptIn(ObsoleteDescriptorBasedAPI::class)
     override fun visitCall(expression: IrCall): IrExpression {
         debugLogger.log("visitCall() expression: ${expression.symbol}")
-        debugLogger.log("visitCall() hasAnnotation: ${expression.symbol.owner.hasAnnotation(FqName("io.github.vooft.pepper.sample.Test"))}")
+        debugLogger.log("visitCall() name: ${expression.symbol.descriptor.name}")
         debugLogger.log("visitCall() dump: ${expression.dump()}")
+
+        when (expression.symbol) {
+            SYMBOL_GIVEN -> {
+                debugLogger.log("visitCall() Given")
+                return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock {  }
+            }
+
+            SYMBOL_WHEN -> debugLogger.log("visitCall() When")
+            SYMBOL_THEN -> debugLogger.log("visitCall() Then")
+        }
 
         if (expression.symbol.descriptor.name.asString().startsWith("test")) {
             return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock {
