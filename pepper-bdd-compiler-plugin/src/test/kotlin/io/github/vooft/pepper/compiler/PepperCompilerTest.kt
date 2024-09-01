@@ -30,13 +30,16 @@ class PepperCompilerTest : FunSpec({
         // language=kotlin
         val source = """
             fun main() {
-                val valGiven = testGiven()
+                Given@ val valGiven = testGiven()
            
-                val valWhen = testWhen(valGiven)
+                When@ val valWhen = testWhen(valGiven)
+    
+                Then@ testThen(valGiven, valWhen)
             }
             
             fun testGiven() = 1
             fun testWhen(param: Int)= param + 1
+            fun testThen(before: Int, after: Int) = require(before < after)
         """.trimIndent()
 
         val result = compile(

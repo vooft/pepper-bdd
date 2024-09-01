@@ -3,10 +3,6 @@ plugins {
     `pepper-bdd-publish`
 }
 
-repositories {
-    mavenCentral()
-}
-
 dependencies {
     implementation(libs.kotlin.compiler.embeddable)
 

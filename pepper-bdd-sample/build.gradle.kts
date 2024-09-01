@@ -12,3 +12,10 @@ pepper {
 dependencies {
     testImplementation(libs.kotest.runner)
 }
+
+configurations.configureEach {
+    resolutionStrategy.dependencySubstitution {
+        substitute(module("io.github.vooft:pepper-bdd-compiler-plugin"))
+            .using(project(":pepper-bdd-compiler-plugin"))
+    }
+}

@@ -1,8 +1,10 @@
 rootProject.name = "pepper-bdd"
 
 include(
+    ":pepper-bdd-api",
     ":pepper-bdd-core",
-    ":pepper-bdd-sample"
+    ":pepper-bdd-sample",
+    ":pepper-bdd-compiler-plugin"
 )
 
 includeBuild("pepper-bdd-gradle") {
@@ -10,4 +12,3 @@ includeBuild("pepper-bdd-gradle") {
         substitute(module("io.github.vooft:pepper-bdd-gradle")).using(project(":"))
     }
 }
-includeBuild("pepper-bdd-compiler-plugin")

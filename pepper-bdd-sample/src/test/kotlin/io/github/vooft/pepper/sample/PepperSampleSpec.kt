@@ -6,19 +6,19 @@ import kotlin.annotation.AnnotationTarget.FUNCTION
 annotation class Test
 
 @Test
-fun a() {
+fun testA() {
     println("a")
 }
 
 @Test
-fun b() {
+fun testB() {
     println("b")
 }
 
 class PepperSampleSpec {
     fun test() {
-        a()
-        b()
+        testA()
+        testB()
     }
 }
 
