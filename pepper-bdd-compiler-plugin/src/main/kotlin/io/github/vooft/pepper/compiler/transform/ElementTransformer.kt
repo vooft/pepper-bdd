@@ -7,20 +7,15 @@ import io.github.vooft.pepper.compiler.transform.StepType.WHEN
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
-import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
-import org.jetbrains.kotlin.descriptors.Modality
 import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
-import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
-import org.jetbrains.kotlin.ir.builders.IrBlockBuilder
-import org.jetbrains.kotlin.ir.builders.declarations.buildFun
+import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irBlock
-import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irCall
-import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
+import org.jetbrains.kotlin.ir.builders.irString
+import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
-import org.jetbrains.kotlin.ir.expressions.impl.IrFunctionExpressionImpl
+import org.jetbrains.kotlin.ir.expressions.IrFunctionAccessExpression
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.dump
 import org.jetbrains.kotlin.ir.util.hasAnnotation
@@ -28,7 +23,6 @@ import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
-import org.jetbrains.kotlin.name.SpecialNames
 
 internal class ElementTransformer(
     private val pluginContext: IrPluginContext,
@@ -56,31 +50,51 @@ internal class ElementTransformer(
 //        +irCall
 //    }
 
-    fun IrBlockBuilder.prefixWithPrintln(irCall: IrCall) {
-        val originalReturnType = irCall.symbol.owner.returnType
-        val lambda = pluginContext.irFactory.buildFun {
-            origin = IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
-            name = SpecialNames.NO_NAME_PROVIDED
-            visibility = DescriptorVisibilities.LOCAL
-            returnType = originalReturnType
-            modality = Modality.FINAL
-        }.apply {
-            parent = irCall.symbol.owner.parent
-            body = DeclarationIrBuilder(pluginContext, irCall.symbol).irBlockBody {
-                +irCall
+    /*
+BLOCK_BODY
+CALL 'public final fun GivenContainer <R> (block: kotlin.Function0<R of io.github.vooft.pepper.dsl.GivenContainer>): R of io.github.vooft.pepper.dsl.GivenContainer declared in io.github.vooft.pepper.dsl' type=kotlin.Unit origin=null
+<R>: kotlin.Unit
+block: FUN_EXPR type=kotlin.Function0<kotlin.Unit> origin=LAMBDA
+  FUN LOCAL_FUNCTION_FOR_LAMBDA name:<anonymous> visibility:local modality:FINAL <> () returnType:kotlin.Unit
+    BLOCK_BODY
+      CALL 'public final fun my test step (): kotlin.Unit declared in io.github.vooft.pepper.sample' type=kotlin.Unit origin=null
+     */
+    fun IrBuilderWithScope.prefixWithPrintln(originalCall: IrCall): IrFunctionAccessExpression {
+        val originalReturnType = originalCall.symbol.owner.returnType
+
+        val current = requireNotNull(currentScope?.irElement as? IrDeclaration)
+        println(current)
+
+        originalCall.symbol.owner.parent
+
+        val lambda = irLambda(
+            returnType = originalReturnType,
+            lambdaType = pluginContext.irBuiltIns.functionN(0).typeWith(originalReturnType),
+            lambdaParent = current.parent // must have local scope accessible
+        ) {
+            +irCall(originalCall.symbol).apply {
+                for (i in 0 until originalCall.typeArgumentsCount) {
+                    putTypeArgument(i, originalCall.getTypeArgument(i))
+                }
             }
         }
 
-        +irCall(givenContainer).apply {
+//        val printlnFunction = pluginContext.referenceFunctions(CallableId(FqName("kotlin.io"), Name.identifier("println")))
+//            .single { it.owner.valueParameters.size == 1 && it.owner.valueParameters.single().type == pluginContext.irBuiltIns.anyNType }
+
+        return irCall(givenContainer).apply {
+            putTypeArgument(0, originalReturnType)
+            putValueArgument(0, irString(originalCall.symbol.owner.name.asString()))
             putValueArgument(
-                index = 0,
-                valueArgument = IrFunctionExpressionImpl(
-                    startOffset = UNDEFINED_OFFSET,
-                    endOffset = UNDEFINED_OFFSET,
-                    type = pluginContext.irBuiltIns.functionN(0).typeWith(originalReturnType),
-                    function = lambda,
-                    origin = IrStatementOrigin.LAMBDA
-                )
+                index = 1,
+                valueArgument = lambda
+//                valueArgument = DeclarationIrBuilder(pluginContext, irCall.symbol).irBlock {
+//                    this.resultType = originalReturnType
+//                    +irCall(printlnFunction).apply {
+//                        putValueArgument(0, irString(irCall.symbol.owner.name.asString()))
+//                    }
+//                    +irReturn(irCall)
+//                }
             )
         }
     }
@@ -121,9 +135,7 @@ internal class ElementTransformer(
         }
 
         if (expression.symbol.owner.hasAnnotation(stepAnnotation)) {
-            return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock {
-                prefixWithPrintln(expression)
-            }
+            return DeclarationIrBuilder(pluginContext, expression.symbol).prefixWithPrintln(expression)
         }
 
 
@@ -136,6 +148,8 @@ internal class ElementTransformer(
 
         return super.visitCall(expression)
     }
+
+
 }
 
 enum class StepType {

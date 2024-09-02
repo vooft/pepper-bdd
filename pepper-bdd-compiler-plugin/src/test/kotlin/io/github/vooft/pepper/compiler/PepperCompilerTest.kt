@@ -6,42 +6,16 @@ import com.tschuchort.compiletesting.SourceFile
 import io.kotest.core.spec.style.FunSpec
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.junit.jupiter.api.Assertions.assertEquals
+import java.io.File
 
 class PepperCompilerTest : FunSpec({
     test("test") {
-        // language=kotlin
-        val spec = """
-            package io.github.vooft.pepper.dsl
-
-            interface PepperSpecDsl
-        """.trimIndent()
-
-        // language=kotlin
-        val dsl = """
-            package io.github.vooft.pepper
-
-            open class PepperSpec : io.github.vooft.pepper.dsl.PepperSpecDsl {
-                init {
-                    Given
-                    println("hello")
-                }
-            }
-
-            val io.github.vooft.pepper.dsl.PepperSpecDsl.Given: Unit get() = error("bla")
-            val io.github.vooft.pepper.dsl.PepperSpecDsl.When: Unit get() = error("bla")
-            val io.github.vooft.pepper.dsl.PepperSpecDsl.Then: Unit get() = error("bla")
-        """.trimIndent()
-
         val result = compile(
             sourceFiles = listOf(
-                SourceFile.kotlin(
-                    name = "spec.kt",
-                    contents = spec
-                ),
-                SourceFile.kotlin(
-                    name = "dsl.kt",
-                    contents = dsl
-                )
+                SourceFile.fromPath(File("/Users/vooft/_code/pepper-bdd/pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/Steps.kt")),
+                SourceFile.fromPath(File("/Users/vooft/_code/pepper-bdd/pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/dsl/PepperSpecDsl.kt")),
+                SourceFile.fromPath(File("/Users/vooft/_code/pepper-bdd/pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/PepperSpec.kt")),
+                SourceFile.fromPath(File("/Users/vooft/_code/pepper-bdd/pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/PepperSampleSpec.kt"))
             )
         )
 

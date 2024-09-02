@@ -1,19 +1,17 @@
 package io.github.vooft.pepper.sample
 
 import io.github.vooft.pepper.PepperSpec
-import io.github.vooft.pepper.Step
 import io.github.vooft.pepper.dsl.Given
 
-class PepperSampleSpec : PepperSpec({
+class PepperUnprocessedSpec : PepperSpec({
     Given
     `my test step`()
 })
 
-@Step
-fun `my test step`() {
-    println("my test step")
-}
+//class PepperProcessedSpec : PepperSpec({
+//    GivenContainer { `my test step`() }
+//})
 
 fun main() {
-    PepperSampleSpec()
+    PepperUnprocessedSpec()
 }
