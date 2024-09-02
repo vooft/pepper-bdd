@@ -79,22 +79,12 @@ block: FUN_EXPR type=kotlin.Function0<kotlin.Unit> origin=LAMBDA
             }
         }
 
-//        val printlnFunction = pluginContext.referenceFunctions(CallableId(FqName("kotlin.io"), Name.identifier("println")))
-//            .single { it.owner.valueParameters.size == 1 && it.owner.valueParameters.single().type == pluginContext.irBuiltIns.anyNType }
-
         return irCall(givenContainer).apply {
             putTypeArgument(0, originalReturnType)
             putValueArgument(0, irString(originalCall.symbol.owner.name.asString()))
             putValueArgument(
                 index = 1,
                 valueArgument = lambda
-//                valueArgument = DeclarationIrBuilder(pluginContext, irCall.symbol).irBlock {
-//                    this.resultType = originalReturnType
-//                    +irCall(printlnFunction).apply {
-//                        putValueArgument(0, irString(irCall.symbol.owner.name.asString()))
-//                    }
-//                    +irReturn(irCall)
-//                }
             )
         }
     }
