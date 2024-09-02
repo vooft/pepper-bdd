@@ -5,7 +5,8 @@ import io.github.vooft.pepper.dsl.Given
 
 class PepperUnprocessedSpec : PepperSpec({
     Given
-    `my test step`()
+    val var1 = `my test step`()
+    `my test step 2`(var1)
 })
 
 //class PepperProcessedSpec : PepperSpec({

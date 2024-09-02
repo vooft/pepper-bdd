@@ -11,6 +11,7 @@ import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irBlock
 import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrDeclaration
 import org.jetbrains.kotlin.ir.expressions.IrCall
@@ -62,21 +63,24 @@ block: FUN_EXPR type=kotlin.Function0<kotlin.Unit> origin=LAMBDA
     fun IrBuilderWithScope.prefixWithPrintln(originalCall: IrCall): IrFunctionAccessExpression {
         val originalReturnType = originalCall.symbol.owner.returnType
 
-        val current = requireNotNull(currentScope?.irElement as? IrDeclaration)
-        println(current)
-
-        originalCall.symbol.owner.parent
+        val currentDeclaration = requireNotNull(currentScope?.irElement as? IrDeclaration)
 
         val lambda = irLambda(
             returnType = originalReturnType,
             lambdaType = pluginContext.irBuiltIns.functionN(0).typeWith(originalReturnType),
-            lambdaParent = current.parent // must have local scope accessible
+            lambdaParent = currentDeclaration.parent // must have local scope accessible
         ) {
-            +irCall(originalCall.symbol).apply {
-                for (i in 0 until originalCall.typeArgumentsCount) {
-                    putTypeArgument(i, originalCall.getTypeArgument(i))
+            +irReturn(
+                irCall(originalCall.symbol).apply {
+                    for (i in 0 until originalCall.typeArgumentsCount) {
+                        putTypeArgument(i, originalCall.getTypeArgument(i))
+                    }
+
+                    for (i in 0 until originalCall.valueArgumentsCount) {
+                        putValueArgument(i, originalCall.getValueArgument(i))
+                    }
                 }
-            }
+            )
         }
 
         return irCall(givenContainer).apply {
