@@ -10,6 +10,12 @@ fun `my test step`(): String {
 }
 
 @Step
-fun `my test step 2`(input: String) {
+fun `my test step 2`(input: String): String {
     println("my test step 2, input: $input")
+    return "world " + Random.nextInt()
+}
+
+@Step
+fun `my test step 3`(input1: String, input2: String) {
+    println("my test step 3, input1: $input1, input2: $input2")
 }
