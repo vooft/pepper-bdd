@@ -12,16 +12,13 @@ class PepperBddCommandLineProcessor : CommandLineProcessor {
 
     override val pluginOptions: Collection<CliOption> = listOf(
         CliOption(
-            optionName = "enabled", valueDescription = "<true|false>",
+            optionName = "enabled",
+            valueDescription = "<true|false>",
             description = "whether to enable the plugin or not"
         )
     )
 
-    override fun processOption(
-        option: AbstractCliOption,
-        value: String,
-        configuration: CompilerConfiguration
-    ) = when (option.optionName) {
+    override fun processOption(option: AbstractCliOption, value: String, configuration: CompilerConfiguration) = when (option.optionName) {
         "enabled" -> configuration.put(KEY_ENABLED, value.toBoolean())
         else -> configuration.put(KEY_ENABLED, true)
     }

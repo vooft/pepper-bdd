@@ -26,10 +26,8 @@ import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
-internal class ElementTransformer(
-    private val pluginContext: IrPluginContext,
-    private val debugLogger: DebugLogger
-) : IrElementTransformerVoidWithContext() {
+internal class ElementTransformer(private val pluginContext: IrPluginContext, private val debugLogger: DebugLogger) :
+    IrElementTransformerVoidWithContext() {
 
     private val symbolGiven = pluginContext.findStep("Given")
     private val symbolWhen = pluginContext.findStep("When")
@@ -39,7 +37,14 @@ internal class ElementTransformer(
     private val whenContainer = pluginContext.findContainerMethod("WhenContainer")
     private val thenContainer = pluginContext.findContainerMethod("ThenContainer")
 
-    private val stepAnnotation = pluginContext.referenceClass(ClassId(FqName("io.github.vooft.pepper"), Name.identifier("Step")))!!
+    private val stepAnnotation = requireNotNull(
+        pluginContext.referenceClass(
+            ClassId(
+                packageFqName = FqName("io.github.vooft.pepper"),
+                topLevelName = Name.identifier("Step")
+            )
+        )
+    )
 
     private var currentStep: StepType = GIVEN
 
@@ -117,12 +122,14 @@ enum class StepType {
     THEN
 }
 
-private fun IrPluginContext.findStep(name: String) = referenceProperties(
-    callableId = CallableId(
-        packageName = FqName("io.github.vooft.pepper.dsl"),
-        callableName = Name.identifier(name)
-    )
-).single().owner.getter!!.symbol
+private fun IrPluginContext.findStep(name: String) = requireNotNull(
+    referenceProperties(
+        callableId = CallableId(
+            packageName = FqName("io.github.vooft.pepper.dsl"),
+            callableName = Name.identifier(name)
+        )
+    ).single().owner.getter
+).symbol
 
 private fun IrPluginContext.findContainerMethod(name: String) = referenceFunctions(
     callableId = CallableId(
