@@ -4,7 +4,6 @@ import io.github.vooft.pepper.CurrentTestScope
 import io.github.vooft.pepper.RemainingSteps
 import io.github.vooft.pepper.StepIdentifier
 import io.kotest.common.KotestInternal
-import io.kotest.core.names.TestName
 import io.kotest.core.source.sourceRef
 import io.kotest.core.test.NestedTest
 import io.kotest.core.test.TestType.Test
@@ -33,7 +32,7 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
         for (remainingStep in remainingSteps) {
             currentScope.registerTestCase(
                 NestedTest(
-                    name = TestName(remainingStep.name),
+                    name = remainingStep.toTestName(),
                     disabled = true,
                     config = null,
                     type = Test,

@@ -37,6 +37,15 @@ fun IrPluginContext.findPepperSpecDsl() = requireNotNull(
     )
 )
 
+fun IrPluginContext.findStepAnnotation() = requireNotNull(
+    referenceClass(
+        ClassId(
+            packageFqName = FqName("io.github.vooft.pepper"),
+            topLevelName = Name.identifier("Step")
+        )
+    )
+)
+
 fun IrPluginContext.findHelper(name: String) = run {
     referenceFunctions(
         callableId = CallableId(

@@ -17,7 +17,7 @@ import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrFail
 import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 
-internal class PepperStepsAppender(
+internal class PepperStepsAdder(
     private val steps: Map<String, List<StepIdentifier>>,
     private val pluginContext: IrPluginContext,
     private val debugLogger: DebugLogger
@@ -59,7 +59,8 @@ internal class PepperStepsAppender(
                         this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
 
                         putValueArgument(0, irString(step.id.toString()))
-                        putValueArgument(1, irString(step.name))
+                        putValueArgument(1, irString(step.prefix.name))
+                        putValueArgument(2, irString(step.name))
                     }
                 }
 
