@@ -58,8 +58,8 @@ internal class PepperStepsAdder(
                     +irCall(addStepFunction).apply {
                         this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
 
-                        putValueArgument(0, irString(step.id.toString()))
-                        putValueArgument(1, irString(step.prefix.name))
+                        putValueArgument(0, irString(step.id))
+                        putValueArgument(1, irString(step.prefix))
                         putValueArgument(2, irString(step.name))
                     }
                 }

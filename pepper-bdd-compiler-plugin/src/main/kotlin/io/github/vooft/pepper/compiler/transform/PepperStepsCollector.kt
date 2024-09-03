@@ -89,8 +89,8 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
 
             currentClassSteps.add(
                 StepIdentifier(
-                    id = UUID.randomUUID(),
-                    prefix = prefix,
+                    id = UUID.randomUUID().toString(),
+                    prefix = "${currentClassSteps.size + 1}. $prefix",
                     name = expression.symbol.owner.name.asString()
                 )
             )
