@@ -12,11 +12,12 @@ import org.jetbrains.kotlin.ir.expressions.IrFunctionExpression
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.expressions.impl.IrFunctionExpressionImpl
 import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.name.Name
 
 fun IrBuilderWithScope.irLambda(
     returnType: IrType,
-    lambdaType: IrType,
+    lambdaType: IrType = context.irBuiltIns.functionN(0).typeWith(returnType),
     lambdaParent: IrDeclarationParent,
     startOffset: Int = this.startOffset,
     endOffset: Int = this.endOffset,

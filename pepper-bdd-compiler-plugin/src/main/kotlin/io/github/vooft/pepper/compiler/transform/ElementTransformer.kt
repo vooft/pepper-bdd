@@ -20,7 +20,6 @@ import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrFunctionAccessExpression
 import org.jetbrains.kotlin.ir.types.classOrFail
-import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.dump
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.name.CallableId
@@ -66,7 +65,6 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
 
         val lambda = irLambda(
             returnType = originalReturnType,
-            lambdaType = pluginContext.irBuiltIns.functionN(0).typeWith(originalReturnType),
             lambdaParent = currentDeclarationParent // must have local scope accessible
         ) { +irReturn(originalCall) }
 
