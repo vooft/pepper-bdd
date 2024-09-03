@@ -65,5 +65,4 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext) 
 
         return super.visitCall(expression)
     }
-
 }

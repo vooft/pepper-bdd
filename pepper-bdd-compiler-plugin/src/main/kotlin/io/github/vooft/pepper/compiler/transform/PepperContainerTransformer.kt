@@ -71,7 +71,7 @@ internal class PepperContainerTransformer(
         )
     )
 
-    private var remainingSteps: MutableList<StepIdentifier> = mutableListOf()
+    private val remainingSteps: MutableList<StepIdentifier> = mutableListOf()
 
     private var currentStep: StepType = GIVEN
     private var stepIndex = 0
@@ -82,7 +82,8 @@ internal class PepperContainerTransformer(
             return super.visitConstructor(declaration)
         }
 
-        remainingSteps = steps[type.classFqName?.asString()]?.toMutableList() ?: mutableListOf()
+        remainingSteps.clear()
+        remainingSteps.addAll(steps[type.classFqName?.asString()] ?: listOf())
 
         return super.visitConstructor(declaration)
     }
@@ -175,7 +176,6 @@ private fun IrPluginContext.findStep(name: String) = requireNotNull(
         )
     ).single().owner.getter
 ).symbol
-
 
 private fun IrPluginContext.findContainerMethod(name: String) = run {
     referenceFunctions(
