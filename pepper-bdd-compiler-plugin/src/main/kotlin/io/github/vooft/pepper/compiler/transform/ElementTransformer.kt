@@ -7,7 +7,6 @@ import io.github.vooft.pepper.compiler.transform.StepType.WHEN
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
-import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irBlock
 import org.jetbrains.kotlin.ir.builders.irCall
@@ -20,7 +19,6 @@ import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrFunctionAccessExpression
 import org.jetbrains.kotlin.ir.types.classOrFail
-import org.jetbrains.kotlin.ir.util.dump
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
@@ -83,7 +81,7 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
             val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
             val extension = element.extensionReceiverParameter ?: return@firstOrNull false
             element.name.asString() == "<anonymous>" && extension.type.classOrFail == scenarioDslClass
-        }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with PepperSpecDsl receiver")
+        }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with $scenarioDslClass receiver")
 
         return irCall(container).apply {
             this.extensionReceiver = irGet(requireNotNull(found.extensionReceiverParameter))
@@ -96,13 +94,7 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
         }
     }
 
-    @OptIn(ObsoleteDescriptorBasedAPI::class)
     override fun visitCall(expression: IrCall): IrExpression {
-        debugLogger.log("visitCall() expression: ${expression.symbol}")
-        debugLogger.log("visitCall() name: ${expression.symbol.descriptor.name}")
-        debugLogger.log("visitCall() hasAnnotation: ${expression.symbol.owner.hasAnnotation(stepAnnotation)}")
-        debugLogger.log("visitCall() dump: ${expression.dump()}")
-
         val replacedStep = replaceIfStep(expression)
         if (replacedStep != null) {
             return replacedStep
