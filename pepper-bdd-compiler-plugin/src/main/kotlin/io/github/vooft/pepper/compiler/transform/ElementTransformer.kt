@@ -58,7 +58,10 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
     private var currentStep: StepType = GIVEN
     private var stepIndex = 0
 
-    private fun IrBuilderWithScope.wrapWithStep(originalCall: IrCall, currentDeclarationParent: IrDeclarationParent): IrFunctionAccessExpression {
+    private fun IrBuilderWithScope.wrapWithStep(
+        originalCall: IrCall,
+        currentDeclarationParent: IrDeclarationParent
+    ): IrFunctionAccessExpression {
         val originalReturnType = originalCall.symbol.owner.returnType
 
         val lambda = irLambda(
@@ -116,6 +119,7 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
             else -> return null
         }
 
+        debugLogger.log("Starting step: $currentStep")
         stepIndex = 0
         return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock { }
     }
