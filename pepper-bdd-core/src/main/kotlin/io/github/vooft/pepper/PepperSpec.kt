@@ -23,26 +23,14 @@ open class PepperSpec(block: suspend PepperSpecDsl.() -> Unit) : PepperSpecDsl, 
         }
     }
 
-    internal suspend fun <R> givenContainer(stepName: String, block: suspend () -> R): R {
-        return testContainer("Given", stepName, block)
-    }
-
-    internal suspend fun <R> whenContainer(stepName: String, block: suspend () -> R): R {
-        return testContainer("When", stepName, block)
-    }
-
-    internal suspend fun <R> thenContainer(stepName: String, block: suspend () -> R): R {
-        return testContainer("Then", stepName, block)
-    }
-
-    private suspend fun <R> testContainer(prefix: String, stepName: String, block: suspend () -> R): R {
+    internal suspend fun <R> testContainer(prefix: String, stepName: String, block: suspend () -> R): R {
         println("$prefix: $stepName")
 
         val currentScope = coroutineContext[CurrentTestScope]!!.scope
         lateinit var capturedValue: CapturedValue<R>
 
         currentScope.registerTestCase(NestedTest(
-            name = TestName("$prefix: ", stepName, true),
+            name = TestName("$prefix: $stepName"),
             disabled = false,
             config = null,
             type = Test,
@@ -67,13 +55,17 @@ data class CurrentTestScope(val scope: TestScope) : AbstractCoroutineContextElem
 }
 
 internal suspend fun <R> PepperSpecDsl.GivenContainer(stepName: String, block: suspend () -> R): R =
-    (this as PepperSpec).givenContainer(stepName, block)
+    (this as PepperSpec).testContainer("Given", stepName, block)
 
 internal suspend fun <R> PepperSpecDsl.WhenContainer(stepName: String, block: suspend () -> R): R =
-    (this as PepperSpec).whenContainer(stepName, block)
+    (this as PepperSpec).testContainer("When", stepName, block)
+
 
 internal suspend fun <R> PepperSpecDsl.ThenContainer(stepName: String, block: suspend () -> R): R =
-    (this as PepperSpec).thenContainer(stepName, block)
+    (this as PepperSpec).testContainer("Then", stepName, block)
+
+internal suspend fun <R> PepperSpecDsl.AndContainer(stepName: String, block: suspend () -> R): R =
+    (this as PepperSpec).testContainer("And", stepName, block)
 
 @Target(AnnotationTarget.FUNCTION)
 annotation class Step

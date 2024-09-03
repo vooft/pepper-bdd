@@ -47,6 +47,7 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
     private val givenContainer = pluginContext.findContainerMethod("GivenContainer")
     private val whenContainer = pluginContext.findContainerMethod("WhenContainer")
     private val thenContainer = pluginContext.findContainerMethod("ThenContainer")
+    private val andContainer = pluginContext.findContainerMethod("AndContainer")
 
     private val stepAnnotation = requireNotNull(
         pluginContext.referenceClass(
@@ -58,6 +59,7 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
     )
 
     private var currentStep: StepType = GIVEN
+    private var stepIndex = 0
 
     private fun IrBuilderWithScope.wrapWithStep(originalCall: IrCall, currentDeclarationParent: IrDeclarationParent): IrFunctionAccessExpression {
         val originalReturnType = originalCall.symbol.owner.returnType
@@ -68,11 +70,16 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
             lambdaParent = currentDeclarationParent // must have local scope accessible
         ) { +irReturn(originalCall) }
 
-        val container = when (currentStep) {
-            GIVEN -> givenContainer
-            WHEN -> whenContainer
-            THEN -> thenContainer
+        val container = when {
+            stepIndex > 0 -> andContainer
+            else -> when (currentStep) {
+                GIVEN -> givenContainer
+                WHEN -> whenContainer
+                THEN -> thenContainer
+            }
         }
+
+        stepIndex++
 
         val found = allScopes.reversed().firstOrNull {
             val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
@@ -111,25 +118,15 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
     }
 
     private fun replaceIfStep(expression: IrCall): IrExpression? {
-        when (expression.symbol) {
-            symbolGiven -> {
-                currentStep = GIVEN
-                debugLogger.log("visitCall() Given")
-            }
-
-            symbolWhen -> {
-                currentStep = WHEN
-                debugLogger.log("visitCall() When")
-            }
-
-            symbolThen -> {
-                currentStep = THEN
-                debugLogger.log("visitCall() Then")
-            }
+        currentStep = when (expression.symbol) {
+            symbolGiven -> GIVEN
+            symbolWhen -> WHEN
+            symbolThen -> THEN
 
             else -> return null
         }
 
+        stepIndex = 0
         return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock { }
     }
 }

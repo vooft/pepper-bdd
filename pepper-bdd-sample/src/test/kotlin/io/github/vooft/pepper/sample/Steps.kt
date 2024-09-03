@@ -5,35 +5,38 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
-import java.util.concurrent.Executors
+import java.util.concurrent.ForkJoinPool
 import kotlin.random.Random
 
 @Step
-suspend fun `my test step`(): String {
+suspend fun `generate random string`(prefix: String): String {
     val random = Random.nextInt()
     delay(1)
-    println("[${Thread.currentThread().name}] my test step, random=$random")
+    printlnWithThread("generating random number, random=$random")
     delay(1)
-    return "hello $random"
+    return "$prefix $random"
+}
+
+data class CompareResult(val first: String, val second: String, val result: Boolean)
+
+@Step
+suspend fun `two strings are compared`(first: String, second: String): CompareResult {
+    withContext(Dispatchers.IO) { printlnWithThread("comparing two strings, first=$first, second=$second") }
+    delay(1)
+    return CompareResult(first, second, first == second)
 }
 
 @Step
-suspend fun `my test step 2`(input: String): String {
-    val random = Random.nextInt()
+suspend fun `compare result is`(compareResult: CompareResult, expected: Boolean) {
     delay(1)
-    withContext(Dispatchers.IO) {
-        println("[${Thread.currentThread().name}] my test step 2, input: $input, random: $random")
-    }
-    delay(1)
-    return "world $random"
-}
-
-@Step
-suspend fun `my test step 3`(input1: String, input2: String) {
-    delay(1)
-    withContext(customDispatcher) {
-        println("[${Thread.currentThread().name}] my test step 3, input1: $input1, input2: $input2")
+    if (compareResult.result != expected) {
+        throw AssertionError("Expected $expected, but got ${compareResult.result}")
+    } else {
+        withContext(customDispatcher) { printlnWithThread("${compareResult.first} == ${compareResult.second} == $expected") }
     }
 }
 
-private val customDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+private val customDispatcher = ForkJoinPool.commonPool().asCoroutineDispatcher()
+private fun printlnWithThread(message: String) {
+    println("[${Thread.currentThread().name}] $message")
+}

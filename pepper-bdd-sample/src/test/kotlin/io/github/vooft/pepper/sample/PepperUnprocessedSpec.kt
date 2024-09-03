@@ -7,13 +7,14 @@ import io.github.vooft.pepper.dsl.When
 
 class PepperUnprocessedSpec : PepperSpec({
     Given
-    val firstStepResult = `my test step`()
+    val firstRandom = `generate random string`("first")
+    val secondRandom = `generate random string`("second")
 
     When
-    val secondStepResult = `my test step 2`(firstStepResult)
+    val compareResult = `two strings are compared`(firstRandom, secondRandom)
 
     Then
-    `my test step 3`(firstStepResult, secondStepResult)
+    `compare result is`(compareResult, false)
 })
 
 fun main() {
