@@ -2,7 +2,7 @@ package io.github.vooft.pepper
 
 import io.github.vooft.pepper.dsl.PepperSpecDsl
 
-open class PepperSpec(block: PepperSpecDsl.() -> Unit): PepperSpecDsl {
+open class PepperSpec(block: PepperSpecDsl.() -> Unit) : PepperSpecDsl {
     init {
         block()
     }
@@ -23,17 +23,11 @@ open class PepperSpec(block: PepperSpecDsl.() -> Unit): PepperSpecDsl {
     }
 }
 
-fun <R> PepperSpecDsl.GivenContainer(stepName: String, block: () -> R): R {
-    return (this as PepperSpec).givenContainer(stepName, block)
-}
+fun <R> PepperSpecDsl.GivenContainer(stepName: String, block: () -> R): R = (this as PepperSpec).givenContainer(stepName, block)
 
-internal fun <R> PepperSpecDsl.WhenContainer(stepName: String, block: () -> R): R {
-    return (this as PepperSpec).whenContainer(stepName, block)
-}
+internal fun <R> PepperSpecDsl.WhenContainer(stepName: String, block: () -> R): R = (this as PepperSpec).whenContainer(stepName, block)
 
-internal fun <R> PepperSpecDsl.ThenContainer(stepName: String, block: () -> R): R {
-    return (this as PepperSpec).thenContainer(stepName, block)
-}
+internal fun <R> PepperSpecDsl.ThenContainer(stepName: String, block: () -> R): R = (this as PepperSpec).thenContainer(stepName, block)
 
 @Target(AnnotationTarget.FUNCTION)
 annotation class Step

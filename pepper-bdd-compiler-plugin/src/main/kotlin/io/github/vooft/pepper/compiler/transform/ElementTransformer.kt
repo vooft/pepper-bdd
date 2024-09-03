@@ -35,7 +35,14 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
     private val symbolWhen = pluginContext.findStep("When")
     private val symbolThen = pluginContext.findStep("Then")
 
-    private val dslClass = pluginContext.referenceClass(ClassId(FqName("io.github.vooft.pepper.dsl"), Name.identifier("PepperSpecDsl")))!!
+    private val dslClass = requireNotNull(
+        pluginContext.referenceClass(
+            ClassId(
+                packageFqName = FqName("io.github.vooft.pepper.dsl"),
+                topLevelName = Name.identifier("PepperSpecDsl")
+            )
+        )
+    )
 
     private val givenContainer = pluginContext.findContainerMethod("GivenContainer")
     private val whenContainer = pluginContext.findContainerMethod("WhenContainer")
@@ -101,7 +108,7 @@ BLOCK_BODY
         }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with PepperSpecDsl receiver")
 
         return irCall(container).apply {
-            this.extensionReceiver = irGet(found.extensionReceiverParameter!!)
+            this.extensionReceiver = irGet(requireNotNull(found.extensionReceiverParameter))
             putTypeArgument(0, originalReturnType)
             putValueArgument(0, irString(originalCall.symbol.owner.name.asString()))
             putValueArgument(
@@ -169,12 +176,12 @@ private fun IrPluginContext.findStep(name: String) = requireNotNull(
     ).single().owner.getter
 ).symbol
 
-//private fun IrPluginContext.findContainerMethod(name: String) = referenceFunctions(
+// private fun IrPluginContext.findContainerMethod(name: String) = referenceFunctions(
 //    callableId = CallableId(
 //        packageName = FqName("io.github.vooft.pepper"),
 //        callableName = Name.identifier("PepperSpec.$name")
 //    )
-//).single().owner
+// ).single().owner
 
 private fun IrPluginContext.findContainerMethod(name: String) = run {
     referenceFunctions(
