@@ -16,3 +16,11 @@ allprojects {
         mavenCentral()
     }
 }
+
+tasks.register("pepperPublishToMavenCentral") {
+    dependsOn(
+        gradle.includedBuilds.map { it.task(":publishAndReleaseToMavenCentral") } +
+                subprojects.mapNotNull { it.tasks.findByName("publishAndReleaseToMavenCentral") }
+    )
+}
+
