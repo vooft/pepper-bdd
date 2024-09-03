@@ -36,6 +36,9 @@ suspend fun `compare result is`(compareResult: CompareResult, expected: Boolean)
     }
 }
 
+@Step
+fun `failing step`(): Unit = throw AssertionError("This step should fail")
+
 private val customDispatcher = ForkJoinPool.commonPool().asCoroutineDispatcher()
 private fun printlnWithThread(message: String) {
     println("[${Thread.currentThread().name}] $message")

@@ -1,5 +1,6 @@
 package io.github.vooft.pepper.compiler.transform
 
+import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
 import org.jetbrains.kotlin.ir.builders.IrBlockBodyBuilder
@@ -13,7 +14,37 @@ import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.expressions.impl.IrFunctionExpressionImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.typeWith
+import org.jetbrains.kotlin.name.CallableId
+import org.jetbrains.kotlin.name.ClassId
+import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+
+fun IrPluginContext.findPepperSpec() = requireNotNull(
+    referenceClass(
+        ClassId(
+            packageFqName = FqName("io.github.vooft.pepper"),
+            topLevelName = Name.identifier("PepperSpec")
+        )
+    )
+)
+
+fun IrPluginContext.findPepperSpecDsl() = requireNotNull(
+    referenceClass(
+        ClassId(
+            packageFqName = FqName("io.github.vooft.pepper.dsl"),
+            topLevelName = Name.identifier("PepperSpecDsl")
+        )
+    )
+)
+
+fun IrPluginContext.findHelper(name: String) = run {
+    referenceFunctions(
+        callableId = CallableId(
+            packageName = FqName("io.github.vooft.pepper.helper"),
+            callableName = Name.identifier(name)
+        )
+    ).single().owner
+}
 
 fun IrBuilderWithScope.irLambda(
     returnType: IrType,

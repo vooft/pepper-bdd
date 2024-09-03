@@ -7,26 +7,33 @@ import io.github.vooft.pepper.compiler.transform.StepType.WHEN
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irBlock
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
+import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrFunctionAccessExpression
+import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrFail
+import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
-internal class ElementTransformer(private val pluginContext: IrPluginContext, private val debugLogger: DebugLogger) :
-    IrElementTransformerVoidWithContext() {
+internal class PepperContainerTransformer(
+    private val steps: Map<String, List<StepIdentifier>>,
+    private val pluginContext: IrPluginContext,
+    private val debugLogger: DebugLogger
+) : IrElementTransformerVoidWithContext() {
 
     private val symbolGiven = pluginContext.findStep("Given")
     private val symbolWhen = pluginContext.findStep("When")
@@ -41,10 +48,10 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
         )
     )
 
-    private val givenContainer = pluginContext.findContainerMethod("GivenContainer")
-    private val whenContainer = pluginContext.findContainerMethod("WhenContainer")
-    private val thenContainer = pluginContext.findContainerMethod("ThenContainer")
-    private val andContainer = pluginContext.findContainerMethod("AndContainer")
+    private val givenContainer = pluginContext.findHelper("GivenContainer")
+    private val whenContainer = pluginContext.findHelper("WhenContainer")
+    private val thenContainer = pluginContext.findHelper("ThenContainer")
+    private val andContainer = pluginContext.findHelper("AndContainer")
 
     private val stepAnnotation = requireNotNull(
         pluginContext.referenceClass(
@@ -55,46 +62,23 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
         )
     )
 
+    private val pepperSpecClass = pluginContext.findPepperSpec()
+
+    private val remainingSteps: MutableList<StepIdentifier> = mutableListOf()
+
     private var currentStep: StepType = GIVEN
     private var stepIndex = 0
 
-    private fun IrBuilderWithScope.wrapWithStep(
-        originalCall: IrCall,
-        currentDeclarationParent: IrDeclarationParent
-    ): IrFunctionAccessExpression {
-        val originalReturnType = originalCall.symbol.owner.returnType
-
-        val lambda = irLambda(
-            returnType = originalReturnType,
-            lambdaParent = currentDeclarationParent // must have local scope accessible
-        ) { +irReturn(originalCall) }
-
-        val container = when {
-            stepIndex > 0 -> andContainer
-            else -> when (currentStep) {
-                GIVEN -> givenContainer
-                WHEN -> whenContainer
-                THEN -> thenContainer
-            }
+    override fun visitConstructor(declaration: IrConstructor): IrStatement {
+        val type = declaration.symbol.owner.returnType
+        if (!type.isSubtypeOfClass(pepperSpecClass)) {
+            return super.visitConstructor(declaration)
         }
 
-        stepIndex++
+        remainingSteps.clear()
+        remainingSteps.addAll(steps[type.classFqName?.asString()] ?: listOf())
 
-        val found = allScopes.reversed().firstOrNull {
-            val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
-            val extension = element.extensionReceiverParameter ?: return@firstOrNull false
-            element.name.asString() == "<anonymous>" && extension.type.classOrFail == scenarioDslClass
-        }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with $scenarioDslClass receiver")
-
-        return irCall(container).apply {
-            this.extensionReceiver = irGet(requireNotNull(found.extensionReceiverParameter))
-            putTypeArgument(0, originalReturnType)
-            putValueArgument(0, irString(originalCall.symbol.owner.name.asString()))
-            putValueArgument(
-                index = 1,
-                valueArgument = lambda
-            )
-        }
+        return super.visitConstructor(declaration)
     }
 
     override fun visitCall(expression: IrCall): IrExpression {
@@ -123,6 +107,52 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
         stepIndex = 0
         return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock { }
     }
+
+    private fun IrBuilderWithScope.wrapWithStep(
+        originalCall: IrCall,
+        currentDeclarationParent: IrDeclarationParent
+    ): IrFunctionAccessExpression {
+        val originalReturnType = originalCall.symbol.owner.returnType
+
+        val lambda = irLambda(
+            returnType = originalReturnType,
+            lambdaParent = currentDeclarationParent // must have local scope accessible
+        ) { +irReturn(originalCall) }
+
+        val container = when {
+            stepIndex > 0 -> andContainer
+            else -> when (currentStep) {
+                GIVEN -> givenContainer
+                WHEN -> whenContainer
+                THEN -> thenContainer
+            }
+        }
+
+        stepIndex++
+
+        val parentFunction = allScopes.reversed().firstOrNull {
+            val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
+            val extension = element.extensionReceiverParameter ?: return@firstOrNull false
+            element.name.asString() == "<anonymous>" && extension.type.classOrFail == scenarioDslClass
+        }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with $scenarioDslClass receiver")
+
+        return irCall(container).apply {
+            this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
+            putTypeArgument(0, originalReturnType)
+
+            val currentCall = originalCall.symbol.owner.name.asString()
+
+            val step = remainingSteps.removeFirst()
+            require(step.name == currentCall) { "Step name mismatch: ${step.name} != $currentCall" }
+
+            putValueArgument(0, irString(step.id.toString()))
+            putValueArgument(1, irString(currentCall))
+            putValueArgument(
+                index = 2,
+                valueArgument = lambda
+            )
+        }
+    }
 }
 
 enum class StepType {
@@ -139,12 +169,3 @@ private fun IrPluginContext.findStep(name: String) = requireNotNull(
         )
     ).single().owner.getter
 ).symbol
-
-private fun IrPluginContext.findContainerMethod(name: String) = run {
-    referenceFunctions(
-        callableId = CallableId(
-            packageName = FqName("io.github.vooft.pepper"),
-            callableName = Name.identifier(name)
-        )
-    ).single().owner
-}
