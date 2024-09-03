@@ -7,7 +7,6 @@ import io.github.vooft.pepper.compiler.transform.StepType.WHEN
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
-import org.jetbrains.kotlin.ir.ObsoleteDescriptorBasedAPI
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irBlock
 import org.jetbrains.kotlin.ir.builders.irCall
@@ -20,8 +19,6 @@ import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrFunctionAccessExpression
 import org.jetbrains.kotlin.ir.types.classOrFail
-import org.jetbrains.kotlin.ir.types.typeWith
-import org.jetbrains.kotlin.ir.util.dump
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
@@ -35,11 +32,11 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
     private val symbolWhen = pluginContext.findStep("When")
     private val symbolThen = pluginContext.findStep("Then")
 
-    private val dslClass = requireNotNull(
+    private val scenarioDslClass = requireNotNull(
         pluginContext.referenceClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper.dsl"),
-                topLevelName = Name.identifier("PepperSpecDsl")
+                topLevelName = Name.identifier("ScenarioDsl")
             )
         )
     )
@@ -47,6 +44,7 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
     private val givenContainer = pluginContext.findContainerMethod("GivenContainer")
     private val whenContainer = pluginContext.findContainerMethod("WhenContainer")
     private val thenContainer = pluginContext.findContainerMethod("ThenContainer")
+    private val andContainer = pluginContext.findContainerMethod("AndContainer")
 
     private val stepAnnotation = requireNotNull(
         pluginContext.referenceClass(
@@ -58,27 +56,35 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
     )
 
     private var currentStep: StepType = GIVEN
+    private var stepIndex = 0
 
-    private fun IrBuilderWithScope.wrapWithStep(originalCall: IrCall, currentDeclarationParent: IrDeclarationParent): IrFunctionAccessExpression {
+    private fun IrBuilderWithScope.wrapWithStep(
+        originalCall: IrCall,
+        currentDeclarationParent: IrDeclarationParent
+    ): IrFunctionAccessExpression {
         val originalReturnType = originalCall.symbol.owner.returnType
 
         val lambda = irLambda(
             returnType = originalReturnType,
-            lambdaType = pluginContext.irBuiltIns.functionN(0).typeWith(originalReturnType),
             lambdaParent = currentDeclarationParent // must have local scope accessible
         ) { +irReturn(originalCall) }
 
-        val container = when (currentStep) {
-            GIVEN -> givenContainer
-            WHEN -> whenContainer
-            THEN -> thenContainer
+        val container = when {
+            stepIndex > 0 -> andContainer
+            else -> when (currentStep) {
+                GIVEN -> givenContainer
+                WHEN -> whenContainer
+                THEN -> thenContainer
+            }
         }
+
+        stepIndex++
 
         val found = allScopes.reversed().firstOrNull {
             val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
             val extension = element.extensionReceiverParameter ?: return@firstOrNull false
-            element.name.asString() == "<anonymous>" && extension.type.classOrFail == dslClass
-        }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with PepperSpecDsl receiver")
+            element.name.asString() == "<anonymous>" && extension.type.classOrFail == scenarioDslClass
+        }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with $scenarioDslClass receiver")
 
         return irCall(container).apply {
             this.extensionReceiver = irGet(requireNotNull(found.extensionReceiverParameter))
@@ -91,13 +97,7 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
         }
     }
 
-    @OptIn(ObsoleteDescriptorBasedAPI::class)
     override fun visitCall(expression: IrCall): IrExpression {
-        debugLogger.log("visitCall() expression: ${expression.symbol}")
-        debugLogger.log("visitCall() name: ${expression.symbol.descriptor.name}")
-        debugLogger.log("visitCall() hasAnnotation: ${expression.symbol.owner.hasAnnotation(stepAnnotation)}")
-        debugLogger.log("visitCall() dump: ${expression.dump()}")
-
         val replacedStep = replaceIfStep(expression)
         if (replacedStep != null) {
             return replacedStep
@@ -111,25 +111,16 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
     }
 
     private fun replaceIfStep(expression: IrCall): IrExpression? {
-        when (expression.symbol) {
-            symbolGiven -> {
-                currentStep = GIVEN
-                debugLogger.log("visitCall() Given")
-            }
-
-            symbolWhen -> {
-                currentStep = WHEN
-                debugLogger.log("visitCall() When")
-            }
-
-            symbolThen -> {
-                currentStep = THEN
-                debugLogger.log("visitCall() Then")
-            }
+        currentStep = when (expression.symbol) {
+            symbolGiven -> GIVEN
+            symbolWhen -> WHEN
+            symbolThen -> THEN
 
             else -> return null
         }
 
+        debugLogger.log("Starting step: $currentStep")
+        stepIndex = 0
         return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock { }
     }
 }

@@ -7,19 +7,18 @@ import io.github.vooft.pepper.dsl.When
 
 class PepperUnprocessedSpec :
     PepperSpec({
-        Given
-        val var1 = `my test step`()
+        Scenario("my test scenario") {
+            Given
+            val firstRandom = `generate random string`("first")
+            val secondRandom = `generate random string`("second")
 
-        When
-        val var2 = `my test step 2`(var1)
+            When
+            val compareResult = `two strings are compared`(firstRandom, secondRandom)
 
-        Then
-        `my test step 3`(var1, var2)
+            Then
+            `compare result is`(compareResult, false)
+        }
     })
-
-// class PepperProcessedSpec : PepperSpec({
-//    GivenContainer { `my test step`() }
-// })
 
 fun main() {
     PepperUnprocessedSpec()

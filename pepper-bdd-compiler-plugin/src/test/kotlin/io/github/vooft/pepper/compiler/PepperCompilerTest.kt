@@ -20,6 +20,9 @@ class PepperCompilerTest :
                         File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/dsl/PepperSpecDsl.kt")
                     ),
                     SourceFile.fromPath(
+                        File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/dsl/PepperSpecDslImpl.kt")
+                    ),
+                    SourceFile.fromPath(
                         File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/PepperSpec.kt")
                     ),
                     SourceFile.fromPath(
