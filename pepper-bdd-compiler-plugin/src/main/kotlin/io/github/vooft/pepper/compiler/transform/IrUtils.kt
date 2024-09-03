@@ -29,6 +29,8 @@ fun IrBuilderWithScope.irLambda(
         this.returnType = returnType
         visibility = DescriptorVisibilities.LOCAL
         origin = IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
+        isSuspend = true
+        isInline = true
     }.apply {
         val bodyBuilder = DeclarationIrBuilder(context, symbol, startOffset, endOffset)
         body = bodyBuilder.irBlockBody {

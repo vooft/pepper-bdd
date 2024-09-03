@@ -7,18 +7,14 @@ import io.github.vooft.pepper.dsl.When
 
 class PepperUnprocessedSpec : PepperSpec({
     Given
-    val var1 = `my test step`()
+    val firstStepResult = `my test step`()
 
     When
-    val var2 = `my test step 2`(var1)
+    val secondStepResult = `my test step 2`(firstStepResult)
 
     Then
-    `my test step 3`(var1, var2)
+    `my test step 3`(firstStepResult, secondStepResult)
 })
-
-// class PepperProcessedSpec : PepperSpec({
-//    GivenContainer { `my test step`() }
-// })
 
 fun main() {
     PepperUnprocessedSpec()
