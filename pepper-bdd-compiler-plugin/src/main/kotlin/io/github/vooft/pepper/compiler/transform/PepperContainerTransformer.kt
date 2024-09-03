@@ -48,10 +48,10 @@ internal class PepperContainerTransformer(
         )
     )
 
-    private val givenContainer = pluginContext.findContainerMethod("GivenContainer")
-    private val whenContainer = pluginContext.findContainerMethod("WhenContainer")
-    private val thenContainer = pluginContext.findContainerMethod("ThenContainer")
-    private val andContainer = pluginContext.findContainerMethod("AndContainer")
+    private val givenContainer = pluginContext.findHelper("GivenContainer")
+    private val whenContainer = pluginContext.findHelper("WhenContainer")
+    private val thenContainer = pluginContext.findHelper("ThenContainer")
+    private val andContainer = pluginContext.findHelper("AndContainer")
 
     private val stepAnnotation = requireNotNull(
         pluginContext.referenceClass(
@@ -62,14 +62,7 @@ internal class PepperContainerTransformer(
         )
     )
 
-    private val pepperSpecClass = requireNotNull(
-        pluginContext.referenceClass(
-            ClassId(
-                packageFqName = FqName("io.github.vooft.pepper"),
-                topLevelName = Name.identifier("PepperSpec")
-            )
-        )
-    )
+    private val pepperSpecClass = pluginContext.findPepperSpec()
 
     private val remainingSteps: MutableList<StepIdentifier> = mutableListOf()
 
@@ -137,14 +130,14 @@ internal class PepperContainerTransformer(
 
         stepIndex++
 
-        val found = allScopes.reversed().firstOrNull {
+        val parentFunction = allScopes.reversed().firstOrNull {
             val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
             val extension = element.extensionReceiverParameter ?: return@firstOrNull false
             element.name.asString() == "<anonymous>" && extension.type.classOrFail == scenarioDslClass
         }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with $scenarioDslClass receiver")
 
         return irCall(container).apply {
-            this.extensionReceiver = irGet(requireNotNull(found.extensionReceiverParameter))
+            this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
             putTypeArgument(0, originalReturnType)
 
             val currentCall = originalCall.symbol.owner.name.asString()
@@ -176,12 +169,3 @@ private fun IrPluginContext.findStep(name: String) = requireNotNull(
         )
     ).single().owner.getter
 ).symbol
-
-private fun IrPluginContext.findContainerMethod(name: String) = run {
-    referenceFunctions(
-        callableId = CallableId(
-            packageName = FqName("io.github.vooft.pepper"),
-            callableName = Name.identifier(name)
-        )
-    ).single().owner
-}

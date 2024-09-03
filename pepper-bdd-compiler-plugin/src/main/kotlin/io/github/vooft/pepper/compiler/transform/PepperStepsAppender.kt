@@ -4,16 +4,18 @@ import io.github.vooft.pepper.compiler.DebugLogger
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.irBlock
 import org.jetbrains.kotlin.ir.builders.irCall
+import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irString
+import org.jetbrains.kotlin.ir.declarations.IrConstructor
+import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.classFqName
-import org.jetbrains.kotlin.ir.types.isNullableAny
-import org.jetbrains.kotlin.name.CallableId
-import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.ir.types.classOrFail
+import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 
 internal class PepperStepsAppender(
     private val steps: Map<String, List<StepIdentifier>>,
@@ -21,18 +23,46 @@ internal class PepperStepsAppender(
     private val debugLogger: DebugLogger
 ) : IrElementTransformerVoidWithContext() {
 
-    override fun visitCall(expression: IrCall): IrExpression {
-        if (expression.symbol.owner.name.asString() == "Scenario"
-            && expression.dispatchReceiver?.type?.classFqName?.asString() == "io.github.vooft.pepper.dsl.PepperSpecDsl") {
+    private val addStepFunction = pluginContext.findHelper("addStep")
 
-            val println = pluginContext.referenceFunctions(CallableId(FqName("kotlin.io"), Name.identifier("println")))
-                .single { it.owner.valueParameters.size == 1 && it.owner.valueParameters.single().type.isNullableAny() }
-                .owner
+    private val pepperSpecClass = pluginContext.findPepperSpec()
+    private val pepperSpecDslClass = pluginContext.findPepperSpecDsl()
+    private var currentClassSteps = listOf<StepIdentifier>()
+
+    override fun visitConstructor(declaration: IrConstructor): IrStatement {
+        val type = declaration.symbol.owner.returnType
+        if (!type.isSubtypeOfClass(pepperSpecClass)) {
+            return super.visitConstructor(declaration)
+        }
+
+        currentClassSteps = steps[type.classFqName?.asString()] ?: listOf()
+
+        return super.visitConstructor(declaration)
+    }
+
+    override fun visitCall(expression: IrCall): IrExpression {
+        if (currentClassSteps.isNotEmpty() &&
+            expression.symbol.owner.name.asString() == "Scenario" &&
+            expression.dispatchReceiver?.type?.classFqName?.asString() == "io.github.vooft.pepper.dsl.PepperSpecDsl"
+        ) {
+            debugLogger.log("Processing scenario call")
+
+            val parentFunction = allScopes.reversed().firstOrNull {
+                val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
+                val extension = element.extensionReceiverParameter ?: return@firstOrNull false
+                element.name.asString() == "<anonymous>" && extension.type.classOrFail == pepperSpecDslClass
+            }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with $pepperSpecDslClass receiver")
 
             return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock {
-                +irCall(println).apply {
-                    putValueArgument(0, irString("abyrvalg"))
+                for (step in currentClassSteps) {
+                    +irCall(addStepFunction).apply {
+                        this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
+
+                        putValueArgument(0, irString(step.id.toString()))
+                        putValueArgument(1, irString(step.name))
+                    }
                 }
+
                 +expression
             }
         }

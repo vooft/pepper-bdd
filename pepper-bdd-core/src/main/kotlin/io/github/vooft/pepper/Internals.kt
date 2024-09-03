@@ -1,30 +1,25 @@
 package io.github.vooft.pepper
 
-import io.github.vooft.pepper.dsl.ScenarioDsl
 import io.kotest.common.KotestInternal
 import io.kotest.core.names.TestName
 import io.kotest.core.source.sourceRef
 import io.kotest.core.test.NestedTest
+import io.kotest.core.test.TestScope
 import io.kotest.core.test.TestType.Test
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.withContext
+import kotlin.coroutines.AbstractCoroutineContextElement
+import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
-internal suspend fun <R> ScenarioDsl.GivenContainer(id: String, stepName: String, block: suspend () -> R): R =
-    testContainer(id, "Given", stepName, block)
-
-internal suspend fun <R> ScenarioDsl.WhenContainer(id: String, stepName: String, block: suspend () -> R): R =
-    testContainer(id, "When", stepName, block)
-
-internal suspend fun <R> ScenarioDsl.ThenContainer(id: String, stepName: String, block: suspend () -> R): R =
-    testContainer(id, "Then", stepName, block)
-
-internal suspend fun <R> ScenarioDsl.AndContainer(id: String, stepName: String, block: suspend () -> R): R =
-    testContainer(id, "And", stepName, block)
-
 @OptIn(KotestInternal::class)
-private suspend fun <R> testContainer(id: String, prefix: String, stepName: String, testBlock: suspend () -> R): R {
-    println("$id: $prefix: $stepName")
+internal suspend fun <R> testContainer(id: String, prefix: String, stepName: String, testBlock: suspend () -> R): R {
+    val remainingSteps = requireNotNull(coroutineContext[RemainingSteps]) { "Remaining steps are missing in the context" }.steps
+    while (remainingSteps.isNotEmpty() && remainingSteps.first().id != id) {
+        remainingSteps.removeFirst()
+    }
+
+    remainingSteps.takeIf { it.isNotEmpty() }?.removeFirst() ?: error("Step $id not found in the remaining steps")
 
     val currentScope = requireNotNull(coroutineContext[CurrentTestScope]) { "Test scope is missing in the context" }.scope
     lateinit var result: StepResult<R>
@@ -52,6 +47,8 @@ private suspend fun <R> testContainer(id: String, prefix: String, stepName: Stri
     return result.value
 }
 
+internal data class StepIdentifier(val id: String, val name: String)
+
 private sealed class StepResult<R> {
     abstract val value: R
 
@@ -60,4 +57,16 @@ private sealed class StepResult<R> {
         override val value: R
             get() = throw error
     }
+}
+
+internal data class CurrentTestScope(val scope: TestScope) : AbstractCoroutineContextElement(CurrentTestScope) {
+    companion object Key : CoroutineContext.Key<CurrentTestScope>
+
+    override fun toString(): String = "CurrentTestScope($scope)"
+}
+
+internal data class RemainingSteps(val steps: MutableList<StepIdentifier>) : AbstractCoroutineContextElement(RemainingSteps) {
+    companion object Key : CoroutineContext.Key<RemainingSteps>
+
+    override fun toString(): String = "RemainingSteps($steps)"
 }

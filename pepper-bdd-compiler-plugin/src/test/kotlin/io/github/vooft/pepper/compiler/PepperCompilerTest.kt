@@ -29,6 +29,9 @@ class PepperCompilerTest :
                         File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/Internals.kt")
                     ),
                     SourceFile.fromPath(
+                        File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/helper/PluginHelpers.kt")
+                    ),
+                    SourceFile.fromPath(
                         File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/SimplePepperSpec.kt")
                     )
                 )
