@@ -1,5 +1,6 @@
 package io.github.vooft.pepper.gradle
 
+import io.github.vooft.pepper_bdd_gradle.BuildConfig
 import org.gradle.api.Project
 import org.gradle.api.provider.Provider
 import org.jetbrains.kotlin.gradle.plugin.KotlinCompilation
@@ -31,7 +32,7 @@ class PepperBddGradleSubPlugin : KotlinCompilerPluginSupportPlugin {
     override fun getPluginArtifact(): SubpluginArtifact = SubpluginArtifact(
         groupId = "io.github.vooft",
         artifactId = "pepper-bdd-compiler-plugin",
-        version = "1.0-SNAPSHOT",
+        version = BuildConfig.VERSION,
     )
 
 }

@@ -24,4 +24,6 @@ detekt = { id = "io.gitlab.arturbosch.detekt", version = "1.23.6" }
 maven-central-publish = { id = "com.vanniktech.maven.publish", version = "0.29.0" }
 dokka = { id = "org.jetbrains.dokka", version = "1.9.20" }
 
+buildconfig = { id = "com.github.gmazzo.buildconfig", version = "5.4.0" }
+
 [bundles]
