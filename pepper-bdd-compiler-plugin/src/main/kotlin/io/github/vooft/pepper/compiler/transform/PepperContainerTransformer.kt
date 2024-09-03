@@ -7,18 +7,22 @@ import io.github.vooft.pepper.compiler.transform.StepType.WHEN
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
 import org.jetbrains.kotlin.ir.builders.irBlock
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
+import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrFunctionAccessExpression
+import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrFail
+import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
@@ -26,6 +30,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 internal class PepperContainerTransformer(
+    private val steps: Map<String, List<StepIdentifier>>,
     private val pluginContext: IrPluginContext,
     private val debugLogger: DebugLogger
 ) : IrElementTransformerVoidWithContext() {
@@ -57,8 +62,57 @@ internal class PepperContainerTransformer(
         )
     )
 
+    private val pepperSpecClass = requireNotNull(
+        pluginContext.referenceClass(
+            ClassId(
+                packageFqName = FqName("io.github.vooft.pepper"),
+                topLevelName = Name.identifier("PepperSpec")
+            )
+        )
+    )
+
+    private var remainingSteps: MutableList<StepIdentifier> = mutableListOf()
+
     private var currentStep: StepType = GIVEN
     private var stepIndex = 0
+
+    override fun visitConstructor(declaration: IrConstructor): IrStatement {
+        val type = declaration.symbol.owner.returnType
+        if (!type.isSubtypeOfClass(pepperSpecClass)) {
+            return super.visitConstructor(declaration)
+        }
+
+        remainingSteps = steps[type.classFqName?.asString()]?.toMutableList() ?: mutableListOf()
+
+        return super.visitConstructor(declaration)
+    }
+
+    override fun visitCall(expression: IrCall): IrExpression {
+        val replacedStep = replaceIfStep(expression)
+        if (replacedStep != null) {
+            return replacedStep
+        }
+
+        if (expression.symbol.owner.hasAnnotation(stepAnnotation)) {
+            return DeclarationIrBuilder(pluginContext, expression.symbol).wrapWithStep(expression, requireNotNull(currentDeclarationParent))
+        }
+
+        return super.visitCall(expression)
+    }
+
+    private fun replaceIfStep(expression: IrCall): IrExpression? {
+        currentStep = when (expression.symbol) {
+            symbolGiven -> GIVEN
+            symbolWhen -> WHEN
+            symbolThen -> THEN
+
+            else -> return null
+        }
+
+        debugLogger.log("Starting step: $currentStep")
+        stepIndex = 0
+        return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock { }
+    }
 
     private fun IrBuilderWithScope.wrapWithStep(
         originalCall: IrCall,
@@ -91,39 +145,19 @@ internal class PepperContainerTransformer(
         return irCall(container).apply {
             this.extensionReceiver = irGet(requireNotNull(found.extensionReceiverParameter))
             putTypeArgument(0, originalReturnType)
-            putValueArgument(0, irString(originalCall.symbol.owner.name.asString()))
+
+            val currentCall = originalCall.symbol.owner.name.asString()
+
+            val step = remainingSteps.removeFirst()
+            require(step.name == currentCall) { "Step name mismatch: ${step.name} != $currentCall" }
+
+            putValueArgument(0, irString(step.id.toString()))
+            putValueArgument(1, irString(currentCall))
             putValueArgument(
-                index = 1,
+                index = 2,
                 valueArgument = lambda
             )
         }
-    }
-
-    override fun visitCall(expression: IrCall): IrExpression {
-        val replacedStep = replaceIfStep(expression)
-        if (replacedStep != null) {
-            return replacedStep
-        }
-
-        if (expression.symbol.owner.hasAnnotation(stepAnnotation)) {
-            return DeclarationIrBuilder(pluginContext, expression.symbol).wrapWithStep(expression, requireNotNull(currentDeclarationParent))
-        }
-
-        return super.visitCall(expression)
-    }
-
-    private fun replaceIfStep(expression: IrCall): IrExpression? {
-        currentStep = when (expression.symbol) {
-            symbolGiven -> GIVEN
-            symbolWhen -> WHEN
-            symbolThen -> THEN
-
-            else -> return null
-        }
-
-        debugLogger.log("Starting step: $currentStep")
-        stepIndex = 0
-        return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock { }
     }
 }
 
@@ -141,6 +175,7 @@ private fun IrPluginContext.findStep(name: String) = requireNotNull(
         )
     ).single().owner.getter
 ).symbol
+
 
 private fun IrPluginContext.findContainerMethod(name: String) = run {
     referenceFunctions(

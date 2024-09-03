@@ -35,7 +35,7 @@ data class CurrentTestScope(val scope: TestScope) : AbstractCoroutineContextElem
 }
 
 @OptIn(KotestInternal::class)
-internal suspend fun <R> testContainer(prefix: String, stepName: String, testBlock: suspend () -> R): R {
+internal suspend fun <R> testContainer(id: String, prefix: String, stepName: String, testBlock: suspend () -> R): R {
     println("$prefix: $stepName")
 
     val currentScope = requireNotNull(coroutineContext[CurrentTestScope]) { "Test scope is missing in the context" }.scope

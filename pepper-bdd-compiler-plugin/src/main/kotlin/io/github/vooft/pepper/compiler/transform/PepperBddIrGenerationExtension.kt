@@ -12,7 +12,7 @@ internal class PepperBddIrGenerationExtension(private val debugLogger: DebugLogg
         moduleFragment.transform(stepsCollector, null)
         debugLogger.log("Steps: ${stepsCollector.steps}")
 
-        moduleFragment.transform(PepperContainerTransformer(pluginContext, debugLogger), null)
+        moduleFragment.transform(PepperContainerTransformer(stepsCollector.steps, pluginContext, debugLogger), null)
 //        debugLogger.log("generate() after: ${moduleFragment.dump()}")
     }
 }
