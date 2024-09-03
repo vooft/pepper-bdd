@@ -5,7 +5,7 @@ import io.github.vooft.pepper.dsl.Given
 import io.github.vooft.pepper.dsl.Then
 import io.github.vooft.pepper.dsl.When
 
-class PepperUnprocessedSpec :
+class SimplePepperSpec :
     PepperSpec({
         Scenario("my test scenario") {
             Given
@@ -19,7 +19,3 @@ class PepperUnprocessedSpec :
             `compare result is`(compareResult, false)
         }
     })
-
-fun main() {
-    PepperUnprocessedSpec()
-}

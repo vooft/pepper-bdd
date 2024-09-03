@@ -1,10 +1,8 @@
 package io.github.vooft.pepper
 
-import io.github.vooft.pepper.PepperSpec.CapturedValue
 import io.github.vooft.pepper.dsl.PepperSpecDsl
 import io.github.vooft.pepper.dsl.PepperSpecDslImpl
 import io.github.vooft.pepper.dsl.Scenario
-import io.github.vooft.pepper.dsl.ScenarioDsl
 import io.kotest.common.KotestInternal
 import io.kotest.core.names.TestName
 import io.kotest.core.source.sourceRef
@@ -28,8 +26,6 @@ open class PepperSpec(scenarioBlock: PepperSpecDsl.() -> Scenario) : FunSpec() {
             withContext(CurrentTestScope(this)) { scenario.scenarioBody() }
         }
     }
-
-    class CapturedValue<T>(val value: T)
 }
 
 data class CurrentTestScope(val scope: TestScope) : AbstractCoroutineContextElement(CurrentTestScope) {
@@ -43,7 +39,7 @@ internal suspend fun <R> testContainer(prefix: String, stepName: String, testBlo
     println("$prefix: $stepName")
 
     val currentScope = requireNotNull(coroutineContext[CurrentTestScope]) { "Test scope is missing in the context" }.scope
-    lateinit var capturedValue: CapturedValue<R>
+    lateinit var result: StepResult<R>
 
     currentScope.registerTestCase(
         NestedTest(
@@ -52,19 +48,31 @@ internal suspend fun <R> testContainer(prefix: String, stepName: String, testBlo
             config = null,
             type = Test,
             source = sourceRef()
-        ) { withContext(CoroutineName("step: $stepName")) { capturedValue = CapturedValue(testBlock()) } }
+        ) {
+            withContext(CoroutineName("step: $stepName")) {
+                result = try {
+                    StepResult.Success(testBlock())
+                } catch (t: Throwable) {
+                    StepResult.Error(t)
+                }
+
+                result.value
+            }
+        }
     )
 
-    return capturedValue.value
+    return result.value
 }
 
-internal suspend fun <R> ScenarioDsl.GivenContainer(stepName: String, block: suspend () -> R): R = testContainer("Given", stepName, block)
+sealed class StepResult<R> {
+    abstract val value: R
 
-internal suspend fun <R> ScenarioDsl.WhenContainer(stepName: String, block: suspend () -> R): R = testContainer("When", stepName, block)
-
-internal suspend fun <R> ScenarioDsl.ThenContainer(stepName: String, block: suspend () -> R): R = testContainer("Then", stepName, block)
-
-internal suspend fun <R> ScenarioDsl.AndContainer(stepName: String, block: suspend () -> R): R = testContainer("And", stepName, block)
+    data class Success<R>(override val value: R) : StepResult<R>()
+    data class Error<R>(val error: Throwable) : StepResult<R>() {
+        override val value: R
+            get() = throw error
+    }
+}
 
 @Target(AnnotationTarget.FUNCTION)
 annotation class Step
