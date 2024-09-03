@@ -14,6 +14,9 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrFunctionExpressionImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.name.Name
+import java.util.UUID
+
+data class StepIdentifier(val id: UUID, val name: String)
 
 fun IrBuilderWithScope.irLambda(
     returnType: IrType,
