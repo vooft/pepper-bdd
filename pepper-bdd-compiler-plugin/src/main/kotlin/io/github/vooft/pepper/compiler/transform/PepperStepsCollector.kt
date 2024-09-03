@@ -1,9 +1,6 @@
 package io.github.vooft.pepper.compiler.transform
 
 import io.github.vooft.pepper.compiler.DebugLogger
-import io.github.vooft.pepper.compiler.transform.StepType.GIVEN
-import io.github.vooft.pepper.compiler.transform.StepType.THEN
-import io.github.vooft.pepper.compiler.transform.StepType.WHEN
 import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
@@ -25,8 +22,10 @@ import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
-internal class ElementTransformer(private val pluginContext: IrPluginContext, private val debugLogger: DebugLogger) :
-    IrElementTransformerVoidWithContext() {
+internal class PepperStepsCollector(
+    private val pluginContext: IrPluginContext,
+    private val debugLogger: DebugLogger
+) : IrElementTransformerVoidWithContext() {
 
     private val symbolGiven = pluginContext.findStep("Given")
     private val symbolWhen = pluginContext.findStep("When")

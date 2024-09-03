@@ -8,7 +8,7 @@ import org.jetbrains.kotlin.ir.declarations.IrModuleFragment
 internal class PepperBddIrGenerationExtension(private val debugLogger: DebugLogger) : IrGenerationExtension {
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
 //        debugLogger.log("generate() before: ${moduleFragment.dump()}")
-        moduleFragment.transform(ElementTransformer(pluginContext, debugLogger), null)
+        moduleFragment.transform(PepperContainerTransformer(pluginContext, debugLogger), null)
 //        debugLogger.log("generate() after: ${moduleFragment.dump()}")
     }
 }
