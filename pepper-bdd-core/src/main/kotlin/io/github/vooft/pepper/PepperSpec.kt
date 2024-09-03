@@ -1,6 +1,10 @@
 package io.github.vooft.pepper
 
+import io.github.vooft.pepper.PepperSpec.CapturedValue
 import io.github.vooft.pepper.dsl.PepperSpecDsl
+import io.github.vooft.pepper.dsl.PepperSpecDslImpl
+import io.github.vooft.pepper.dsl.Scenario
+import io.github.vooft.pepper.dsl.ScenarioDsl
 import io.kotest.core.names.TestName
 import io.kotest.core.source.sourceRef
 import io.kotest.core.spec.style.FunSpec
@@ -14,34 +18,14 @@ import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
-open class PepperSpec(block: suspend PepperSpecDsl.() -> Unit) : PepperSpecDsl, FunSpec() {
+open class PepperSpec(scenarioBlock: PepperSpecDsl.() -> Scenario) : FunSpec() {
     init {
-        addContainer(TestName("root"), false, null) {
-            withContext(CurrentTestScope(this)) {
-                block()
-            }
+        val dsl = PepperSpecDslImpl()
+        val scenario = dsl.scenarioBlock()
+
+        addContainer(TestName("Scenario: ${scenario.name}"), false, null) {
+            withContext(CurrentTestScope(this)) { scenario.scenarioBody() }
         }
-    }
-
-    internal suspend fun <R> testContainer(prefix: String, stepName: String, block: suspend () -> R): R {
-        println("$prefix: $stepName")
-
-        val currentScope = coroutineContext[CurrentTestScope]!!.scope
-        lateinit var capturedValue: CapturedValue<R>
-
-        currentScope.registerTestCase(NestedTest(
-            name = TestName("$prefix: $stepName"),
-            disabled = false,
-            config = null,
-            type = Test,
-            source = sourceRef()
-        ) {
-            withContext(CoroutineName("step: $stepName")) {
-                capturedValue = CapturedValue(block())
-            }
-        })
-
-        return capturedValue.value
     }
 
     class CapturedValue<T>(val value: T)
@@ -54,18 +38,34 @@ data class CurrentTestScope(val scope: TestScope) : AbstractCoroutineContextElem
     override fun toString(): String = "CurrentTestScope($scope)"
 }
 
-internal suspend fun <R> PepperSpecDsl.GivenContainer(stepName: String, block: suspend () -> R): R =
-    (this as PepperSpec).testContainer("Given", stepName, block)
+internal suspend fun <R> testContainer(prefix: String, stepName: String, testBlock: suspend () -> R): R {
+    println("$prefix: $stepName")
 
-internal suspend fun <R> PepperSpecDsl.WhenContainer(stepName: String, block: suspend () -> R): R =
-    (this as PepperSpec).testContainer("When", stepName, block)
+    val currentScope = coroutineContext[CurrentTestScope]!!.scope
+    lateinit var capturedValue: CapturedValue<R>
 
+    currentScope.registerTestCase(NestedTest(
+        name = TestName("$prefix: $stepName"),
+        disabled = false,
+        config = null,
+        type = Test,
+        source = sourceRef()
+    ) { withContext(CoroutineName("step: $stepName")) { capturedValue = CapturedValue(testBlock()) } })
 
-internal suspend fun <R> PepperSpecDsl.ThenContainer(stepName: String, block: suspend () -> R): R =
-    (this as PepperSpec).testContainer("Then", stepName, block)
+    return capturedValue.value
+}
 
-internal suspend fun <R> PepperSpecDsl.AndContainer(stepName: String, block: suspend () -> R): R =
-    (this as PepperSpec).testContainer("And", stepName, block)
+internal suspend fun <R> ScenarioDsl.GivenContainer(stepName: String, block: suspend () -> R): R =
+    testContainer("Given", stepName, block)
+
+internal suspend fun <R> ScenarioDsl.WhenContainer(stepName: String, block: suspend () -> R): R =
+    testContainer("When", stepName, block)
+
+internal suspend fun <R> ScenarioDsl.ThenContainer(stepName: String, block: suspend () -> R): R =
+    testContainer("Then", stepName, block)
+
+internal suspend fun <R> ScenarioDsl.AndContainer(stepName: String, block: suspend () -> R): R =
+    testContainer("And", stepName, block)
 
 @Target(AnnotationTarget.FUNCTION)
 annotation class Step

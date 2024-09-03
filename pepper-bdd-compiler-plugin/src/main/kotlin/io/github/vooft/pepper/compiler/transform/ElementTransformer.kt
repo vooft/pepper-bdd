@@ -35,11 +35,11 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
     private val symbolWhen = pluginContext.findStep("When")
     private val symbolThen = pluginContext.findStep("Then")
 
-    private val dslClass = requireNotNull(
+    private val scenarioDslClass = requireNotNull(
         pluginContext.referenceClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper.dsl"),
-                topLevelName = Name.identifier("PepperSpecDsl")
+                topLevelName = Name.identifier("ScenarioDsl")
             )
         )
     )
@@ -84,7 +84,7 @@ internal class ElementTransformer(private val pluginContext: IrPluginContext, pr
         val found = allScopes.reversed().firstOrNull {
             val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
             val extension = element.extensionReceiverParameter ?: return@firstOrNull false
-            element.name.asString() == "<anonymous>" && extension.type.classOrFail == dslClass
+            element.name.asString() == "<anonymous>" && extension.type.classOrFail == scenarioDslClass
         }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with PepperSpecDsl receiver")
 
         return irCall(container).apply {

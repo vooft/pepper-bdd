@@ -6,15 +6,17 @@ import io.github.vooft.pepper.dsl.Then
 import io.github.vooft.pepper.dsl.When
 
 class PepperUnprocessedSpec : PepperSpec({
-    Given
-    val firstRandom = `generate random string`("first")
-    val secondRandom = `generate random string`("second")
+    Scenario("my test scenario") {
+        Given
+        val firstRandom = `generate random string`("first")
+        val secondRandom = `generate random string`("second")
 
-    When
-    val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        When
+        val compareResult = `two strings are compared`(firstRandom, secondRandom)
 
-    Then
-    `compare result is`(compareResult, false)
+        Then
+        `compare result is`(compareResult, false)
+    }
 })
 
 fun main() {
