@@ -48,20 +48,7 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R): 
 }
 
 internal data class StepIdentifier(val id: String, val prefix: String, val name: String) {
-    fun toTestName() = TestName("${prefix.lowercase().capitalizeAsciiOnly()}: $name")
-}
-
-private fun String.capitalizeAsciiOnly(): String {
-    if (isEmpty()) return this
-    val c = this[0]
-    return if (c in 'a'..'z') {
-        buildString(length) {
-            append(c.uppercaseChar())
-            append(this@capitalizeAsciiOnly, 1, this@capitalizeAsciiOnly.length)
-        }
-    } else {
-        this
-    }
+    fun toTestName() = TestName("$prefix: $name")
 }
 
 private sealed class StepResult<R> {

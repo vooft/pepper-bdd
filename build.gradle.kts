@@ -20,7 +20,13 @@ allprojects {
 tasks.register("pepperPublishToMavenCentral") {
     dependsOn(
         gradle.includedBuilds.map { it.task(":publishAndReleaseToMavenCentral") } +
-                subprojects.mapNotNull { it.tasks.findByName("publishAndReleaseToMavenCentral") }
+            subprojects.mapNotNull { it.tasks.findByName("publishAndReleaseToMavenCentral") }
     )
 }
 
+tasks.register("pepperPublishToMavenLocal") {
+    dependsOn(
+        gradle.includedBuilds.map { it.task(":publishToMavenLocal") } +
+            subprojects.mapNotNull { it.tasks.findByName("publishToMavenLocal") }
+    )
+}
