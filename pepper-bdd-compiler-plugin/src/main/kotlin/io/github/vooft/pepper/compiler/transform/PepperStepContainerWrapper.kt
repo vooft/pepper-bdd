@@ -18,11 +18,8 @@ import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrFunctionAccessExpression
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrFail
-import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
-import org.jetbrains.kotlin.ir.util.hasAnnotation
-import org.jetbrains.kotlin.name.ClassId
-import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.ir.types.classifierOrFail
+import org.jetbrains.kotlin.ir.types.superTypes
 
 internal class PepperStepContainerWrapper(
     private val steps: Map<String, List<StepIdentifier>>,
@@ -30,24 +27,13 @@ internal class PepperStepContainerWrapper(
     private val debugLogger: DebugLogger
 ) : IrElementTransformerVoidWithContext() {
 
-    private val scenarioDslClass = requireNotNull(
-        pluginContext.referenceClass(
-            ClassId(
-                packageFqName = FqName("io.github.vooft.pepper.dsl"),
-                topLevelName = Name.identifier("ScenarioDsl")
-            )
-        )
-    )
-
-    private val stepContainer = pluginContext.findHelper("StepContainer")
-    private val stepAnnotation = pluginContext.findStepAnnotation()
-    private val pepperSpecClass = pluginContext.findPepperSpec()
+    private val references by lazy { PepperReferences(pluginContext) }
 
     private val remainingSteps: MutableList<StepIdentifier> = mutableListOf()
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
-        if (!type.isSubtypeOfClass(pepperSpecClass)) {
+        if (!type.classifierOrFail.superTypes().any { it.classFqName == PepperReferences.pepperClassSpecFqName }) {
             return super.visitConstructor(declaration)
         }
 
@@ -58,14 +44,14 @@ internal class PepperStepContainerWrapper(
     }
 
     override fun visitCall(expression: IrCall): IrExpression {
-        if (expression.symbol.owner.hasAnnotation(stepAnnotation)) {
-            return DeclarationIrBuilder(
-                pluginContext,
-                expression.symbol
-            ).wrapWithContainer(expression, requireNotNull(currentDeclarationParent))
+        if (!expression.symbol.owner.annotations.any { it.type.classFqName == PepperReferences.stepAnnotationFqName }) {
+            return super.visitCall(expression)
         }
 
-        return super.visitCall(expression)
+        return DeclarationIrBuilder(
+            pluginContext,
+            expression.symbol
+        ).wrapWithContainer(expression, requireNotNull(currentDeclarationParent))
     }
 
     private fun IrBuilderWithScope.wrapWithContainer(
@@ -82,12 +68,12 @@ internal class PepperStepContainerWrapper(
         val parentFunction = allScopes.reversed().firstOrNull {
             val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
             val extension = element.extensionReceiverParameter ?: return@firstOrNull false
-            element.name.asString() == "<anonymous>" && extension.type.classOrFail == scenarioDslClass
-        }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with $scenarioDslClass receiver")
+            element.name.asString() == "<anonymous>" && extension.type.classOrFail == references.scenarioDsl
+        }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with ${references.scenarioDsl} receiver")
 
         debugLogger.log("Wrapping call with StepContainer: ${originalCall.symbol.owner.name}")
 
-        return irCall(stepContainer).apply {
+        return irCall(references.stepContainer).apply {
             this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
             putTypeArgument(0, originalReturnType)
 

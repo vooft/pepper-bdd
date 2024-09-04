@@ -15,7 +15,8 @@ import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrFail
-import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
+import org.jetbrains.kotlin.ir.types.classifierOrFail
+import org.jetbrains.kotlin.ir.types.superTypes
 
 internal class PepperStepsAdder(
     private val steps: Map<String, List<StepIdentifier>>,
@@ -23,15 +24,13 @@ internal class PepperStepsAdder(
     private val debugLogger: DebugLogger
 ) : IrElementTransformerVoidWithContext() {
 
-    private val addStepFunction = pluginContext.findHelper("addStep")
+    private val references by lazy { PepperReferences(pluginContext) }
 
-    private val pepperSpecClass = pluginContext.findPepperSpec()
-    private val pepperSpecDslClass = pluginContext.findPepperSpecDsl()
     private var currentClassSteps = listOf<StepIdentifier>()
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
-        if (!type.isSubtypeOfClass(pepperSpecClass)) {
+        if (!type.classifierOrFail.superTypes().any { it.classFqName == PepperReferences.pepperClassSpecFqName }) {
             return super.visitConstructor(declaration)
         }
 
@@ -43,19 +42,19 @@ internal class PepperStepsAdder(
     override fun visitCall(expression: IrCall): IrExpression {
         if (currentClassSteps.isNotEmpty() &&
             expression.symbol.owner.name.asString() == "Scenario" &&
-            expression.dispatchReceiver?.type?.classFqName?.asString() == "io.github.vooft.pepper.dsl.PepperSpecDsl"
+            expression.dispatchReceiver?.type?.classFqName == PepperReferences.pepperClassSpecDslFqName
         ) {
             debugLogger.log("Processing scenario call")
 
             val parentFunction = allScopes.reversed().firstOrNull {
                 val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
                 val extension = element.extensionReceiverParameter ?: return@firstOrNull false
-                element.name.asString() == "<anonymous>" && extension.type.classOrFail == pepperSpecDslClass
-            }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with $pepperSpecDslClass receiver")
+                element.name.asString() == "<anonymous>" && extension.type.classOrFail == references.pepperSpecDsl
+            }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with ${references.pepperSpecDsl} receiver")
 
             return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock {
                 for (step in currentClassSteps) {
-                    +irCall(addStepFunction).apply {
+                    +irCall(references.addStep).apply {
                         this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
 
                         putValueArgument(0, irString(step.id))

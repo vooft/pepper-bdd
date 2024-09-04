@@ -11,8 +11,10 @@ interface Scenario {
     val scenarioBody: suspend () -> Unit
 }
 
-val ScenarioDsl.Given: Unit get() = pepperFail()
-val ScenarioDsl.When: Unit get() = pepperFail()
-val ScenarioDsl.Then: Unit get() = pepperFail()
+val ScenarioDsl.Given: PepperPrefix get() = pepperFail()
+val ScenarioDsl.When: PepperPrefix get() = pepperFail()
+val ScenarioDsl.Then: PepperPrefix get() = pepperFail()
+
+interface PepperPrefix
 
 private fun pepperFail(): Nothing = error("This function should be replaced by a compiler plugin, please check your Gradle configuration")

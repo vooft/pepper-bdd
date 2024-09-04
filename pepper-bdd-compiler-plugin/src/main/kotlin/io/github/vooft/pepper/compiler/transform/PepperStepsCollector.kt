@@ -13,21 +13,15 @@ import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.classFqName
-import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
-import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.types.classifierOrFail
+import org.jetbrains.kotlin.ir.types.superTypes
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
-import org.jetbrains.kotlin.name.CallableId
-import org.jetbrains.kotlin.name.ClassId
-import org.jetbrains.kotlin.name.FqName
-import org.jetbrains.kotlin.name.Name
 import java.util.UUID
 
 internal class PepperStepsCollector(private val pluginContext: IrPluginContext, private val debugLogger: DebugLogger) :
     IrElementTransformerVoid() {
 
-    private val symbolGiven = pluginContext.findStep("Given")
-    private val symbolWhen = pluginContext.findStep("When")
-    private val symbolThen = pluginContext.findStep("Then")
+    private val references by lazy { PepperReferences(pluginContext) }
 
     private var currentClassName: String? = null
     private val currentClassSteps = mutableListOf<StepIdentifier>()
@@ -42,27 +36,9 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
             return (current + visitedClasses).filterValues { it.isNotEmpty() }
         }
 
-    private val stepAnnotation = requireNotNull(
-        pluginContext.referenceClass(
-            ClassId(
-                packageFqName = FqName("io.github.vooft.pepper"),
-                topLevelName = Name.identifier("Step")
-            )
-        )
-    )
-
-    private val pepperSpecClass = requireNotNull(
-        pluginContext.referenceClass(
-            ClassId(
-                packageFqName = FqName("io.github.vooft.pepper"),
-                topLevelName = Name.identifier("PepperSpec")
-            )
-        )
-    )
-
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
-        if (!type.isSubtypeOfClass(pepperSpecClass)) {
+        if (!type.classifierOrFail.superTypes().any { it.classFqName == PepperReferences.pepperClassSpecFqName }) {
             return super.visitConstructor(declaration)
         }
 
@@ -76,34 +52,46 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
     }
 
     override fun visitCall(expression: IrCall): IrExpression {
-        val replacedStep = replaceIfStep(expression)
+        val replacedStep = replaceIfPrefix(expression)
         if (replacedStep != null) {
             return replacedStep
         }
 
-        if (currentClassName != null && expression.symbol.owner.hasAnnotation(stepAnnotation)) {
-            val prefix = when (stepIndex++) {
-                0 -> currentStepPrefix
-                else -> AND
-            }
-
-            currentClassSteps.add(
-                StepIdentifier(
-                    id = UUID.randomUUID().toString(),
-                    prefix = "${currentClassSteps.size + 1}. $prefix",
-                    name = expression.symbol.owner.name.asString()
-                )
-            )
-        }
+        collectStep(expression)
 
         return super.visitCall(expression)
     }
 
-    private fun replaceIfStep(expression: IrCall): IrExpression? {
+    private fun collectStep(expression: IrCall) {
+        if (currentClassName == null ||
+            !expression.symbol.owner.annotations.any { it.type.classFqName == PepperReferences.stepAnnotationFqName }
+        ) {
+            return
+        }
+
+        val prefix = when (stepIndex++) {
+            0 -> currentStepPrefix
+            else -> AND
+        }
+
+        currentClassSteps.add(
+            StepIdentifier(
+                id = UUID.randomUUID().toString(),
+                prefix = "${currentClassSteps.size + 1}. $prefix",
+                name = expression.symbol.owner.name.asString()
+            )
+        )
+    }
+
+    private fun replaceIfPrefix(expression: IrCall): IrExpression? {
+        if (expression.type.classFqName != PepperReferences.pepperPrefixFqName) {
+            return null
+        }
+
         currentStepPrefix = when (expression.symbol) {
-            symbolGiven -> GIVEN
-            symbolWhen -> WHEN
-            symbolThen -> THEN
+            references.prefixGiven -> GIVEN
+            references.prefixWhen -> WHEN
+            references.prefixThen -> THEN
 
             else -> return null
         }
@@ -113,12 +101,3 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
         return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock { }
     }
 }
-
-private fun IrPluginContext.findStep(name: String) = requireNotNull(
-    referenceProperties(
-        callableId = CallableId(
-            packageName = FqName("io.github.vooft.pepper.dsl"),
-            callableName = Name.identifier(name)
-        )
-    ).single().owner.getter
-).symbol
