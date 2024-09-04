@@ -27,4 +27,30 @@ class SimplePepperSpec : PepperSpec({
 })
 ```
 
-<img src="docs/ordered-steps.png" height="200">
+<img src="docs/ordered-steps-report.png" height="200">
+<img src="docs/ordered-steps-intellij.png" height="200">
+
+# Usage
+Project is not yet published to the Gradle Plugins Portal, so you need to add plugin dependency manually via the `buildscript` section.
+
+```kotlin
+buildscript {
+    dependencies {
+        classpath("io.github.vooft:pepper-bdd-gradle:<version>")
+    }
+}
+
+apply(plugin = "io.github.vooft.pepper-bdd")
+```
+
+Also you need to add `pepper-bdd-core` dependency to your project.
+
+```kotlin
+dependencies {
+    testImplementation("io.github.vooft:pepper-bdd-core:<version>")
+}
+```
+
+After this you can create a test by inheriting from `io.github.vooft.pepper.PepperSpec` and compiler will pick it up automatically.
+
+If you didn't add any steps, or forgot to add a plugin, an exception will be thrown on test execution.

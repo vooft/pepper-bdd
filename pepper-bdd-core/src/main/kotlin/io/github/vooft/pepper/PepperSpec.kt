@@ -6,6 +6,7 @@ import io.github.vooft.pepper.dsl.Scenario
 import io.kotest.core.names.TestName
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.spec.style.scopes.addContainer
+import io.kotest.core.spec.style.scopes.addTest
 import kotlinx.coroutines.withContext
 
 open class PepperSpec(scenarioBlock: PepperSpecDsl.() -> Scenario) : FunSpec() {
@@ -13,10 +14,16 @@ open class PepperSpec(scenarioBlock: PepperSpecDsl.() -> Scenario) : FunSpec() {
         val dsl = PepperSpecDslImpl()
         val scenario = dsl.scenarioBlock()
 
-        val remainingSteps = dsl.remainingSteps.toMutableList()
-        addContainer(TestName("Scenario: ${scenario.name}"), false, null) {
-            withContext(CurrentTestScope(this) + RemainingSteps(remainingSteps)) {
-                scenario.scenarioBody()
+        if (dsl.remainingSteps.isEmpty()) {
+            addTest(TestName("No steps found"), false, null) {
+                throw AssertionError("No steps found, did you register pepper-bdd plugin correctly?")
+            }
+        } else {
+            val remainingSteps = dsl.remainingSteps.toMutableList()
+            addContainer(TestName("Scenario: ${scenario.name}"), false, null) {
+                withContext(CurrentTestScope(this) + RemainingSteps(remainingSteps)) {
+                    scenario.scenarioBody()
+                }
             }
         }
     }

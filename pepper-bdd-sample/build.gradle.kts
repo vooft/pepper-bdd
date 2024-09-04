@@ -6,9 +6,6 @@ plugins {
     id("io.github.vooft.pepper-bdd")
 }
 
-pepper {
-}
-
 dependencies {
     testImplementation(project(":pepper-bdd-core"))
     testImplementation(libs.kotest.runner)
