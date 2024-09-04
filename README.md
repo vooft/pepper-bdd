@@ -31,8 +31,7 @@ class SimplePepperSpec : PepperSpec({
 <img src="docs/ordered-steps-intellij.png" height="200">
 
 # Usage
-Project is not yet published to [Gradle Plugins Portal](https://plugins.gradle.org/), 
-so you need to add plugin dependency manually via the `buildscript` section.
+Project is not yet published to the Gradle Plugins Portal, so you need to add plugin dependency manually via the `buildscript` section.
 
 ```kotlin
 buildscript {
