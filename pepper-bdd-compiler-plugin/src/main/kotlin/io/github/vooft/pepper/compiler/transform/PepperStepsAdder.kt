@@ -53,12 +53,18 @@ internal class PepperStepsAdder(
             }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with ${references.pepperSpecDsl} receiver")
 
             return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock {
-                for (step in currentClassSteps) {
+                val stepIndexLength = currentClassSteps.size.toString().length
+                for ((index, step) in currentClassSteps.withIndex()) {
                     +irCall(references.addStep).apply {
                         this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
 
+                        val prefix = listOf(
+                            index.toString().padStart(stepIndexLength, '0'),
+                            ". ",
+                            step.prefix.capitalized
+                        ).joinToString("")
                         putValueArgument(0, irString(step.id))
-                        putValueArgument(1, irString(step.prefix))
+                        putValueArgument(1, irString(prefix))
                         putValueArgument(2, irString(step.name))
                     }
                 }
@@ -70,3 +76,10 @@ internal class PepperStepsAdder(
         return super.visitCall(expression)
     }
 }
+
+private val StepPrefix.capitalized: String
+    get() {
+        val first = name.first().uppercase()
+        val rest = name.drop(1).lowercase()
+        return first + rest
+    }
