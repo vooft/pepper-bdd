@@ -5,6 +5,7 @@ import io.github.vooft.pepper.compiler.transform.StepPrefix.AND
 import io.github.vooft.pepper.compiler.transform.StepPrefix.GIVEN
 import io.github.vooft.pepper.compiler.transform.StepPrefix.THEN
 import io.github.vooft.pepper.compiler.transform.StepPrefix.WHEN
+import org.jetbrains.kotlin.backend.common.IrElementTransformerVoidWithContext
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.ir.IrStatement
@@ -15,11 +16,10 @@ import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.hasAnnotation
-import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import java.util.UUID
 
 internal class PepperStepsCollector(private val pluginContext: IrPluginContext, private val debugLogger: DebugLogger) :
-    IrElementTransformerVoid() {
+    IrElementTransformerVoidWithContext() {
 
     private val references = PepperReferences(pluginContext)
 
@@ -52,6 +52,10 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
     }
 
     override fun visitCall(expression: IrCall): IrExpression {
+        if (allScopes.findScenarioDslBlock() == null) {
+            return super.visitCall(expression)
+        }
+
         val replacedStep = replaceIfPrefix(expression)
         if (replacedStep != null) {
             return replacedStep

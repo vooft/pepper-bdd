@@ -58,6 +58,7 @@ class PepperReferences(pluginContext: IrPluginContext) {
 
     companion object {
         val pepperClassSpecDslFqName get() = FqName("io.github.vooft.pepper.dsl.PepperSpecDsl")
+        val pepperScenarioDslFqName get() = FqName("io.github.vooft.pepper.dsl.ScenarioDsl")
     }
 }
 

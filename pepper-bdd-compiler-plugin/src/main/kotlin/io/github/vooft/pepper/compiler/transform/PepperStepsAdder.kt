@@ -39,6 +39,7 @@ internal class PepperStepsAdder(
     }
 
     override fun visitCall(expression: IrCall): IrExpression {
+        // here we only check the Scenario method call
         if (currentClassSteps.isNotEmpty() &&
             expression.symbol.owner.name.asString() == "Scenario" &&
             expression.dispatchReceiver?.type?.classFqName == PepperReferences.pepperClassSpecDslFqName

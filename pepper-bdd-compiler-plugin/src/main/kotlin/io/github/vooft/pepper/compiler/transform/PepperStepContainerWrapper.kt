@@ -12,12 +12,10 @@ import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
-import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrFunctionAccessExpression
 import org.jetbrains.kotlin.ir.types.classFqName
-import org.jetbrains.kotlin.ir.types.classOrFail
 import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 
@@ -44,7 +42,7 @@ internal class PepperStepContainerWrapper(
     }
 
     override fun visitCall(expression: IrCall): IrExpression {
-        if (!expression.symbol.owner.hasAnnotation(references.stepAnnotation)) {
+        if (!expression.symbol.owner.hasAnnotation(references.stepAnnotation) || allScopes.findScenarioDslBlock() == null) {
             return super.visitCall(expression)
         }
 
@@ -65,11 +63,8 @@ internal class PepperStepContainerWrapper(
             lambdaParent = currentDeclarationParent // must have local scope accessible
         ) { +irReturn(originalCall) }
 
-        val parentFunction = allScopes.reversed().firstOrNull {
-            val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
-            val extension = element.extensionReceiverParameter ?: return@firstOrNull false
-            element.name.asString() == "<anonymous>" && extension.type.classOrFail == references.scenarioDsl
-        }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with ${references.scenarioDsl} receiver")
+        val parentFunction = allScopes.findScenarioDslBlock()
+            ?: error("Cannot find lambda function with ${PepperReferences.pepperScenarioDslFqName} receiver")
 
         debugLogger.log("Wrapping call with StepContainer: ${originalCall.symbol.owner.name}")
 

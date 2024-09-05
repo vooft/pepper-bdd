@@ -17,6 +17,10 @@ suspend fun `generate random string`(prefix: String): String {
     return "$prefix $random"
 }
 
+@Step
+suspend fun `generate two random strings`(prefix: String): Pair<String, String> =
+    `generate random string`(prefix) to `generate random string`(prefix)
+
 data class CompareResult(val first: String, val second: String, val result: Boolean)
 
 @Step
