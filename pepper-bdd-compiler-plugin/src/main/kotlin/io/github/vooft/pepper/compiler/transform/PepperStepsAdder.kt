@@ -59,7 +59,7 @@ internal class PepperStepsAdder(
                         this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
 
                         val prefix = listOf(
-                            index.toString().padStart(stepIndexLength, '0'),
+                            (index + 1).toString().padStart(stepIndexLength, '0'),
                             ". ",
                             step.prefix.capitalized
                         ).joinToString("")
