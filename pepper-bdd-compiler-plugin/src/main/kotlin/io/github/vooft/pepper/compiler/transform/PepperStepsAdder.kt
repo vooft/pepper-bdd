@@ -15,8 +15,7 @@ import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrFail
-import org.jetbrains.kotlin.ir.types.classifierOrFail
-import org.jetbrains.kotlin.ir.types.superTypes
+import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 
 internal class PepperStepsAdder(
     private val steps: Map<String, List<StepIdentifier>>,
@@ -24,13 +23,13 @@ internal class PepperStepsAdder(
     private val debugLogger: DebugLogger
 ) : IrElementTransformerVoidWithContext() {
 
-    private val references by lazy { PepperReferences(pluginContext) }
+    private val references = PepperReferences(pluginContext)
 
     private var currentClassSteps = listOf<StepIdentifier>()
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
-        if (!type.classifierOrFail.superTypes().any { it.classFqName == PepperReferences.pepperClassSpecFqName }) {
+        if (!type.isSubtypeOfClass(references.pepperSpec)) {
             return super.visitConstructor(declaration)
         }
 

@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 class PepperReferences(pluginContext: IrPluginContext) {
-    val pepperClassSpecFqName = requireNotNull(
+    val pepperSpec = requireNotNull(
         pluginContext.referenceClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper"),
@@ -58,9 +58,6 @@ class PepperReferences(pluginContext: IrPluginContext) {
 
     companion object {
         val pepperClassSpecDslFqName get() = FqName("io.github.vooft.pepper.dsl.PepperSpecDsl")
-        val pepperClassSpecFqName get() = FqName("io.github.vooft.pepper.PepperSpec")
-        val stepAnnotationFqName get() = FqName("io.github.vooft.pepper.Step")
-        val pepperPrefixFqName get() = FqName("io.github.vooft.pepper.dsl.PepperPrefix")
     }
 }
 

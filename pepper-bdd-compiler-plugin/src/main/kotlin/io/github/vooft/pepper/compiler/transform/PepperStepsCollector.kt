@@ -13,15 +13,15 @@ import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.classFqName
-import org.jetbrains.kotlin.ir.types.classifierOrFail
-import org.jetbrains.kotlin.ir.types.superTypes
+import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
+import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.visitors.IrElementTransformerVoid
 import java.util.UUID
 
 internal class PepperStepsCollector(private val pluginContext: IrPluginContext, private val debugLogger: DebugLogger) :
     IrElementTransformerVoid() {
 
-    private val references by lazy { PepperReferences(pluginContext) }
+    private val references = PepperReferences(pluginContext)
 
     private var currentClassName: String? = null
     private val currentClassSteps = mutableListOf<StepIdentifier>()
@@ -38,7 +38,7 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
-        if (!type.classifierOrFail.superTypes().any { it.classFqName == PepperReferences.pepperClassSpecFqName }) {
+        if (!type.isSubtypeOfClass(references.pepperSpec)) {
             return super.visitConstructor(declaration)
         }
 
@@ -63,9 +63,7 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
     }
 
     private fun collectStep(expression: IrCall) {
-        if (currentClassName == null ||
-            !expression.symbol.owner.annotations.any { it.type.classFqName == PepperReferences.stepAnnotationFqName }
-        ) {
+        if (currentClassName == null || !expression.symbol.owner.hasAnnotation(references.stepAnnotation)) {
             return
         }
 
@@ -84,10 +82,6 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
     }
 
     private fun replaceIfPrefix(expression: IrCall): IrExpression? {
-        if (expression.type.classFqName != PepperReferences.pepperPrefixFqName) {
-            return null
-        }
-
         currentStepPrefix = when (expression.symbol) {
             references.prefixGiven -> GIVEN
             references.prefixWhen -> WHEN

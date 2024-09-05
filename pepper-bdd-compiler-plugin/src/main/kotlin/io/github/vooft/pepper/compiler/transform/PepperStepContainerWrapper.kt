@@ -18,8 +18,8 @@ import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.expressions.IrFunctionAccessExpression
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrFail
-import org.jetbrains.kotlin.ir.types.classifierOrFail
-import org.jetbrains.kotlin.ir.types.superTypes
+import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
+import org.jetbrains.kotlin.ir.util.hasAnnotation
 
 internal class PepperStepContainerWrapper(
     private val steps: Map<String, List<StepIdentifier>>,
@@ -27,13 +27,13 @@ internal class PepperStepContainerWrapper(
     private val debugLogger: DebugLogger
 ) : IrElementTransformerVoidWithContext() {
 
-    private val references by lazy { PepperReferences(pluginContext) }
+    private val references = PepperReferences(pluginContext)
 
     private val remainingSteps: MutableList<StepIdentifier> = mutableListOf()
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
-        if (!type.classifierOrFail.superTypes().any { it.classFqName == PepperReferences.pepperClassSpecFqName }) {
+        if (!type.isSubtypeOfClass(references.pepperSpec)) {
             return super.visitConstructor(declaration)
         }
 
@@ -44,7 +44,7 @@ internal class PepperStepContainerWrapper(
     }
 
     override fun visitCall(expression: IrCall): IrExpression {
-        if (!expression.symbol.owner.annotations.any { it.type.classFqName == PepperReferences.stepAnnotationFqName }) {
+        if (!expression.symbol.owner.hasAnnotation(references.stepAnnotation)) {
             return super.visitCall(expression)
         }
 
@@ -82,7 +82,7 @@ internal class PepperStepContainerWrapper(
             val step = remainingSteps.removeFirst()
             require(step.name == currentCall) { "Step name mismatch: ${step.name} != $currentCall" }
 
-            putValueArgument(0, irString(step.id.toString()))
+            putValueArgument(0, irString(step.id))
             putValueArgument(
                 index = 1,
                 valueArgument = lambda
