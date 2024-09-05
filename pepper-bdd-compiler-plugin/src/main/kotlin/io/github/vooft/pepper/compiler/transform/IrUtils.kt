@@ -1,5 +1,6 @@
 package io.github.vooft.pepper.compiler.transform
 
+import org.jetbrains.kotlin.backend.common.ScopeWithIr
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.descriptors.DescriptorVisibilities
@@ -9,15 +10,23 @@ import org.jetbrains.kotlin.ir.builders.declarations.buildFun
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
+import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrFunctionExpression
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.expressions.impl.IrFunctionExpressionImpl
 import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+
+fun List<ScopeWithIr>.findScenarioDslBlock() = reversed().firstOrNull {
+    val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
+    val extension = element.extensionReceiverParameter ?: return@firstOrNull false
+    element.name.asString() == "<anonymous>" && extension.type.classFqName == PepperReferences.pepperScenarioDslFqName
+}?.irElement as? IrSimpleFunction
 
 fun IrPluginContext.findPepperSpec() = requireNotNull(
     referenceClass(
