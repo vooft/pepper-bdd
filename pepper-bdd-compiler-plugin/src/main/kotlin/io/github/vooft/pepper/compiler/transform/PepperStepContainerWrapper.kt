@@ -27,7 +27,7 @@ internal class PepperStepContainerWrapper(
 
     private val references = PepperReferences(pluginContext)
 
-    private val remainingSteps: MutableList<StepIdentifier> = mutableListOf()
+    private var currentScenario = CurrentScenarioStorage(null)
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
@@ -35,13 +35,24 @@ internal class PepperStepContainerWrapper(
             return super.visitConstructor(declaration)
         }
 
-        remainingSteps.clear()
-        remainingSteps.addAll(steps[type.classFqName?.asString()] ?: listOf())
+        currentScenario = CurrentScenarioStorage(type.classFqName?.let { ClassName(it.asString()) })
 
         return super.visitConstructor(declaration)
     }
 
     override fun visitCall(expression: IrCall): IrExpression {
+        if (currentScenario.className == null) {
+            return super.visitCall(expression)
+        }
+
+        val scenarioTitle = expression.findScenarioTitle()
+        if (scenarioTitle != null) {
+            currentScenario = CurrentScenarioStorage(currentScenario.className)
+            currentScenario.scenarionTitle = ScenarioTitle(scenarioTitle)
+            currentScenario.remainingSteps.addAll(steps[currentScenario.scenarioIdentifier] ?: emptyList())
+            return super.visitCall(expression)
+        }
+
         if (!expression.symbol.owner.hasAnnotation(references.stepAnnotation) || allScopes.findScenarioDslBlock() == null) {
             return super.visitCall(expression)
         }
@@ -74,14 +85,25 @@ internal class PepperStepContainerWrapper(
 
             val currentCall = originalCall.symbol.owner.name.asString()
 
-            val step = remainingSteps.removeFirst()
+            require(currentScenario.remainingSteps.isNotEmpty()) { "No steps left for scenario ${currentScenario.scenarioIdentifier}" }
+            val step = currentScenario.remainingSteps.removeFirst()
             require(step.name == currentCall) { "Step name mismatch: ${step.name} != $currentCall" }
 
-            putValueArgument(0, irString(step.id))
-            putValueArgument(
-                index = 1,
-                valueArgument = lambda
-            )
+            putValueArgument(index = 0, valueArgument = irString(step.id))
+            putValueArgument(index = 1, valueArgument = lambda)
         }
     }
+
+    private class CurrentScenarioStorage(val className: ClassName?) {
+        var scenarionTitle: ScenarioTitle? = null
+        val remainingSteps: MutableList<StepIdentifier> = mutableListOf()
+    }
+
+    private val CurrentScenarioStorage.scenarioIdentifier: ScenarioIdentifier?
+        get() {
+            val className = className ?: return null
+            val scenarioTitle = scenarionTitle ?: return null
+
+            return ScenarioIdentifier(className, scenarioTitle)
+        }
 }

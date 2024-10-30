@@ -32,7 +32,8 @@ fun List<ScopeWithIr>.findScenarioDslBlock() = reversed().firstOrNull {
 
 fun IrCall.findScenarioTitle(): String? {
     if (symbol.owner.name.asString() == "Scenario" &&
-            dispatchReceiver?.type?.classFqName == PepperReferences.pepperClassSpecDslFqName) {
+        dispatchReceiver?.type?.classFqName == PepperReferences.pepperClassSpecDslFqName
+    ) {
         val titleConst = getValueArgument(0) as? IrConst<*> ?: return null
         return titleConst.value as? String
     }

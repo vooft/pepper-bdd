@@ -41,7 +41,7 @@ style:
   MagicNumber:
     active: false
   ReturnCount:
-    max: 3
+    max: 5
   UseOrEmpty:
     active: false
 

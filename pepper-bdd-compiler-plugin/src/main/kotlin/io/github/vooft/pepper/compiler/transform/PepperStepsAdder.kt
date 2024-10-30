@@ -25,7 +25,8 @@ internal class PepperStepsAdder(
 
     private val references = PepperReferences(pluginContext)
 
-    private var currentClassSteps = listOf<StepIdentifier>()
+    private var currentClassName: ClassName? = null
+    private var currentScenarioSteps = listOf<StepIdentifier>()
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
@@ -33,18 +34,24 @@ internal class PepperStepsAdder(
             return super.visitConstructor(declaration)
         }
 
-        currentClassSteps = steps[type.classFqName?.asString()] ?: listOf()
+        currentClassName = type.classFqName?.let { ClassName(it.asString()) }
 
         return super.visitConstructor(declaration)
     }
 
     override fun visitCall(expression: IrCall): IrExpression {
-        // here we only check the Scenario method call
-        if (currentClassSteps.isEmpty()) {
+        val className = currentClassName
+        if (className == null) {
             return super.visitCall(expression)
         }
 
         val scenarioTitle = expression.findScenarioTitle() ?: return super.visitCall(expression)
+        currentScenarioSteps = steps[ScenarioIdentifier(className, ScenarioTitle(scenarioTitle))] ?: listOf()
+
+        // here we only check the Scenario method call
+        if (currentScenarioSteps.isEmpty()) {
+            return super.visitCall(expression)
+        }
 
         debugLogger.log("Processing scenario call $scenarioTitle")
 
@@ -55,8 +62,8 @@ internal class PepperStepsAdder(
         }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with ${references.pepperSpecDsl} receiver")
 
         return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock {
-            val stepIndexLength = currentClassSteps.size.toString().length
-            for ((index, step) in currentClassSteps.withIndex()) {
+            val stepIndexLength = currentScenarioSteps.size.toString().length
+            for ((index, step) in currentScenarioSteps.withIndex()) {
                 +irCall(references.addStep).apply {
                     this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
 

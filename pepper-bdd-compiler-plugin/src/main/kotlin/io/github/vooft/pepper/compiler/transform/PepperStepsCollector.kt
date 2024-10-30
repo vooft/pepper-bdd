@@ -45,7 +45,6 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
         return super.visitConstructor(declaration)
     }
 
-    @Suppress("detekt:ReturnCount")
     override fun visitCall(expression: IrCall): IrExpression {
         if (currentScenario.className == null) {
             return super.visitCall(expression)
@@ -53,6 +52,9 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
 
         val scenarioTitle = expression.findScenarioTitle()
         if (scenarioTitle != null) {
+            currentScenario.scenarioIdentifier?.let { visitedScenarios[it] = currentScenario.steps.toList() }
+
+            currentScenario = CurrentScenarioStorage(currentScenario.className)
             currentScenario.scenarionTitle = ScenarioTitle(scenarioTitle)
             return super.visitCall(expression)
         }
@@ -103,21 +105,21 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
         prefixStepIndex = 0
         return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock { }
     }
-}
 
-private class CurrentScenarioStorage(val className: ClassName? = null) {
-    var scenarionTitle: ScenarioTitle? = null
+    private class CurrentScenarioStorage(val className: ClassName? = null) {
+        var scenarionTitle: ScenarioTitle? = null
 
-    val steps = mutableListOf<StepIdentifier>()
+        val steps = mutableListOf<StepIdentifier>()
 
-    var stepPrefix: StepPrefix = GIVEN
-    var prefixStepIndex = 0
-}
-
-private val CurrentScenarioStorage.scenarioIdentifier: ScenarioIdentifier?
-    get() {
-        val className = className ?: return null
-        val scenarioTitle = scenarionTitle ?: return null
-
-        return ScenarioIdentifier(className, scenarioTitle)
+        var stepPrefix: StepPrefix = GIVEN
+        var prefixStepIndex = 0
     }
+
+    private val CurrentScenarioStorage.scenarioIdentifier: ScenarioIdentifier?
+        get() {
+            val className = className ?: return null
+            val scenarioTitle = scenarionTitle ?: return null
+
+            return ScenarioIdentifier(className, scenarioTitle)
+        }
+}
