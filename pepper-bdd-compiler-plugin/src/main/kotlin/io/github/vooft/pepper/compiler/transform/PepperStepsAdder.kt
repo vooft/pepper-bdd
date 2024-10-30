@@ -18,14 +18,15 @@ import org.jetbrains.kotlin.ir.types.classOrFail
 import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 
 internal class PepperStepsAdder(
-    private val steps: Map<String, List<StepIdentifier>>,
+    private val steps: Map<ScenarioIdentifier, List<StepIdentifier>>,
     private val pluginContext: IrPluginContext,
     private val debugLogger: DebugLogger
 ) : IrElementTransformerVoidWithContext() {
 
     private val references = PepperReferences(pluginContext)
 
-    private var currentClassSteps = listOf<StepIdentifier>()
+    private var currentClassName: ClassName? = null
+    private var currentScenarioSteps = listOf<StepIdentifier>()
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
@@ -33,47 +34,54 @@ internal class PepperStepsAdder(
             return super.visitConstructor(declaration)
         }
 
-        currentClassSteps = steps[type.classFqName?.asString()] ?: listOf()
+        currentClassName = type.classFqName?.let { ClassName(it.asString()) }
 
         return super.visitConstructor(declaration)
     }
 
     override fun visitCall(expression: IrCall): IrExpression {
-        // here we only check the Scenario method call
-        if (currentClassSteps.isNotEmpty() &&
-            expression.symbol.owner.name.asString() == "Scenario" &&
-            expression.dispatchReceiver?.type?.classFqName == PepperReferences.pepperClassSpecDslFqName
-        ) {
-            debugLogger.log("Processing scenario call")
-
-            val parentFunction = allScopes.reversed().firstOrNull {
-                val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
-                val extension = element.extensionReceiverParameter ?: return@firstOrNull false
-                element.name.asString() == "<anonymous>" && extension.type.classOrFail == references.pepperSpecDsl
-            }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with ${references.pepperSpecDsl} receiver")
-
-            return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock {
-                val stepIndexLength = currentClassSteps.size.toString().length
-                for ((index, step) in currentClassSteps.withIndex()) {
-                    +irCall(references.addStep).apply {
-                        this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
-
-                        val prefix = listOf(
-                            (index + 1).toString().padStart(stepIndexLength, '0'),
-                            ". ",
-                            step.prefix.capitalized
-                        ).joinToString("")
-                        putValueArgument(0, irString(step.id))
-                        putValueArgument(1, irString(prefix))
-                        putValueArgument(2, irString(step.name))
-                    }
-                }
-
-                +expression
-            }
+        val className = currentClassName
+        if (className == null) {
+            return super.visitCall(expression)
         }
 
-        return super.visitCall(expression)
+        val scenarioTitle = expression.findScenarioTitle() ?: return super.visitCall(expression)
+        currentScenarioSteps = steps[ScenarioIdentifier(className, ScenarioTitle(scenarioTitle))] ?: listOf()
+
+        // here we only check the Scenario method call
+        if (currentScenarioSteps.isEmpty()) {
+            return super.visitCall(expression)
+        }
+
+        debugLogger.log("Processing scenario call $scenarioTitle")
+
+        val parentFunction = allScopes.reversed().firstOrNull {
+            val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
+            val extension = element.extensionReceiverParameter ?: return@firstOrNull false
+            element.name.asString() == "<anonymous>" && extension.type.classOrFail == references.pepperSpecDsl
+        }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with ${references.pepperSpecDsl} receiver")
+
+        return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock {
+            val stepIndexLength = currentScenarioSteps.size.toString().length
+            for ((index, step) in currentScenarioSteps.withIndex()) {
+                +irCall(references.addStep).apply {
+                    this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
+
+                    val prefix = listOf(
+                        (index + 1).toString().padStart(stepIndexLength, '0'),
+                        ". ",
+                        step.prefix.capitalized
+                    ).joinToString("")
+
+                    putValueArgument(0, irString(scenarioTitle))
+                    putValueArgument(1, irString(step.id))
+                    putValueArgument(2, irString(prefix))
+                    putValueArgument(3, irString(step.name))
+                }
+            }
+
+            +expression
+        }
     }
 }
 

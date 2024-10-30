@@ -14,7 +14,7 @@ import kotlin.coroutines.coroutineContext
 
 @OptIn(KotestInternal::class)
 internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R): R {
-    val remainingSteps = requireNotNull(coroutineContext[RemainingSteps]) { "Remaining steps are missing in the context" }.steps
+    val remainingSteps = requireNotNull(coroutineContext[PepperRemainingSteps]) { "Remaining steps are missing in the context" }.steps
     while (remainingSteps.isNotEmpty() && remainingSteps.first().id != id) {
         remainingSteps.removeFirst()
     }
@@ -67,8 +67,8 @@ internal data class CurrentTestScope(val scope: TestScope) : AbstractCoroutineCo
     override fun toString(): String = "CurrentTestScope($scope)"
 }
 
-internal data class RemainingSteps(val steps: MutableList<StepIdentifier>) : AbstractCoroutineContextElement(RemainingSteps) {
-    companion object Key : CoroutineContext.Key<RemainingSteps>
+internal data class PepperRemainingSteps(val steps: MutableList<StepIdentifier>) : AbstractCoroutineContextElement(PepperRemainingSteps) {
+    companion object Key : CoroutineContext.Key<PepperRemainingSteps>
 
     override fun toString(): String = "RemainingSteps($steps)"
 }

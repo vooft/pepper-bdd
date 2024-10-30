@@ -1,48 +1,61 @@
 package io.github.vooft.pepper.dsl
 
 import io.github.vooft.pepper.CurrentTestScope
-import io.github.vooft.pepper.RemainingSteps
+import io.github.vooft.pepper.PepperRemainingSteps
 import io.github.vooft.pepper.StepIdentifier
 import io.kotest.common.KotestInternal
 import io.kotest.core.source.sourceRef
 import io.kotest.core.test.NestedTest
 import io.kotest.core.test.TestType.Test
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
 
 internal class PepperSpecDslImpl : PepperSpecDsl {
 
-    internal val remainingSteps = mutableListOf<StepIdentifier>()
+    private val lazyScenarios = mutableMapOf<String, LazyScenario>()
+    val scenarios: Collection<Scenario> get() = lazyScenarios.values
 
-    override fun Scenario(description: String, scenarioBody: suspend ScenarioDsl.() -> Unit): Scenario {
+    val stepsPerScenario = mutableMapOf<String, List<StepIdentifier>>()
+
+    override fun Scenario(scenarioTitle: String, scenarioBody: suspend ScenarioDsl.() -> Unit) {
+        assert(!lazyScenarios.containsKey(scenarioTitle)) { "Scenario with description $scenarioTitle already exists" }
         val dsl = ScenarioDslImpl()
-        return ScenarioImpl(description) {
-            try {
-                dsl.scenarioBody()
-            } catch (_: Throwable) {
-                registerRemainingSteps()
-            }
-        }
+        lazyScenarios[scenarioTitle] = LazyScenario(scenarioTitle) { dsl.scenarioBody() }
     }
 
-    @OptIn(KotestInternal::class)
-    private suspend fun registerRemainingSteps() {
-        val remainingSteps = requireNotNull(coroutineContext[RemainingSteps]) { "Remaining steps are missing in the context" }.steps
-        val currentScope = requireNotNull(coroutineContext[CurrentTestScope]) { "Test scope is missing in the context" }.scope
+    internal fun addStep(scenarioTitle: String, stepIdentifier: StepIdentifier) {
+        stepsPerScenario[scenarioTitle] = stepsPerScenario[scenarioTitle].orEmpty() + stepIdentifier
+    }
 
-        for (remainingStep in remainingSteps) {
-            currentScope.registerTestCase(
-                NestedTest(
-                    name = remainingStep.toTestName(),
-                    disabled = true,
-                    config = null,
-                    type = Test,
-                    source = sourceRef()
-                ) { }
-            )
+    private inner class LazyScenario(override val title: String, private val rawScenarioBody: suspend () -> Unit) : Scenario {
+
+        override val hasSteps get() = stepsPerScenario[title].orEmpty().isNotEmpty()
+
+        override val scenarioBody: suspend () -> Unit = {
+            withContext(PepperRemainingSteps(stepsPerScenario.getValue(title).toMutableList())) {
+                runCatching { rawScenarioBody() }
+                    .onFailure { registerRemainingSteps() }
+            }
         }
     }
 }
 
 internal class ScenarioDslImpl : ScenarioDsl
 
-class ScenarioImpl(override val name: String, override val scenarioBody: suspend () -> Unit) : Scenario
+@OptIn(KotestInternal::class)
+private suspend fun registerRemainingSteps() {
+    val remainingSteps = requireNotNull(coroutineContext[PepperRemainingSteps]) { "Remaining steps are missing in the context" }.steps
+    val currentScope = requireNotNull(coroutineContext[CurrentTestScope]) { "Test scope is missing in the context" }.scope
+
+    for (remainingStep in remainingSteps) {
+        currentScope.registerTestCase(
+            NestedTest(
+                name = remainingStep.toTestName(),
+                disabled = true,
+                config = null,
+                type = Test,
+                source = sourceRef()
+            ) { }
+        )
+    }
+}
