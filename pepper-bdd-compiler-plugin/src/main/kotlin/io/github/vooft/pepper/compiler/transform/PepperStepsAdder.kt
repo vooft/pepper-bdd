@@ -12,6 +12,7 @@ import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.expressions.IrCall
+import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrFail
@@ -25,7 +26,6 @@ internal class PepperStepsAdder(
 
     private val references = PepperReferences(pluginContext)
 
-    private lateinit var currentClassName: String
     private var currentClassSteps = listOf<StepIdentifier>()
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
@@ -34,7 +34,6 @@ internal class PepperStepsAdder(
             return super.visitConstructor(declaration)
         }
 
-        currentClassName = type.classFqName?.asString() ?: ""
         currentClassSteps = steps[type.classFqName?.asString()] ?: listOf()
 
         return super.visitConstructor(declaration)
@@ -48,6 +47,7 @@ internal class PepperStepsAdder(
         ) {
             debugLogger.log("Processing scenario call")
 
+            val scenarioTitleConst = expression.getValueArgument(0) as? IrConst<*> ?: error("Cannot get scenario name at $expression")
             val parentFunction = allScopes.reversed().firstOrNull {
                 val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
                 val extension = element.extensionReceiverParameter ?: return@firstOrNull false
@@ -66,7 +66,7 @@ internal class PepperStepsAdder(
                             step.prefix.capitalized
                         ).joinToString("")
 
-                        putValueArgument(0, irString(currentClassName))
+                        putValueArgument(0, irString(scenarioTitleConst.value as String))
                         putValueArgument(1, irString(step.id))
                         putValueArgument(2, irString(prefix))
                         putValueArgument(3, irString(step.name))

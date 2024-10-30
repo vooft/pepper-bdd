@@ -12,6 +12,8 @@ open class PepperSpec(scenarioBlock: PepperSpecDsl.() -> Unit) : FunSpec() {
         val dsl = PepperSpecDslImpl()
         dsl.scenarioBlock()
 
+        assert(dsl.scenarios.isNotEmpty()) { "No scenarios found" }
+
         for (scenario in dsl.scenarios) {
             assert(scenario.hasSteps) { "No steps found for scenario ${scenario.title}" }
 
