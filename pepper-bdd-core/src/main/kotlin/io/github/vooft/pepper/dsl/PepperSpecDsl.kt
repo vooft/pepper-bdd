@@ -1,13 +1,13 @@
 package io.github.vooft.pepper.dsl
 
 interface PepperSpecDsl {
-    fun Scenario(description: String, scenarioBody: suspend ScenarioDsl.() -> Unit): Scenario
+    fun Scenario(scenarioTitle: String, scenarioBody: suspend ScenarioDsl.() -> Unit)
 }
 
 interface ScenarioDsl
 
 interface Scenario {
-    val name: String
+    val title: String
     val scenarioBody: suspend () -> Unit
 }
 
