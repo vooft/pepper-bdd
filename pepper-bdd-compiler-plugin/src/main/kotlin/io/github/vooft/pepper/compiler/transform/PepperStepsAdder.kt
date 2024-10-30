@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.ir.types.classOrFail
 import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 
 internal class PepperStepsAdder(
-    private val steps: Map<String, List<StepIdentifier>>,
+    private val steps: Map<ScenarioIdentifier, List<StepIdentifier>>,
     private val pluginContext: IrPluginContext,
     private val debugLogger: DebugLogger
 ) : IrElementTransformerVoidWithContext() {

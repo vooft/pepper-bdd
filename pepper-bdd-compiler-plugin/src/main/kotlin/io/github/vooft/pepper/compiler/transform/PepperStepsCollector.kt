@@ -23,17 +23,14 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
 
     private val references = PepperReferences(pluginContext)
 
-    private var currentClassName: String? = null
-    private val currentClassSteps = mutableListOf<StepIdentifier>()
+    private var currentScenario = CurrentScenarioStorage(null)
 
-    private var currentStepPrefix: StepPrefix = GIVEN
-    private var stepIndex = 0
-
-    private val visitedClasses = mutableMapOf<String, List<StepIdentifier>>()
-    val steps: Map<String, List<StepIdentifier>>
+    private val visitedScenarios = mutableMapOf<ScenarioIdentifier, List<StepIdentifier>>()
+    val steps: Map<ScenarioIdentifier, List<StepIdentifier>>
         get() {
-            val current = currentClassName?.let { mapOf(it to currentClassSteps.toList()) } ?: mapOf()
-            return (current + visitedClasses).filterValues { it.isNotEmpty() }
+            val current = currentScenario.scenarioIdentifier
+                ?.let { mapOf(it to currentScenario.steps.toList()) } ?: mapOf()
+            return (current + visitedScenarios).filterValues { it.isNotEmpty() }
         }
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
@@ -42,41 +39,49 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
             return super.visitConstructor(declaration)
         }
 
-        currentClassName?.let {
-            visitedClasses[it] = currentClassSteps.toList()
-            currentClassSteps.clear()
-        }
+        currentScenario.scenarioIdentifier?.let { visitedScenarios[it] = currentScenario.steps.toList() }
+        currentScenario = CurrentScenarioStorage(type.classFqName?.let { ClassName(it.asString()) })
 
-        currentClassName = type.classFqName?.asString()
         return super.visitConstructor(declaration)
     }
 
+    @Suppress("detekt:ReturnCount")
     override fun visitCall(expression: IrCall): IrExpression {
+        if (currentScenario.className == null) {
+            return super.visitCall(expression)
+        }
+
+        val scenarioTitle = expression.findScenarioTitle()
+        if (scenarioTitle != null) {
+            currentScenario.scenarionTitle = ScenarioTitle(scenarioTitle)
+            return super.visitCall(expression)
+        }
+
         if (allScopes.findScenarioDslBlock() == null) {
             return super.visitCall(expression)
         }
 
-        val replacedStep = replaceIfPrefix(expression)
+        val replacedStep = currentScenario.replaceIfPrefix(expression)
         if (replacedStep != null) {
             return replacedStep
         }
 
-        collectStep(expression)
+        currentScenario.collectStep(expression)
 
         return super.visitCall(expression)
     }
 
-    private fun collectStep(expression: IrCall) {
-        if (currentClassName == null || !expression.symbol.owner.hasAnnotation(references.stepAnnotation)) {
+    private fun CurrentScenarioStorage.collectStep(expression: IrCall) {
+        if (!expression.symbol.owner.hasAnnotation(references.stepAnnotation)) {
             return
         }
 
-        val prefix = when (stepIndex++) {
-            0 -> currentStepPrefix
+        val prefix = when (prefixStepIndex++) {
+            0 -> stepPrefix
             else -> AND
         }
 
-        currentClassSteps.add(
+        steps.add(
             StepIdentifier(
                 id = UUID.randomUUID().toString(),
                 prefix = prefix,
@@ -85,8 +90,8 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
         )
     }
 
-    private fun replaceIfPrefix(expression: IrCall): IrExpression? {
-        currentStepPrefix = when (expression.symbol) {
+    private fun CurrentScenarioStorage.replaceIfPrefix(expression: IrCall): IrExpression? {
+        stepPrefix = when (expression.symbol) {
             references.prefixGiven -> GIVEN
             references.prefixWhen -> WHEN
             references.prefixThen -> THEN
@@ -94,8 +99,25 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
             else -> return null
         }
 
-        debugLogger.log("Starting prefix: $currentStepPrefix")
-        stepIndex = 0
+        debugLogger.log("Starting prefix: $stepPrefix")
+        prefixStepIndex = 0
         return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock { }
     }
 }
+
+private class CurrentScenarioStorage(val className: ClassName? = null) {
+    var scenarionTitle: ScenarioTitle? = null
+
+    val steps = mutableListOf<StepIdentifier>()
+
+    var stepPrefix: StepPrefix = GIVEN
+    var prefixStepIndex = 0
+}
+
+private val CurrentScenarioStorage.scenarioIdentifier: ScenarioIdentifier?
+    get() {
+        val className = className ?: return null
+        val scenarioTitle = scenarionTitle ?: return null
+
+        return ScenarioIdentifier(className, scenarioTitle)
+    }

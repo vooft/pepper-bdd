@@ -20,7 +20,7 @@ import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 
 internal class PepperStepContainerWrapper(
-    private val steps: Map<String, List<StepIdentifier>>,
+    private val steps: Map<ScenarioIdentifier, List<StepIdentifier>>,
     private val pluginContext: IrPluginContext,
     private val debugLogger: DebugLogger
 ) : IrElementTransformerVoidWithContext() {
