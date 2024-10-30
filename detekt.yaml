@@ -21,9 +21,6 @@ complexity:
   LongMethod:
     ignoreAnnotated:
       - org.junit.jupiter.api.Test
-  TooManyFunctions:
-    ignoreAnnotated:
-      - org.springframework.context.annotation.Configuration
   LongParameterList:
     ignoreDefaultParameters: true
     functionThreshold: 7
