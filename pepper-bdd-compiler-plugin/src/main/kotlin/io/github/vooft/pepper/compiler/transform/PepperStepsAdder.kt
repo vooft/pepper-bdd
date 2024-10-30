@@ -25,6 +25,7 @@ internal class PepperStepsAdder(
 
     private val references = PepperReferences(pluginContext)
 
+    private lateinit var currentClassName: String
     private var currentClassSteps = listOf<StepIdentifier>()
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
@@ -33,6 +34,7 @@ internal class PepperStepsAdder(
             return super.visitConstructor(declaration)
         }
 
+        currentClassName = type.classFqName?.asString() ?: ""
         currentClassSteps = steps[type.classFqName?.asString()] ?: listOf()
 
         return super.visitConstructor(declaration)
@@ -63,9 +65,11 @@ internal class PepperStepsAdder(
                             ". ",
                             step.prefix.capitalized
                         ).joinToString("")
-                        putValueArgument(0, irString(step.id))
-                        putValueArgument(1, irString(prefix))
-                        putValueArgument(2, irString(step.name))
+
+                        putValueArgument(0, irString(currentClassName))
+                        putValueArgument(1, irString(step.id))
+                        putValueArgument(2, irString(prefix))
+                        putValueArgument(3, irString(step.name))
                     }
                 }
 

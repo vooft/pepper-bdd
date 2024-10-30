@@ -13,12 +13,17 @@ import kotlin.coroutines.coroutineContext
 internal class PepperSpecDslImpl : PepperSpecDsl {
 
     private val lazyScenarios = mutableMapOf<String, LazyScenario>()
-    val scenarios get() = lazyScenarios.values
+    val scenarios: Collection<Scenario> get() = lazyScenarios.values
 
     override fun Scenario(scenarioTitle: String, scenarioBody: suspend ScenarioDsl.() -> Unit) {
         assert(!lazyScenarios.containsKey(scenarioTitle)) { "Scenario with description $scenarioTitle already exists" }
         val dsl = ScenarioDslImpl()
         lazyScenarios[scenarioTitle] = LazyScenario(scenarioTitle) { dsl.scenarioBody() }
+    }
+
+    internal fun addStep(className: String, stepIdentifier: StepIdentifier) {
+        val scenario = lazyScenarios[className] ?: error("Scenario with description $className not found")
+        scenario.allSteps.add(StepIdentifier(id = stepId, prefix = prefix, name = stepName))
     }
 }
 
@@ -26,10 +31,13 @@ internal class ScenarioDslImpl : ScenarioDsl
 
 internal class LazyScenario(
     override val title: String,
-    private val allSteps: MutableList<StepIdentifier> = mutableListOf(),
     private val rawScenarioBody: suspend () -> Unit
 ) : Scenario {
-    val hasSteps get() = allSteps.isNotEmpty()
+
+    val allSteps: MutableList<StepIdentifier> = mutableListOf()
+
+    override val hasSteps get() = allSteps.isNotEmpty()
+
     override val scenarioBody: suspend () -> Unit = {
         withContext(PepperRemainingSteps(allSteps.toMutableList())) {
             runCatching { rawScenarioBody }

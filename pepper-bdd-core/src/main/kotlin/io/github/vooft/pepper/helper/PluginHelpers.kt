@@ -8,6 +8,6 @@ import io.github.vooft.pepper.testContainer
 
 internal suspend fun <R> ScenarioDsl.StepContainer(id: String, block: suspend () -> R): R = testContainer(id, block)
 
-internal fun PepperSpecDsl.addStep(id: String, prefix: String, name: String) {
-    (this as PepperSpecDslImpl).remainingSteps.add(StepIdentifier(id = id, prefix = prefix, name = name))
+internal fun PepperSpecDsl.addStep(scenarioName: String, stepId: String, prefix: String, stepName: String) {
+    (this as PepperSpecDslImpl).addStep(StepIdentifier(id = stepId, prefix = prefix, name = stepName))
 }

@@ -8,6 +8,7 @@ interface ScenarioDsl
 
 interface Scenario {
     val title: String
+    val hasSteps: Boolean
     val scenarioBody: suspend () -> Unit
 }
 
