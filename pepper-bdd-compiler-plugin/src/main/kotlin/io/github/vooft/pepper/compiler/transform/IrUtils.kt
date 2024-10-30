@@ -11,6 +11,8 @@ import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.expressions.IrCall
+import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrFunctionExpression
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.expressions.impl.IrFunctionExpressionImpl
@@ -27,6 +29,16 @@ fun List<ScopeWithIr>.findScenarioDslBlock() = reversed().firstOrNull {
     val extension = element.extensionReceiverParameter ?: return@firstOrNull false
     element.name.asString() == "<anonymous>" && extension.type.classFqName == PepperReferences.pepperScenarioDslFqName
 }?.irElement as? IrSimpleFunction
+
+fun IrCall.findScenarioTitle(): String? {
+    if (symbol.owner.name.asString() == "Scenario" &&
+            dispatchReceiver?.type?.classFqName == PepperReferences.pepperClassSpecDslFqName) {
+        val titleConst = getValueArgument(0) as? IrConst<*> ?: return null
+        return titleConst.value as? String
+    }
+
+    return null
+}
 
 fun IrPluginContext.findPepperSpec() = requireNotNull(
     referenceClass(
