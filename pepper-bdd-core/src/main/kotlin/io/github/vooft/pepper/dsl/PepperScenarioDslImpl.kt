@@ -10,7 +10,7 @@ import io.kotest.core.test.TestType.Test
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.coroutineContext
 
-internal class PepperSpecDslImpl : PepperSpecDsl {
+internal class PepperScenarioDslImpl : PepperScenarioDsl {
 
     private val lazyScenarios = mutableMapOf<String, LazyScenario>()
     val scenarios: Collection<Scenario> get() = lazyScenarios.values

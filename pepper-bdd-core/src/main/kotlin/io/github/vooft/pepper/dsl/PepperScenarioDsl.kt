@@ -1,6 +1,6 @@
 package io.github.vooft.pepper.dsl
 
-interface PepperSpecDsl {
+interface PepperScenarioDsl {
     fun Scenario(scenarioTitle: String, scenarioBody: suspend ScenarioDsl.() -> Unit)
 }
 

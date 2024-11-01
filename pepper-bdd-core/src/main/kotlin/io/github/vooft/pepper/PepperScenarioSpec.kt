@@ -1,15 +1,15 @@
 package io.github.vooft.pepper
 
-import io.github.vooft.pepper.dsl.PepperSpecDsl
-import io.github.vooft.pepper.dsl.PepperSpecDslImpl
+import io.github.vooft.pepper.dsl.PepperScenarioDsl
+import io.github.vooft.pepper.dsl.PepperScenarioDslImpl
 import io.kotest.core.names.TestName
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.spec.style.scopes.addContainer
 import kotlinx.coroutines.withContext
 
-open class PepperScenarioSpec(scenarioBlock: PepperSpecDsl.() -> Unit) : FunSpec() {
+open class PepperScenarioSpec(scenarioBlock: PepperScenarioDsl.() -> Unit) : FunSpec() {
     init {
-        val dsl = PepperSpecDslImpl()
+        val dsl = PepperScenarioDslImpl()
         dsl.scenarioBlock()
 
         assert(dsl.scenarios.isNotEmpty()) { "No scenarios found" }
