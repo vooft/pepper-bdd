@@ -7,7 +7,7 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.spec.style.scopes.addContainer
 import kotlinx.coroutines.withContext
 
-open class PepperSpec(scenarioBlock: PepperSpecDsl.() -> Unit) : FunSpec() {
+open class PepperScenarioSpec(scenarioBlock: PepperSpecDsl.() -> Unit) : FunSpec() {
     init {
         val dsl = PepperSpecDslImpl()
         dsl.scenarioBlock()
