@@ -11,7 +11,7 @@ class PepperReferences(pluginContext: IrPluginContext) {
         pluginContext.referenceClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper"),
-                topLevelName = Name.identifier("PepperSpec")
+                topLevelName = Name.identifier("PepperScenarioSpec")
             )
         )
     )
@@ -20,7 +20,7 @@ class PepperReferences(pluginContext: IrPluginContext) {
         pluginContext.referenceClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper.dsl"),
-                topLevelName = Name.identifier("PepperSpecDsl")
+                topLevelName = Name.identifier("PepperScenarioDsl")
             )
         )
     )
