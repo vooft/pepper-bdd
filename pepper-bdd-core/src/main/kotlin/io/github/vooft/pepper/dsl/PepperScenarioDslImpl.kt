@@ -17,9 +17,9 @@ internal class PepperScenarioDslImpl : PepperScenarioDsl {
 
     val stepsPerScenario = mutableMapOf<String, List<StepIdentifier>>()
 
-    override fun Scenario(scenarioTitle: String, scenarioBody: suspend ScenarioDsl.() -> Unit) {
+    override fun Scenario(scenarioTitle: String, scenarioBody: suspend ScenarioDsl<Nothing>.() -> Unit) {
         assert(!lazyScenarios.containsKey(scenarioTitle)) { "Scenario with description $scenarioTitle already exists" }
-        val dsl = ScenarioDslImpl()
+        val dsl = object : ScenarioDsl<Nothing> {}
         lazyScenarios[scenarioTitle] = LazyScenario(scenarioTitle) { dsl.scenarioBody() }
     }
 
@@ -39,8 +39,6 @@ internal class PepperScenarioDslImpl : PepperScenarioDsl {
         }
     }
 }
-
-internal class ScenarioDslImpl : ScenarioDsl
 
 @OptIn(KotestInternal::class)
 private suspend fun registerRemainingSteps() {

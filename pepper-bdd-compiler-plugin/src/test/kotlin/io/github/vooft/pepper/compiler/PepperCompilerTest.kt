@@ -13,7 +13,7 @@ class PepperCompilerTest :
         test("single scenario") {
             val result = compile(
                 sourceFiles = sharedSourceFiles + SourceFile.fromPath(
-                    File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/SimplePepperSpec.kt")
+                    File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/SimplePepperScenarioSpec.kt")
                 )
             )
 
@@ -25,7 +25,7 @@ class PepperCompilerTest :
         test("two scenarios") {
             val result = compile(
                 sourceFiles = sharedSourceFiles + SourceFile.fromPath(
-                    File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/TwoScenariosSpec.kt")
+                    File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/TwoScenariosScenarioSpec.kt")
                 )
             )
 
@@ -40,13 +40,13 @@ private val sharedSourceFiles = listOf(
         File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/Steps.kt")
     ),
     SourceFile.fromPath(
-        File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/dsl/PepperSpecDsl.kt")
+        File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/dsl/PepperScenarioDsl.kt")
     ),
     SourceFile.fromPath(
-        File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/dsl/PepperSpecDslImpl.kt")
+        File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/dsl/PepperScenarioDslImpl.kt")
     ),
     SourceFile.fromPath(
-        File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/PepperSpec.kt")
+        File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/PepperScenarioSpec.kt")
     ),
     SourceFile.fromPath(
         File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/Internals.kt")
