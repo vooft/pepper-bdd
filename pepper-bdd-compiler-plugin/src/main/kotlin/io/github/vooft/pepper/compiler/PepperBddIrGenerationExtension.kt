@@ -1,7 +1,7 @@
 package io.github.vooft.pepper.compiler
 
+import io.github.vooft.pepper.compiler.transform.PepperRemainingStepsAdder
 import io.github.vooft.pepper.compiler.transform.PepperStepContainerWrapper
-import io.github.vooft.pepper.compiler.transform.PepperStepsAdder
 import io.github.vooft.pepper.compiler.transform.PepperStepsCollector
 import org.jetbrains.kotlin.backend.common.extensions.IrGenerationExtension
 import org.jetbrains.kotlin.backend.common.extensions.IrPluginContext
@@ -26,7 +26,7 @@ internal class PepperBddIrGenerationExtension(private val debugLogger: DebugLogg
         val steps = stepsCollector.steps
         if (steps.isNotEmpty()) {
             moduleFragment.transform(PepperStepContainerWrapper(stepsCollector.steps, pluginContext, debugLogger), null)
-            moduleFragment.transform(PepperStepsAdder(stepsCollector.steps, pluginContext, debugLogger), null)
+            moduleFragment.transform(PepperRemainingStepsAdder(stepsCollector.steps, pluginContext, debugLogger), null)
         }
 
 //        debugLogger.log("generate() after: ${moduleFragment.dump()}")

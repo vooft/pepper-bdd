@@ -17,7 +17,7 @@ import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrFail
 import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 
-internal class PepperStepsAdder(
+internal class PepperRemainingStepsAdder(
     private val steps: Map<ScenarioIdentifier, List<StepIdentifier>>,
     private val pluginContext: IrPluginContext,
     private val debugLogger: DebugLogger
@@ -30,7 +30,7 @@ internal class PepperStepsAdder(
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
-        if (!type.isSubtypeOfClass(references.pepperSpec)) {
+        if (!type.isSubtypeOfClass(references.pepperScenarioSpec)) {
             return super.visitConstructor(declaration)
         }
 
@@ -58,8 +58,8 @@ internal class PepperStepsAdder(
         val parentFunction = allScopes.reversed().firstOrNull {
             val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
             val extension = element.extensionReceiverParameter ?: return@firstOrNull false
-            element.name.asString() == "<anonymous>" && extension.type.classOrFail == references.pepperSpecDsl
-        }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with ${references.pepperSpecDsl} receiver")
+            element.name.asString() == "<anonymous>" && extension.type.classOrFail == references.pepperScenarioDsl
+        }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with ${references.pepperScenarioDsl} receiver")
 
         return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock {
             val stepIndexLength = currentScenarioSteps.size.toString().length

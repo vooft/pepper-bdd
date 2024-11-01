@@ -35,7 +35,7 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
-        if (!type.isSubtypeOfClass(references.pepperSpec)) {
+        if (!type.isSubtypeOfClass(references.pepperScenarioSpec)) {
             return super.visitConstructor(declaration)
         }
 
@@ -52,8 +52,8 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
 
         val scenarioTitle = expression.findScenarioTitle()
         if (scenarioTitle != null) {
+            debugLogger.log("Found scenario: $scenarioTitle")
             currentScenario.scenarioIdentifier?.let { visitedScenarios[it] = currentScenario.steps.toList() }
-
             currentScenario = CurrentScenarioStorage(currentScenario.className)
             currentScenario.scenarionTitle = ScenarioTitle(scenarioTitle)
             return super.visitCall(expression)
@@ -88,7 +88,7 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
                 id = UUID.randomUUID().toString(),
                 prefix = prefix,
                 name = expression.symbol.owner.name.asString()
-            )
+            ).also { debugLogger.log("Adding step: $it") }
         )
     }
 

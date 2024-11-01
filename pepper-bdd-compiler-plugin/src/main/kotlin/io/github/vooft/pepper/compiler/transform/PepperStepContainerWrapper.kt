@@ -31,7 +31,7 @@ internal class PepperStepContainerWrapper(
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
-        if (!type.isSubtypeOfClass(references.pepperSpec)) {
+        if (!type.isSubtypeOfClass(references.pepperScenarioSpec)) {
             return super.visitConstructor(declaration)
         }
 
@@ -47,6 +47,7 @@ internal class PepperStepContainerWrapper(
 
         val scenarioTitle = expression.findScenarioTitle()
         if (scenarioTitle != null) {
+            debugLogger.log("Found scenario $scenarioTitle")
             currentScenario = CurrentScenarioStorage(currentScenario.className)
             currentScenario.scenarionTitle = ScenarioTitle(scenarioTitle)
             currentScenario.remainingSteps.addAll(steps[currentScenario.scenarioIdentifier] ?: emptyList())
@@ -75,7 +76,7 @@ internal class PepperStepContainerWrapper(
         ) { +irReturn(originalCall) }
 
         val parentFunction = allScopes.findScenarioDslBlock()
-            ?: error("Cannot find lambda function with ${PepperReferences.pepperScenarioDslFqName} receiver")
+            ?: error("Cannot find lambda function with ${PepperReferences.scenarioDslFqName} receiver")
 
         debugLogger.log("Wrapping call with StepContainer: ${originalCall.symbol.owner.name}")
 

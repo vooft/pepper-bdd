@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 class PepperReferences(pluginContext: IrPluginContext) {
-    val pepperSpec = requireNotNull(
+    val pepperScenarioSpec = requireNotNull(
         pluginContext.referenceClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper"),
@@ -16,11 +16,11 @@ class PepperReferences(pluginContext: IrPluginContext) {
         )
     )
 
-    val pepperSpecDsl = requireNotNull(
+    val pepperScenarioDsl = requireNotNull(
         pluginContext.referenceClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper.dsl"),
-                topLevelName = Name.identifier("PepperScenarioDsl")
+                topLevelName = Name.identifier(PEPPER_SCENARIO_DSL)
             )
         )
     )
@@ -57,8 +57,8 @@ class PepperReferences(pluginContext: IrPluginContext) {
     val addStep = pluginContext.findHelper("addStep")
 
     companion object {
-        val pepperClassSpecDslFqName get() = FqName("io.github.vooft.pepper.dsl.PepperSpecDsl")
-        val pepperScenarioDslFqName get() = FqName("io.github.vooft.pepper.dsl.ScenarioDsl")
+        val pepperScenarioDslFqName get() = FqName("io.github.vooft.pepper.dsl.$PEPPER_SCENARIO_DSL")
+        val scenarioDslFqName get() = FqName("io.github.vooft.pepper.dsl.ScenarioDsl")
     }
 }
 
@@ -70,3 +70,5 @@ private fun IrPluginContext.findStep(name: String) = requireNotNull(
         )
     ).single().owner.getter
 ).symbol
+
+private const val PEPPER_SCENARIO_DSL = "PepperScenarioDsl"
