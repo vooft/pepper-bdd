@@ -17,10 +17,47 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
 
     val stepsPerScenario = mutableMapOf<String, List<StepIdentifier>>()
 
-    override fun Scenario(scenarioTitle: String, scenarioBody: suspend ScenarioDsl.() -> Unit) {
+    override fun Scenario(scenarioTitle: String, scenarioBody: suspend ScenarioDsl<Nothing>.() -> Unit) {
         assert(!lazyScenarios.containsKey(scenarioTitle)) { "Scenario with description $scenarioTitle already exists" }
-        val dsl = ScenarioDslImpl()
+        val dsl = object : ScenarioDsl<Nothing> {
+            override val example: Nothing get() = error("Example is not available in simple scenario")
+        }
+
         lazyScenarios[scenarioTitle] = LazyScenario(scenarioTitle) { dsl.scenarioBody() }
+    }
+
+    override fun <T> ScenarioOutline(
+        scenarioTitle: String,
+        outlineDsl: ScenarioOutlineDsl<T>.() -> Unit
+    ): ScenarioWithExampleStartDsl<T> {
+        val examples = mutableMapOf<String, T>()
+        val scenarioOutlineDsl = object : ScenarioOutlineDsl<T> {
+            override fun Examples(block: ExamplesDsl<T>.() -> Unit) {
+                val exampleDsl = object : ExamplesDsl<T> {
+                    override fun String.invoke(block: () -> T) {
+                        examples[this] = block()
+                    }
+                }
+                exampleDsl.block()
+
+                assert(examples.isNotEmpty()) { "No examples found for scenario outline $scenarioTitle" }
+            }
+        }
+
+        scenarioOutlineDsl.outlineDsl()
+
+        return object : ScenarioWithExampleStartDsl<T> {
+            override suspend fun Outline(block: ScenarioDsl<T>.() -> Unit) {
+                for ((exampleTitle, exampleValue) in examples) {
+                    val dsl = object : ScenarioDsl<T> {
+                        override val example: T get() = exampleValue
+                    }
+                    val fullTitle = "$scenarioTitle: $exampleTitle"
+                    assert(!lazyScenarios.containsKey(fullTitle)) { "Scenario with description $fullTitle already exists" }
+                    lazyScenarios[fullTitle] = LazyScenario(fullTitle) { dsl.block() }
+                }
+            }
+        }
     }
 
     internal fun addStep(scenarioTitle: String, stepIdentifier: StepIdentifier) {
@@ -39,8 +76,6 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
         }
     }
 }
-
-internal class ScenarioDslImpl : ScenarioDsl
 
 @OptIn(KotestInternal::class)
 private suspend fun registerRemainingSteps() {

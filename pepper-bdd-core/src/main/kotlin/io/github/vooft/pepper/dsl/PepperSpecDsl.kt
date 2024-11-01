@@ -1,10 +1,25 @@
 package io.github.vooft.pepper.dsl
 
 interface PepperSpecDsl {
-    fun Scenario(scenarioTitle: String, scenarioBody: suspend ScenarioDsl.() -> Unit)
+    fun Scenario(scenarioTitle: String, scenarioBody: suspend ScenarioDsl<Nothing>.() -> Unit)
+    fun <T> ScenarioOutline(scenarioTitle: String, outlineDsl: ScenarioOutlineDsl<T>.() -> Unit): ScenarioWithExampleStartDsl<T>
 }
 
-interface ScenarioDsl
+interface ScenarioDsl<T> {
+    val example: T
+}
+
+interface ScenarioOutlineDsl<T> {
+    fun Examples(block: ExamplesDsl<T>.() -> Unit)
+}
+
+interface ExamplesDsl<T> {
+    fun String.invoke(block: () -> T)
+}
+
+interface ScenarioWithExampleStartDsl<T> {
+    suspend infix fun Outline(block: ScenarioDsl<T>.() -> Unit)
+}
 
 interface Scenario {
     val title: String
@@ -12,9 +27,9 @@ interface Scenario {
     val scenarioBody: suspend () -> Unit
 }
 
-val ScenarioDsl.Given: PepperPrefix get() = pepperFail()
-val ScenarioDsl.When: PepperPrefix get() = pepperFail()
-val ScenarioDsl.Then: PepperPrefix get() = pepperFail()
+val ScenarioDsl<*>.Given: PepperPrefix get() = pepperFail()
+val ScenarioDsl<*>.When: PepperPrefix get() = pepperFail()
+val ScenarioDsl<*>.Then: PepperPrefix get() = pepperFail()
 
 interface PepperPrefix
 
