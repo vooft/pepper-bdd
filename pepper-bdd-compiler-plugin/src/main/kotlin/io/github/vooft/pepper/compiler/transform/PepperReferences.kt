@@ -25,6 +25,15 @@ class PepperReferences(pluginContext: IrPluginContext) {
         )
     )
 
+    val scenarioDslSymbol = requireNotNull(
+        pluginContext.referenceClass(
+            ClassId(
+                packageFqName = FqName("io.github.vooft.pepper.dsl"),
+                topLevelName = Name.identifier("ScenarioDsl")
+            )
+        )
+    )
+
     val stepAnnotationSymbol = requireNotNull(
         pluginContext.referenceClass(
             ClassId(
@@ -48,7 +57,6 @@ class PepperReferences(pluginContext: IrPluginContext) {
     val addStep = pluginContext.findHelper("addStep")
 
     companion object {
-        val examplesDslTerminalFqName get() = FqName("io.github.vooft.pepper.dsl.ExamplesDslTerminal")
         val pepperSpecDslFqName get() = FqName("io.github.vooft.pepper.dsl.PepperSpecDsl")
         val scenarioDslFqName get() = FqName("io.github.vooft.pepper.dsl.ScenarioDsl")
     }

@@ -40,10 +40,7 @@ internal class PepperRemainingStepsAdder(
     }
 
     override fun visitCall(expression: IrCall): IrExpression {
-        val className = currentClassName
-        if (className == null) {
-            return super.visitCall(expression)
-        }
+        val className = currentClassName ?: return super.visitCall(expression)
 
         val scenarioTitle = expression.findScenarioTitle() ?: return super.visitCall(expression)
         currentScenarioSteps = steps[ScenarioIdentifier(className, ScenarioTitle(scenarioTitle))] ?: listOf()
@@ -53,13 +50,15 @@ internal class PepperRemainingStepsAdder(
             return super.visitCall(expression)
         }
 
-        debugLogger.log("Processing scenario call $scenarioTitle")
+        debugLogger.log("Adding remaining steps to scenario $scenarioTitle")
 
         val parentFunction = allScopes.reversed().firstOrNull {
             val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
             val extension = element.extensionReceiverParameter ?: return@firstOrNull false
             element.name.asString() == "<anonymous>" && extension.type.classOrFail == references.pepperSpecDslSymbol
         }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with ${references.pepperSpecDslSymbol} receiver")
+
+        debugLogger.log("Adding steps to scenario inside $parentFunction")
 
         return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock {
             val stepIndexLength = currentScenarioSteps.size.toString().length

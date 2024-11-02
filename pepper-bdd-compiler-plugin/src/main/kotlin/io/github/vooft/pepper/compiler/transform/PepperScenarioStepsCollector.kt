@@ -61,7 +61,7 @@ internal class PepperScenarioStepsCollector(
             return super.visitCall(expression)
         }
 
-        if (allScopes.findScenarioDslBlock() == null) {
+        if (allScopes.findScenarioDslBlock(references) == null) {
             return super.visitCall(expression)
         }
 

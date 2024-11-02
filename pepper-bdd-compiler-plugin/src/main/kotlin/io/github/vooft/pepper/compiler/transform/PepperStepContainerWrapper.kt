@@ -53,7 +53,7 @@ internal class PepperStepContainerWrapper(
             return super.visitCall(expression)
         }
 
-        if (!expression.symbol.owner.hasAnnotation(references.stepAnnotationSymbol) || allScopes.findScenarioDslBlock() == null) {
+        if (!expression.symbol.owner.hasAnnotation(references.stepAnnotationSymbol) || allScopes.findScenarioDslBlock(references) == null) {
             return super.visitCall(expression)
         }
 
@@ -74,7 +74,7 @@ internal class PepperStepContainerWrapper(
             lambdaParent = currentDeclarationParent // must have local scope accessible
         ) { +irReturn(originalCall) }
 
-        val parentFunction = allScopes.findScenarioDslBlock()
+        val parentFunction = allScopes.findScenarioDslBlock(references)
             ?: error("Cannot find lambda function with ${PepperReferences.scenarioDslFqName} receiver")
 
         debugLogger.log("Wrapping call with StepContainer: ${originalCall.symbol.owner.name}")
