@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 class PepperReferences(pluginContext: IrPluginContext) {
-    val pepperSpec = requireNotNull(
+    val pepperSpecSymbol = requireNotNull(
         pluginContext.referenceClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper"),
@@ -16,7 +16,7 @@ class PepperReferences(pluginContext: IrPluginContext) {
         )
     )
 
-    val pepperSpecDsl = requireNotNull(
+    val pepperSpecDslSymbol = requireNotNull(
         pluginContext.referenceClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper.dsl"),
@@ -25,23 +25,7 @@ class PepperReferences(pluginContext: IrPluginContext) {
         )
     )
 
-    val stepAnnotation = requireNotNull(
-        pluginContext.referenceClass(
-            ClassId(
-                packageFqName = FqName("io.github.vooft.pepper"),
-                topLevelName = Name.identifier("Step")
-            )
-        )
-    )
-
-    val stepContainer = pluginContext.referenceFunctions(
-        callableId = CallableId(
-            packageName = FqName("io.github.vooft.pepper.helper"),
-            callableName = Name.identifier("StepContainer")
-        )
-    ).single().owner
-
-    val scenarioDsl = requireNotNull(
+    val scenarioDslSymbol = requireNotNull(
         pluginContext.referenceClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper.dsl"),
@@ -50,6 +34,22 @@ class PepperReferences(pluginContext: IrPluginContext) {
         )
     )
 
+    val stepAnnotationSymbol = requireNotNull(
+        pluginContext.referenceClass(
+            ClassId(
+                packageFqName = FqName("io.github.vooft.pepper"),
+                topLevelName = Name.identifier("Step")
+            )
+        )
+    )
+
+    val stepContainerSymbol = pluginContext.referenceFunctions(
+        callableId = CallableId(
+            packageName = FqName("io.github.vooft.pepper.helper"),
+            callableName = Name.identifier("StepContainer")
+        )
+    ).single().owner
+
     val prefixGiven = pluginContext.findStep("Given")
     val prefixWhen = pluginContext.findStep("When")
     val prefixThen = pluginContext.findStep("Then")
@@ -57,8 +57,8 @@ class PepperReferences(pluginContext: IrPluginContext) {
     val addStep = pluginContext.findHelper("addStep")
 
     companion object {
-        val pepperClassSpecDslFqName get() = FqName("io.github.vooft.pepper.dsl.PepperSpecDsl")
-        val pepperScenarioDslFqName get() = FqName("io.github.vooft.pepper.dsl.ScenarioDsl")
+        val pepperSpecDslFqName get() = FqName("io.github.vooft.pepper.dsl.PepperSpecDsl")
+        val scenarioDslFqName get() = FqName("io.github.vooft.pepper.dsl.ScenarioDsl")
     }
 }
 

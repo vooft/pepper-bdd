@@ -15,9 +15,9 @@ open class PepperSpec(scenarioBlock: PepperSpecDsl.() -> Unit) : FunSpec() {
         assert(dsl.scenarios.isNotEmpty()) { "No scenarios found" }
 
         for (scenario in dsl.scenarios) {
-            assert(scenario.hasSteps) { "No steps found for scenario ${scenario.title}" }
+            assert(scenario.hasSteps) { "No steps found for scenario ${scenario.key.scenarioTitle}" }
 
-            addContainer(TestName("Scenario: ${scenario.title}"), false, null) {
+            addContainer(TestName("Scenario: ${scenario.key.title}"), false, null) {
                 withContext(CurrentTestScope(this)) {
                     scenario.scenarioBody()
                 }

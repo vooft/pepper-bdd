@@ -18,21 +18,22 @@ import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.expressions.impl.IrFunctionExpressionImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
+import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
-fun List<ScopeWithIr>.findScenarioDslBlock() = reversed().firstOrNull {
+fun List<ScopeWithIr>.findScenarioDslBlock(references: PepperReferences) = reversed().firstOrNull {
     val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
     val extension = element.extensionReceiverParameter ?: return@firstOrNull false
-    element.name.asString() == "<anonymous>" && extension.type.classFqName == PepperReferences.pepperScenarioDslFqName
+    element.name.asString() == "<anonymous>" && extension.type.isSubtypeOfClass(references.scenarioDslSymbol)
 }?.irElement as? IrSimpleFunction
 
 fun IrCall.findScenarioTitle(): String? {
-    if (symbol.owner.name.asString() == "Scenario" &&
-        dispatchReceiver?.type?.classFqName == PepperReferences.pepperClassSpecDslFqName
+    if (symbol.owner.name.asString() in listOf("Scenario", "ScenarioExamples") &&
+        dispatchReceiver?.type?.classFqName == PepperReferences.pepperSpecDslFqName
     ) {
         val titleConst = getValueArgument(0) as? IrConst<*> ?: return null
         return titleConst.value as? String

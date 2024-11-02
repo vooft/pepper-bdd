@@ -47,6 +47,24 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R): 
     return result.value
 }
 
+@OptIn(KotestInternal::class)
+internal suspend fun registerRemainingSteps() {
+    val remainingSteps = requireNotNull(coroutineContext[PepperRemainingSteps]) { "Remaining steps are missing in the context" }.steps
+    val currentScope = requireNotNull(coroutineContext[CurrentTestScope]) { "Test scope is missing in the context" }.scope
+
+    for (remainingStep in remainingSteps) {
+        currentScope.registerTestCase(
+            NestedTest(
+                name = remainingStep.toTestName(),
+                disabled = true,
+                config = null,
+                type = Test,
+                source = sourceRef()
+            ) { }
+        )
+    }
+}
+
 internal data class StepIdentifier(val id: String, val prefix: String, val name: String) {
     fun toTestName() = TestName("$prefix: $name")
 }

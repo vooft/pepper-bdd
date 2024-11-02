@@ -18,7 +18,7 @@ import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import java.util.UUID
 
-internal class PepperStepsCollector(private val pluginContext: IrPluginContext, private val debugLogger: DebugLogger) :
+internal class PepperScenarioStepsCollector(private val pluginContext: IrPluginContext, private val debugLogger: DebugLogger) :
     IrElementTransformerVoidWithContext() {
 
     private val references = PepperReferences(pluginContext)
@@ -35,7 +35,7 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
-        if (!type.isSubtypeOfClass(references.pepperSpec)) {
+        if (!type.isSubtypeOfClass(references.pepperSpecSymbol)) {
             return super.visitConstructor(declaration)
         }
 
@@ -59,7 +59,7 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
             return super.visitCall(expression)
         }
 
-        if (allScopes.findScenarioDslBlock() == null) {
+        if (allScopes.findScenarioDslBlock(references) == null) {
             return super.visitCall(expression)
         }
 
@@ -74,7 +74,7 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
     }
 
     private fun CurrentScenarioStorage.collectStep(expression: IrCall) {
-        if (!expression.symbol.owner.hasAnnotation(references.stepAnnotation)) {
+        if (!expression.symbol.owner.hasAnnotation(references.stepAnnotationSymbol)) {
             return
         }
 
