@@ -31,7 +31,7 @@ internal class PepperStepContainerWrapper(
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
-        if (!type.isSubtypeOfClass(references.pepperSpec)) {
+        if (!type.isSubtypeOfClass(references.pepperSpecSymbol)) {
             return super.visitConstructor(declaration)
         }
 
@@ -53,7 +53,7 @@ internal class PepperStepContainerWrapper(
             return super.visitCall(expression)
         }
 
-        if (!expression.symbol.owner.hasAnnotation(references.stepAnnotation) || allScopes.findScenarioDslBlock() == null) {
+        if (!expression.symbol.owner.hasAnnotation(references.stepAnnotationSymbol) || allScopes.findScenarioDslBlock() == null) {
             return super.visitCall(expression)
         }
 
@@ -75,11 +75,11 @@ internal class PepperStepContainerWrapper(
         ) { +irReturn(originalCall) }
 
         val parentFunction = allScopes.findScenarioDslBlock()
-            ?: error("Cannot find lambda function with ${PepperReferences.pepperScenarioDslFqName} receiver")
+            ?: error("Cannot find lambda function with ${PepperReferences.scenarioDslFqName} receiver")
 
         debugLogger.log("Wrapping call with StepContainer: ${originalCall.symbol.owner.name}")
 
-        return irCall(references.stepContainer).apply {
+        return irCall(references.stepContainerSymbol).apply {
             this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
             putTypeArgument(0, originalReturnType)
 

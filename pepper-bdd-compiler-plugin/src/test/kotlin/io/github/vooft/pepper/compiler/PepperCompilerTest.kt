@@ -33,6 +33,18 @@ class PepperCompilerTest :
 
             assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
         }
+
+        test("scenario with examples") {
+            val result = compile(
+                sourceFiles = sharedSourceFiles + SourceFile.fromPath(
+                    File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/ExamplesSpec.kt")
+                )
+            )
+
+            println(result.generatedFiles.joinToString("\n"))
+
+            assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+        }
     })
 
 private val sharedSourceFiles = listOf(

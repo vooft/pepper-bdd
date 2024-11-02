@@ -27,12 +27,12 @@ import org.jetbrains.kotlin.name.Name
 fun List<ScopeWithIr>.findScenarioDslBlock() = reversed().firstOrNull {
     val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
     val extension = element.extensionReceiverParameter ?: return@firstOrNull false
-    element.name.asString() == "<anonymous>" && extension.type.classFqName == PepperReferences.pepperScenarioDslFqName
+    element.name.asString() == "<anonymous>" && extension.type.classFqName == PepperReferences.scenarioDslFqName
 }?.irElement as? IrSimpleFunction
 
 fun IrCall.findScenarioTitle(): String? {
     if (symbol.owner.name.asString() == "Scenario" &&
-        dispatchReceiver?.type?.classFqName == PepperReferences.pepperClassSpecDslFqName
+        dispatchReceiver?.type?.classFqName == PepperReferences.pepperSpecDslFqName
     ) {
         val titleConst = getValueArgument(0) as? IrConst<*> ?: return null
         return titleConst.value as? String

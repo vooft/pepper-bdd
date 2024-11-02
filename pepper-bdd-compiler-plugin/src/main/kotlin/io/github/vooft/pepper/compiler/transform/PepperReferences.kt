@@ -7,7 +7,7 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 class PepperReferences(pluginContext: IrPluginContext) {
-    val pepperSpec = requireNotNull(
+    val pepperSpecSymbol = requireNotNull(
         pluginContext.referenceClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper"),
@@ -16,7 +16,7 @@ class PepperReferences(pluginContext: IrPluginContext) {
         )
     )
 
-    val pepperSpecDsl = requireNotNull(
+    val pepperSpecDslSymbol = requireNotNull(
         pluginContext.referenceClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper.dsl"),
@@ -25,7 +25,7 @@ class PepperReferences(pluginContext: IrPluginContext) {
         )
     )
 
-    val stepAnnotation = requireNotNull(
+    val stepAnnotationSymbol = requireNotNull(
         pluginContext.referenceClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper"),
@@ -34,21 +34,12 @@ class PepperReferences(pluginContext: IrPluginContext) {
         )
     )
 
-    val stepContainer = pluginContext.referenceFunctions(
+    val stepContainerSymbol = pluginContext.referenceFunctions(
         callableId = CallableId(
             packageName = FqName("io.github.vooft.pepper.helper"),
             callableName = Name.identifier("StepContainer")
         )
     ).single().owner
-
-    val scenarioDsl = requireNotNull(
-        pluginContext.referenceClass(
-            ClassId(
-                packageFqName = FqName("io.github.vooft.pepper.dsl"),
-                topLevelName = Name.identifier("ScenarioDsl")
-            )
-        )
-    )
 
     val prefixGiven = pluginContext.findStep("Given")
     val prefixWhen = pluginContext.findStep("When")
@@ -57,8 +48,9 @@ class PepperReferences(pluginContext: IrPluginContext) {
     val addStep = pluginContext.findHelper("addStep")
 
     companion object {
-        val pepperClassSpecDslFqName get() = FqName("io.github.vooft.pepper.dsl.PepperSpecDsl")
-        val pepperScenarioDslFqName get() = FqName("io.github.vooft.pepper.dsl.ScenarioDsl")
+        val examplesDslTerminalFqName get() = FqName("io.github.vooft.pepper.dsl.ExamplesDslTerminal")
+        val pepperSpecDslFqName get() = FqName("io.github.vooft.pepper.dsl.PepperSpecDsl")
+        val scenarioDslFqName get() = FqName("io.github.vooft.pepper.dsl.ScenarioDsl")
     }
 }
 

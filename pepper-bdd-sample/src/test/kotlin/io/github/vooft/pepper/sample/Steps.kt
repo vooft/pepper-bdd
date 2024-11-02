@@ -21,23 +21,36 @@ suspend fun `generate random string`(prefix: String): String {
 suspend fun `generate two random strings`(prefix: String): Pair<String, String> =
     `generate random string`(prefix) to `generate random string`(prefix)
 
-data class CompareResult(val first: String, val second: String, val result: Boolean)
+data class CompareResult<T>(val first: T, val second: T, val result: Boolean)
 
 @Step
-suspend fun `two strings are compared`(first: String, second: String): CompareResult {
+suspend fun `two strings are compared`(first: String, second: String): CompareResult<String> {
     withContext(Dispatchers.IO) { printlnWithThread("comparing two strings, first=$first, second=$second") }
     delay(1)
     return CompareResult(first, second, first == second)
 }
 
 @Step
-suspend fun `compare result is`(compareResult: CompareResult, expected: Boolean) {
+suspend fun <T> `compare result is`(compareResult: CompareResult<T>, expected: Boolean) {
     delay(1)
     if (compareResult.result != expected) {
         throw AssertionError("Expected $expected, but got ${compareResult.result}")
     } else {
         withContext(customDispatcher) { printlnWithThread("${compareResult.first} == ${compareResult.second} == $expected") }
     }
+}
+
+@Step
+suspend fun `multiply by two`(number: Int): Int {
+    delay(1)
+    return number * 2
+}
+
+@Step
+suspend fun `two ints are compared`(first: Int, second: Int): CompareResult<Int> {
+    withContext(Dispatchers.IO) { printlnWithThread("comparing two ints, first=$first, second=$second") }
+    delay(1)
+    return CompareResult(first, second, first == second)
 }
 
 @Step

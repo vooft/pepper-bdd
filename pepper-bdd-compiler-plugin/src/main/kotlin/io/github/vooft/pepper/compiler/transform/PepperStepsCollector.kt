@@ -35,7 +35,7 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
 
     override fun visitConstructor(declaration: IrConstructor): IrStatement {
         val type = declaration.symbol.owner.returnType
-        if (!type.isSubtypeOfClass(references.pepperSpec)) {
+        if (!type.isSubtypeOfClass(references.pepperSpecSymbol)) {
             return super.visitConstructor(declaration)
         }
 
@@ -74,7 +74,7 @@ internal class PepperStepsCollector(private val pluginContext: IrPluginContext, 
     }
 
     private fun CurrentScenarioStorage.collectStep(expression: IrCall) {
-        if (!expression.symbol.owner.hasAnnotation(references.stepAnnotation)) {
+        if (!expression.symbol.owner.hasAnnotation(references.stepAnnotationSymbol)) {
             return
         }
 

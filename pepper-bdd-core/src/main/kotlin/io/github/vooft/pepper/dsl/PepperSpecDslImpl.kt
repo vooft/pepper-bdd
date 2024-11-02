@@ -1,14 +1,9 @@
 package io.github.vooft.pepper.dsl
 
-import io.github.vooft.pepper.CurrentTestScope
 import io.github.vooft.pepper.PepperRemainingSteps
 import io.github.vooft.pepper.StepIdentifier
-import io.kotest.common.KotestInternal
-import io.kotest.core.source.sourceRef
-import io.kotest.core.test.NestedTest
-import io.kotest.core.test.TestType.Test
+import io.github.vooft.pepper.registerRemainingSteps
 import kotlinx.coroutines.withContext
-import kotlin.coroutines.coroutineContext
 
 internal class PepperSpecDslImpl : PepperSpecDsl {
 
@@ -19,8 +14,30 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
 
     override fun Scenario(scenarioTitle: String, scenarioBody: suspend ScenarioDsl.() -> Unit) {
         assert(!lazyScenarios.containsKey(scenarioTitle)) { "Scenario with description $scenarioTitle already exists" }
-        val dsl = ScenarioDslImpl()
+        val dsl = object : ScenarioDsl {}
         lazyScenarios[scenarioTitle] = LazyScenario(scenarioTitle) { dsl.scenarioBody() }
+    }
+
+    override fun <T> ScenarioExamples(scenarioTitle: String, examplesBody: ExamplesDsl<T>.() -> Unit): ExamplesDslTerminal<T> {
+        val examples = mutableMapOf<String, T>()
+        val examplesDsl = ExamplesDsl { examplesBlock ->
+            val previousExample = examples.put(this, examplesBlock())
+            assert(previousExample == null) { "Example with description $this already exists" }
+        }
+        examplesDsl.examplesBody()
+
+        return ExamplesDslTerminal { scenarioBody ->
+            for ((exampleTitle, example) in examples) {
+                val titleWithExample = "$scenarioTitle: $exampleTitle"
+                assert(!lazyScenarios.containsKey(titleWithExample)) { "Scenario with description $titleWithExample already exists" }
+
+                val dsl = object : ScenarioWithExampleDsl<T> {
+                    override val example = example
+                }
+                val scenario = LazyScenario("$scenarioTitle: $exampleTitle") { dsl.scenarioBody() }
+                lazyScenarios[scenario.title] = scenario
+            }
+        }
     }
 
     internal fun addStep(scenarioTitle: String, stepIdentifier: StepIdentifier) {
@@ -37,25 +54,5 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
                     .onFailure { registerRemainingSteps() }
             }
         }
-    }
-}
-
-internal class ScenarioDslImpl : ScenarioDsl
-
-@OptIn(KotestInternal::class)
-private suspend fun registerRemainingSteps() {
-    val remainingSteps = requireNotNull(coroutineContext[PepperRemainingSteps]) { "Remaining steps are missing in the context" }.steps
-    val currentScope = requireNotNull(coroutineContext[CurrentTestScope]) { "Test scope is missing in the context" }.scope
-
-    for (remainingStep in remainingSteps) {
-        currentScope.registerTestCase(
-            NestedTest(
-                name = remainingStep.toTestName(),
-                disabled = true,
-                config = null,
-                type = Test,
-                source = sourceRef()
-            ) { }
-        )
     }
 }
