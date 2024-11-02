@@ -55,10 +55,10 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
 
     private inner class LazyScenario(override val key: ScenarioKey, private val rawScenarioBody: suspend () -> Unit) : Scenario {
 
-        override val hasSteps get() = stepsPerScenario.containsKey(key.title)
+        override val hasSteps get() = stepsPerScenario.containsKey(key.scenarioTitle)
 
         override val scenarioBody: suspend () -> Unit = {
-            withContext(PepperRemainingSteps(stepsPerScenario.getValue(key.title).toMutableList())) {
+            withContext(PepperRemainingSteps(stepsPerScenario.getValue(key.scenarioTitle).toMutableList())) {
                 runCatching { rawScenarioBody() }
                     .onFailure { registerRemainingSteps() }
             }

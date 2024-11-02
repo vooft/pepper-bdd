@@ -25,11 +25,17 @@ interface Scenario {
     val scenarioBody: suspend () -> Unit
 
     sealed interface ScenarioKey {
+        val scenarioTitle: String
         val title: String
     }
 
-    data class Simple(override val title: String): ScenarioKey
-    data class Example(override val title: String, val example: String): ScenarioKey
+    data class Simple(override val scenarioTitle: String): ScenarioKey {
+        override val title: String get() = scenarioTitle
+    }
+
+    data class Example(override val scenarioTitle: String, val example: String): ScenarioKey {
+        override val title: String get() = "$scenarioTitle: $example"
+    }
 }
 
 val ScenarioDsl.Given: PepperPrefix get() = pepperFail()
