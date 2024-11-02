@@ -7,7 +7,7 @@ interface PepperSpecDsl {
 
 interface ScenarioDsl
 
-interface ScenarioWithExampleDsl<T>: ScenarioDsl {
+interface ScenarioWithExampleDsl<T> : ScenarioDsl {
     val example: T
 }
 
@@ -29,11 +29,11 @@ interface Scenario {
         val title: String
     }
 
-    data class Simple(override val scenarioTitle: String): ScenarioKey {
+    data class Simple(override val scenarioTitle: String) : ScenarioKey {
         override val title: String get() = scenarioTitle
     }
 
-    data class Example(override val scenarioTitle: String, val example: String): ScenarioKey {
+    data class Example(override val scenarioTitle: String, val example: String) : ScenarioKey {
         override val title: String get() = "$scenarioTitle: $example"
     }
 }

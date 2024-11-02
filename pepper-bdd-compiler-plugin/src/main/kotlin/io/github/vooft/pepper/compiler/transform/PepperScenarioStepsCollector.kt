@@ -18,10 +18,8 @@ import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import java.util.UUID
 
-internal class PepperScenarioStepsCollector(
-    private val pluginContext: IrPluginContext,
-    private val debugLogger: DebugLogger
-) : IrElementTransformerVoidWithContext() {
+internal class PepperScenarioStepsCollector(private val pluginContext: IrPluginContext, private val debugLogger: DebugLogger) :
+    IrElementTransformerVoidWithContext() {
 
     private val references = PepperReferences(pluginContext)
 
