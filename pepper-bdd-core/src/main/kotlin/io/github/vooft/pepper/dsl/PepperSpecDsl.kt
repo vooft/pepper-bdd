@@ -20,9 +20,16 @@ fun interface ExamplesDslTerminal<T> {
 }
 
 interface Scenario {
-    val title: String
+    val key: ScenarioKey
     val hasSteps: Boolean
     val scenarioBody: suspend () -> Unit
+
+    sealed interface ScenarioKey {
+        val title: String
+    }
+
+    data class Simple(override val title: String): ScenarioKey
+    data class Example(override val title: String, val example: String): ScenarioKey
 }
 
 val ScenarioDsl.Given: PepperPrefix get() = pepperFail()

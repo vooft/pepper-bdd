@@ -2,25 +2,29 @@ package io.github.vooft.pepper.dsl
 
 import io.github.vooft.pepper.PepperRemainingSteps
 import io.github.vooft.pepper.StepIdentifier
+import io.github.vooft.pepper.dsl.Scenario.Example
+import io.github.vooft.pepper.dsl.Scenario.ScenarioKey
+import io.github.vooft.pepper.dsl.Scenario.Simple
 import io.github.vooft.pepper.registerRemainingSteps
 import kotlinx.coroutines.withContext
 
 internal class PepperSpecDslImpl : PepperSpecDsl {
 
-    private val lazyScenarios = mutableMapOf<String, LazyScenario>()
+    private val lazyScenarios = mutableMapOf<ScenarioKey, LazyScenario>()
     val scenarios: Collection<Scenario> get() = lazyScenarios.values
 
-    val stepsPerScenario = mutableMapOf<String, List<StepIdentifier>>()
+    private val stepsPerScenario = mutableMapOf<String, List<StepIdentifier>>()
 
     override fun Scenario(scenarioTitle: String, scenarioBody: suspend ScenarioDsl.() -> Unit) {
-        assert(!lazyScenarios.containsKey(scenarioTitle)) { "Scenario with description $scenarioTitle already exists" }
+        val key = Simple(scenarioTitle)
+
+        assert(!lazyScenarios.containsKey(key)) { "Scenario with description $scenarioTitle already exists" }
+
         val dsl = object : ScenarioDsl {}
-        lazyScenarios[scenarioTitle] = LazyScenario(scenarioTitle) { dsl.scenarioBody() }
+        lazyScenarios[key] = LazyScenario(key) { dsl.scenarioBody() }
     }
 
     override fun <T> ScenarioExamples(scenarioTitle: String, examplesBody: ExamplesDsl<T>.() -> Unit): ExamplesDslTerminal<T> {
-        assert(!lazyScenarios.containsKey(scenarioTitle)) { "Scenario with description $scenarioTitle already exists" }
-
         val examples = mutableMapOf<String, T>()
         val examplesDsl = ExamplesDsl { examplesBlock ->
             val previousExample = examples.put(this, examplesBlock())
@@ -30,21 +34,17 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
 
         assert(examples.isNotEmpty()) { "Examples should not be empty for scenario $scenarioTitle" }
 
-        // put fake lazy scenario to catch missing outline
-        lazyScenarios[scenarioTitle] = LazyScenario(scenarioTitle) { }
-
         return ExamplesDslTerminal { scenarioBody ->
-            lazyScenarios.remove(scenarioTitle)
-
             for ((exampleTitle, example) in examples) {
+                val key = Example(scenarioTitle, exampleTitle)
                 val titleWithExample = "$scenarioTitle: $exampleTitle"
-                assert(!lazyScenarios.containsKey(titleWithExample)) { "Scenario with description $titleWithExample already exists" }
+                assert(!lazyScenarios.containsKey(key)) { "Scenario with description $titleWithExample already exists" }
 
                 val dsl = object : ScenarioWithExampleDsl<T> {
                     override val example = example
                 }
-                val scenario = LazyScenario("$scenarioTitle: $exampleTitle") { dsl.scenarioBody() }
-                lazyScenarios[scenario.title] = scenario
+                val scenario = LazyScenario(key) { dsl.scenarioBody() }
+                lazyScenarios[key] = scenario
             }
         }
     }
@@ -53,15 +53,17 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
         stepsPerScenario[scenarioTitle] = stepsPerScenario[scenarioTitle].orEmpty() + stepIdentifier
     }
 
-    private inner class LazyScenario(override val title: String, private val rawScenarioBody: suspend () -> Unit) : Scenario {
+    private inner class LazyScenario(override val key: ScenarioKey, private val rawScenarioBody: suspend () -> Unit) : Scenario {
 
-        override val hasSteps get() = stepsPerScenario[title].orEmpty().isNotEmpty()
+        override val hasSteps get() = stepsPerScenario.containsKey(key.title)
 
         override val scenarioBody: suspend () -> Unit = {
-            withContext(PepperRemainingSteps(stepsPerScenario.getValue(title).toMutableList())) {
+            withContext(PepperRemainingSteps(stepsPerScenario.getValue(key.title).toMutableList())) {
                 runCatching { rawScenarioBody() }
                     .onFailure { registerRemainingSteps() }
             }
         }
     }
 }
+
+
