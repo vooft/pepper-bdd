@@ -19,6 +19,8 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
     }
 
     override fun <T> ScenarioExamples(scenarioTitle: String, examplesBody: ExamplesDsl<T>.() -> Unit): ExamplesDslTerminal<T> {
+        assert(!lazyScenarios.containsKey(scenarioTitle)) { "Scenario with description $scenarioTitle already exists" }
+
         val examples = mutableMapOf<String, T>()
         val examplesDsl = ExamplesDsl { examplesBlock ->
             val previousExample = examples.put(this, examplesBlock())
@@ -26,7 +28,14 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
         }
         examplesDsl.examplesBody()
 
+        assert(examples.isNotEmpty()) { "Examples should not be empty for scenario $scenarioTitle" }
+
+        // put fake lazy scenario to catch missing outline
+        lazyScenarios[scenarioTitle] = LazyScenario(scenarioTitle) { }
+
         return ExamplesDslTerminal { scenarioBody ->
+            lazyScenarios.remove(scenarioTitle)
+
             for ((exampleTitle, example) in examples) {
                 val titleWithExample = "$scenarioTitle: $exampleTitle"
                 assert(!lazyScenarios.containsKey(titleWithExample)) { "Scenario with description $titleWithExample already exists" }
