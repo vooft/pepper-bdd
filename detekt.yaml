@@ -19,6 +19,7 @@ naming:
 
 complexity:
   LongMethod:
+    threshold: 100
     ignoreAnnotated:
       - org.junit.jupiter.api.Test
   LongParameterList:

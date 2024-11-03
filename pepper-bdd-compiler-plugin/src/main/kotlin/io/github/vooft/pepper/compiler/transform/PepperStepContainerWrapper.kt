@@ -29,7 +29,6 @@ import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.typeWith
-import org.jetbrains.kotlin.ir.util.dump
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.isVararg
 import org.jetbrains.kotlin.ir.util.toIrConst
@@ -83,10 +82,7 @@ internal class PepperStepContainerWrapper(
         ).wrapWithContainer(expression, requireNotNull(currentDeclarationParent))
     }
 
-    private fun IrBuilderWithScope.wrapWithContainer(
-        originalCall: IrCall,
-        currentDeclarationParent: IrDeclarationParent
-    ): IrExpression {
+    private fun IrBuilderWithScope.wrapWithContainer(originalCall: IrCall, currentDeclarationParent: IrDeclarationParent): IrExpression {
         val originalReturnType = originalCall.symbol.owner.returnType
 
         val lambda = irLambda(
@@ -202,7 +198,8 @@ internal class PepperStepContainerWrapper(
 //                    elements = listOf()
                     elements = arguments.map { (name, expression) ->
                         IrConstructorCallImpl(
-                            startOffset = UNDEFINED_OFFSET, endOffset = UNDEFINED_OFFSET,
+                            startOffset = UNDEFINED_OFFSET,
+                            endOffset = UNDEFINED_OFFSET,
                             type = argumentPairType,
                             symbol = pairConstructorCall,
                             typeArgumentsCount = 2,
@@ -215,7 +212,8 @@ internal class PepperStepContainerWrapper(
                             debugLogger.log("Adding argument: $name = $expression")
                             putValueArgument(0, name.toIrConst(stringType))
                             putValueArgument(
-                                1, IrGetValueImpl(
+                                1,
+                                IrGetValueImpl(
                                     startOffset = expression.startOffset,
                                     endOffset = expression.endOffset,
                                     type = expression.type,
@@ -226,7 +224,7 @@ internal class PepperStepContainerWrapper(
                     }
                 )
             )
-        }.also { debugLogger.log("Arguments map: ${it.dump()}") }
+        }
     }
 
     private class CurrentScenarioStorage(val className: ClassName?) {
