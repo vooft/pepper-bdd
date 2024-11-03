@@ -31,6 +31,34 @@ class SimplePepperSpec : PepperSpec({
 <img src="docs/ordered-steps-report-simple.png" height="200">
 <img src="docs/ordered-steps-intellij-simple.png" height="200">
 
+## Placeholders in step names
+```kotlin
+// step with placeholder in its name
+// string inside curly braces will be replaced with actual value from the arguments, if there is no match, it will stay as-is 
+// it is possible to use dollar sign in a method name, but intellij can't handle it properly and will show that the method is not used, even though it is
+@Step
+fun `compare result is {expected}`(compareResult: CompareResult, expected: Boolean) {
+    assert(compareResult.result == expected) { "Expected $expected, but got ${compareResult.result}" }
+}
+
+class SimplePepperSpec : PepperSpec({
+    Scenario("my test scenario") {
+        Given
+        val firstRandom = `generate random string`("first")
+        val secondRandom = `generate random string`("second")
+
+        When
+        val compareResult = `two strings are compared`(firstRandom, secondRandom)
+
+        Then
+        // just call the method normally, the plugin will replace the placeholder with the actual value
+        `compare result is {expected}`(compareResult, false)
+    }
+})
+```
+
+<img src="docs/ordered-steps-intellij-simple-placeholder.png" height="200">
+
 ## Multiple scenarios per spec
 ```kotlin
 class TwoScenariosSpec : PepperSpec({
