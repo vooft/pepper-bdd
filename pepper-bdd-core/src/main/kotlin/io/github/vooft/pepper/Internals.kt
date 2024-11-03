@@ -13,7 +13,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
 @OptIn(KotestInternal::class)
-internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R): R {
+internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, arguments: Map<String, Any?>): R {
     val remainingSteps = requireNotNull(coroutineContext[PepperRemainingSteps]) { "Remaining steps are missing in the context" }.steps
     while (remainingSteps.isNotEmpty() && remainingSteps.first().id != id) {
         remainingSteps.removeFirst()

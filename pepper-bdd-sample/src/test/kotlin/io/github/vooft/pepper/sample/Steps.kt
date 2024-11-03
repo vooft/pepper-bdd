@@ -41,7 +41,7 @@ suspend fun <T> `compare result is`(compareResult: CompareResult<T>, expected: B
 }
 
 @Step
-suspend fun `multiply by two`(number: Int): Int {
+suspend fun `multiply {number} by two`(number: Int): Int {
     delay(1)
     return number * 2
 }
