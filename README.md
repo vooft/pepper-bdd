@@ -52,7 +52,7 @@ class SimplePepperSpec : PepperSpec({
 
         Then
         // just call the method normally, the plugin will replace the placeholder with the actual value
-        `compare result is '{expected}'`(compareResult, false)
+        `compare result is '{expected}'`(compareResult = compareResult, expected = false)
     }
 })
 ```
