@@ -18,6 +18,6 @@ class FailingPepperSpec :
             val compareResult = `two strings are compared`(firstRandom, secondRandom)
 
             Then
-            `compare result is`(compareResult, true)
+            `compare result is {expected}`(compareResult, true)
         }
     })

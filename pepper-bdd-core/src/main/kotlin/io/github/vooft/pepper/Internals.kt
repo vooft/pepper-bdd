@@ -26,7 +26,7 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
 
     currentScope.registerTestCase(
         NestedTest(
-            name = step.toTestName(),
+            name = step.toTestName(substitutions = arguments),
             disabled = false,
             config = null,
             type = Test,
@@ -55,7 +55,7 @@ internal suspend fun registerRemainingSteps() {
     for (remainingStep in remainingSteps) {
         currentScope.registerTestCase(
             NestedTest(
-                name = remainingStep.toTestName(),
+                name = remainingStep.toTestName(mapOf()),
                 disabled = true,
                 config = null,
                 type = Test,
@@ -66,7 +66,10 @@ internal suspend fun registerRemainingSteps() {
 }
 
 internal data class StepIdentifier(val id: String, val prefix: String, val name: String) {
-    fun toTestName() = TestName("$prefix: $name")
+    fun toTestName(substitutions: Map<String, Any?>): TestName {
+        val substituted = substitutions.entries.fold(name) { acc, (key, value) -> acc.replace("{$key}", value.toString()) }
+        return TestName("$prefix: $substituted")
+    }
 }
 
 private sealed class StepResult<R> {

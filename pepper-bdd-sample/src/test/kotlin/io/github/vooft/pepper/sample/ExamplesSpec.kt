@@ -19,7 +19,7 @@ class ExamplesSpec :
             val compareResult = `two ints are compared`(multiplication, example.result)
 
             Then
-            `compare result is`(compareResult, example.compareResult)
+            `compare result is {expected}`(compareResult, example.compareResult)
         }
     })
 

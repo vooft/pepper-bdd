@@ -16,6 +16,6 @@ class SimplePepperSpec :
             val compareResult = `two strings are compared`(firstRandom, secondRandom)
 
             Then
-            `compare result is`(compareResult, false)
+            `compare result is {expected}`(compareResult, false)
         }
     })
