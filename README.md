@@ -37,7 +37,7 @@ class SimplePepperSpec : PepperSpec({
 // string inside curly braces will be replaced with actual value from the arguments, if there is no match, it will stay as-is 
 // it is possible to use dollar sign in a method name, but intellij can't handle it properly and will show that the method is not used, even though it is
 @Step
-fun `compare result is {expected}`(compareResult: CompareResult, expected: Boolean) {
+fun `compare result is '{expected}'`(compareResult: CompareResult, expected: Boolean) {
     assert(compareResult.result == expected) { "Expected $expected, but got ${compareResult.result}" }
 }
 
@@ -52,7 +52,7 @@ class SimplePepperSpec : PepperSpec({
 
         Then
         // just call the method normally, the plugin will replace the placeholder with the actual value
-        `compare result is {expected}`(compareResult, false)
+        `compare result is '{expected}'`(compareResult, false)
     }
 })
 ```
