@@ -7,29 +7,37 @@ import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.UNDEFINED_OFFSET
 import org.jetbrains.kotlin.ir.builders.IrBuilderWithScope
+import org.jetbrains.kotlin.ir.builders.irBlock
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGet
 import org.jetbrains.kotlin.ir.builders.irReturn
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
+import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
+import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.declarations.IrVariable
+import org.jetbrains.kotlin.ir.declarations.impl.IrVariableImpl
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.expressions.IrFunctionAccessExpression
 import org.jetbrains.kotlin.ir.expressions.impl.IrCallImpl
+import org.jetbrains.kotlin.ir.expressions.impl.IrConstructorCallImpl
+import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrVarargImpl
+import org.jetbrains.kotlin.ir.symbols.impl.IrVariableSymbolImpl
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.typeWith
 import org.jetbrains.kotlin.ir.util.dump
-import org.jetbrains.kotlin.ir.util.getAllArgumentsWithIr
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.isVararg
+import org.jetbrains.kotlin.ir.util.toIrConst
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+import java.util.concurrent.atomic.AtomicInteger
 
 internal class PepperStepContainerWrapper(
     private val steps: Map<ScenarioIdentifier, List<StepIdentifier>>,
@@ -78,7 +86,7 @@ internal class PepperStepContainerWrapper(
     private fun IrBuilderWithScope.wrapWithContainer(
         originalCall: IrCall,
         currentDeclarationParent: IrDeclarationParent
-    ): IrFunctionAccessExpression {
+    ): IrExpression {
         val originalReturnType = originalCall.symbol.owner.returnType
 
         val lambda = irLambda(
@@ -91,23 +99,72 @@ internal class PepperStepContainerWrapper(
 
         debugLogger.log("Wrapping call with StepContainer: ${originalCall.symbol.owner.name}")
 
-        return irCall(references.stepContainerSymbol).apply {
-            this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
-            putTypeArgument(0, originalReturnType)
+        return irBlock {
+            // store each argument in a variable and replace them in a call to avoid double-calculation
+            val variables = originalCall.replaceValueArgumentsWithVariables(parentFunction)
+            variables.forEach { (_, variable) -> +variable }
 
-            val currentCall = originalCall.symbol.owner.name.asString()
+            // StepContainer("stepId", { originalCall(arg1, arg2) }, mapOf("arg1" to arg1, "arg2" to arg2))
+            +irCall(references.stepContainerSymbol).apply {
+                this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
+                putTypeArgument(0, originalReturnType)
 
-            require(currentScenario.remainingSteps.isNotEmpty()) { "No steps left for scenario ${currentScenario.scenarioIdentifier}" }
-            val step = currentScenario.remainingSteps.removeFirst()
-            require(step.name == currentCall) { "Step name mismatch: ${step.name} != $currentCall" }
+                val currentCall = originalCall.symbol.owner.name.asString()
 
-            putValueArgument(index = 0, valueArgument = irString(step.id))
-            putValueArgument(index = 1, valueArgument = lambda)
-            putValueArgument(index = 2, valueArgument = originalCall.valueArgumentsToMap())
+                require(currentScenario.remainingSteps.isNotEmpty()) { "No steps left for scenario ${currentScenario.scenarioIdentifier}" }
+                val step = currentScenario.remainingSteps.removeFirst()
+                require(step.name == currentCall) { "Step name mismatch: ${step.name} != $currentCall" }
+
+                putValueArgument(index = 0, valueArgument = irString(step.id))
+                putValueArgument(index = 1, valueArgument = lambda)
+                putValueArgument(index = 2, valueArgument = valueArgumentsToMap(variables))
+            }
         }
     }
 
-    private fun IrCall.valueArgumentsToMap(): IrCallImpl {
+    /**
+     * Generates new variable for each argument and replaces argument with variable.
+     */
+    private fun IrCall.replaceValueArgumentsWithVariables(outerFunction: IrFunction): Map<String, IrVariable> {
+        val result = mutableMapOf<String, IrVariable>()
+
+        for (index in 0..<valueArgumentsCount) {
+            val parameter = symbol.owner.valueParameters[index]
+            val expression = getValueArgument(index) ?: continue
+
+            val variable = IrVariableImpl(
+                startOffset = UNDEFINED_OFFSET,
+                endOffset = UNDEFINED_OFFSET,
+                origin = IrDeclarationOrigin.DEFINED,
+                symbol = IrVariableSymbolImpl(),
+                name = Name.identifier("pepperVariable$${GENERATED_VARIABLE_COUNTER.getAndIncrement()}"),
+                type = parameter.type,
+                isVar = false,
+                isConst = false,
+                isLateinit = false
+            )
+            variable.parent = outerFunction
+            variable.initializer = expression
+            putValueArgument(
+                index = index,
+                valueArgument = IrGetValueImpl(
+                    startOffset = expression.startOffset,
+                    endOffset = expression.endOffset,
+                    type = expression.type,
+                    symbol = variable.symbol,
+                )
+            )
+
+            result[parameter.name.asString()] = variable
+        }
+
+        return result.toMap()
+    }
+
+    /**
+     * Convert value arguments to mapOf("arg1" to arg1, "arg2" to arg2)
+     */
+    private fun valueArgumentsToMap(arguments: Map<String, IrVariable>): IrCallImpl {
         val irBuiltIns = pluginContext.irBuiltIns
         val nullableAnyType = irBuiltIns.anyType.makeNullable()
         val stringType = irBuiltIns.stringType
@@ -121,8 +178,6 @@ internal class PepperStepContainerWrapper(
         val mapOfSymbol = pluginContext.referenceFunctions(mapOfCallableId)
             .first { it.owner.valueParameters.size == 1 && it.owner.valueParameters.first().isVararg }
         val argumentsMapType = irBuiltIns.mapClass.typeWith(stringType, nullableAnyType)
-
-        val allArguments = getAllArgumentsWithIr()
 
         return IrCallImpl(
             startOffset = UNDEFINED_OFFSET,
@@ -144,24 +199,32 @@ internal class PepperStepContainerWrapper(
                     endOffset = UNDEFINED_OFFSET,
                     type = irBuiltIns.arrayClass.typeWith(argumentPairType),
                     varargElementType = argumentPairType,
-                    elements = listOf())
-//                    allArguments.map { (valueParameter, expression) ->
-//                        IrConstructorCallImpl(
-//                            startOffset = UNDEFINED_OFFSET, endOffset = UNDEFINED_OFFSET,
-//                            type = argumentPairType,
-//                            symbol = pairConstructorCall,
-//                            typeArgumentsCount = 2,
-//                            constructorTypeArgumentsCount = 0,
-//                            valueArgumentsCount = 2,
-//                        ).apply {
-//                            putTypeArgument(0, stringType)
-//                            putTypeArgument(1, nullableAnyType)
-//
-//                            debugLogger.log("Adding argument: ${valueParameter.name} = $expression")
-//                            putValueArgument(0, valueParameter.name.asString().toIrConst(stringType))
-//                            putValueArgument(1, expression)
-//                        }
-//                    })
+//                    elements = listOf()
+                    elements = arguments.map { (name, expression) ->
+                        IrConstructorCallImpl(
+                            startOffset = UNDEFINED_OFFSET, endOffset = UNDEFINED_OFFSET,
+                            type = argumentPairType,
+                            symbol = pairConstructorCall,
+                            typeArgumentsCount = 2,
+                            constructorTypeArgumentsCount = 0,
+                            valueArgumentsCount = 2,
+                        ).apply {
+                            putTypeArgument(0, stringType)
+                            putTypeArgument(1, nullableAnyType)
+
+                            debugLogger.log("Adding argument: $name = $expression")
+                            putValueArgument(0, name.toIrConst(stringType))
+                            putValueArgument(
+                                1, IrGetValueImpl(
+                                    startOffset = expression.startOffset,
+                                    endOffset = expression.endOffset,
+                                    type = expression.type,
+                                    symbol = expression.symbol,
+                                )
+                            )
+                        }
+                    }
+                )
             )
         }.also { debugLogger.log("Arguments map: ${it.dump()}") }
     }
@@ -178,4 +241,8 @@ internal class PepperStepContainerWrapper(
 
             return ScenarioIdentifier(className, scenarioTitle)
         }
+
+    companion object {
+        private val GENERATED_VARIABLE_COUNTER = AtomicInteger()
+    }
 }
