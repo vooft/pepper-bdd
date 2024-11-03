@@ -13,13 +13,13 @@ class ExamplesSpec :
             "example 3" { Example(input = 3, result = 5, compareResult = false) }
         } Outline {
             Given
-            val multiplication = `multiply by two`(example.input)
+            val multiplication = `multiply {number} by two`(example.input)
 
             When
             val compareResult = `two ints are compared`(multiplication, example.result)
 
             Then
-            `compare result is`(compareResult, example.compareResult)
+            `compare result is '{expected}'`(compareResult, example.compareResult)
         }
     })
 

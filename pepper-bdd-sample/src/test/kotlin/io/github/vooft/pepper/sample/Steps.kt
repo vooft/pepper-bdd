@@ -31,7 +31,7 @@ suspend fun `two strings are compared`(first: String, second: String): CompareRe
 }
 
 @Step
-suspend fun <T> `compare result is`(compareResult: CompareResult<T>, expected: Boolean) {
+suspend fun <T> `compare result is '{expected}'`(compareResult: CompareResult<T>, expected: Boolean) {
     delay(1)
     if (compareResult.result != expected) {
         throw AssertionError("Expected $expected, but got ${compareResult.result}")
@@ -41,7 +41,7 @@ suspend fun <T> `compare result is`(compareResult: CompareResult<T>, expected: B
 }
 
 @Step
-suspend fun `multiply by two`(number: Int): Int {
+suspend fun `multiply {number} by two`(number: Int): Int {
     delay(1)
     return number * 2
 }
