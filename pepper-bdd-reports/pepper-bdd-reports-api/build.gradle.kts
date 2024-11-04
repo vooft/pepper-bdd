@@ -13,5 +13,10 @@ kotlin {
             api(libs.kotlinx.datetime)
             api(libs.kotlinx.serialization.json)
         }
+        jvmTest.dependencies {
+            implementation(kotlin("reflect"))
+            implementation(libs.kotest.runner.jvm)
+            implementation(libs.kotest.assertions.json)
+        }
     }
 }
