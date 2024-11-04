@@ -1,12 +1,12 @@
 plugins {
-    `pepper-bdd-base`
+    `pepper-bdd-jvm`
     `pepper-bdd-publish`
 }
 
 dependencies {
     implementation(libs.kotlin.compiler.embeddable)
 
-    testImplementation(libs.kotest.runner)
+    testImplementation(libs.kotest.runner.jvm)
     testImplementation(libs.kotlin.compile.testing)
 }
 

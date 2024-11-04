@@ -1,5 +1,5 @@
 plugins {
-    `pepper-bdd-base`
+    `pepper-bdd-jvm`
 
     // dependency is already added in the root build.gradle.kts
     // without it the `pepper` accessor is not generated
@@ -8,7 +8,7 @@ plugins {
 
 dependencies {
     testImplementation(project(":pepper-bdd-core"))
-    testImplementation(libs.kotest.runner)
+    testImplementation(libs.kotest.runner.jvm)
 }
 
 configurations.configureEach {
