@@ -11,6 +11,7 @@ gradle-plugin-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", vers
 gradle-plugin-maven-central-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.30.0" }
 
 kotest-framework-api = { module = "io.kotest:kotest-framework-api", version.ref = "kotest" }
+kotest-framework-engine = { module = "io.kotest:kotest-framework-engine", version.ref = "kotest" }
 kotest-runner-jvm = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 kotest-assertions-json = { module = "io.kotest:kotest-assertions-json", version.ref = "kotest" }
 
@@ -27,5 +28,6 @@ plugin-publish = { id = "com.gradle.plugin-publish", version = "1.3.0" }
 
 buildconfig = { id = "com.github.gmazzo.buildconfig", version = "5.5.0" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+kotest-multiplatform = { id = "io.kotest.multiplatform", version.ref = "kotest" }
 
 [bundles]
