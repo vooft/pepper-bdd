@@ -14,7 +14,7 @@ import kotlinx.serialization.json.Json
 class PepperTestProjectTest : ShouldSpec({
     should("serialize PepperTestProject") {
         val project = PepperTestProject(
-            version = 1,
+            version = 2,
             scenarios = listOf(
                 PepperTestScenario(
                     className = "io.github.pepper.reports.api.PepperTestProjectTest",
