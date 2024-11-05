@@ -23,8 +23,8 @@ tasks.withType<Detekt> {
 }
 
 tasks.withType<JavaCompile> {
-    sourceCompatibility = "11"
-    targetCompatibility = "11"
+    sourceCompatibility = "21"
+    targetCompatibility = "21"
 }
 
 tasks.withType<LintTask> {
