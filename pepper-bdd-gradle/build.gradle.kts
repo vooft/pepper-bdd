@@ -1,5 +1,6 @@
 plugins {
     `pepper-bdd-base`
+    `pepper-bdd-publish`
     alias(libs.plugins.buildconfig)
     alias(libs.plugins.plugin.publish)
 }
