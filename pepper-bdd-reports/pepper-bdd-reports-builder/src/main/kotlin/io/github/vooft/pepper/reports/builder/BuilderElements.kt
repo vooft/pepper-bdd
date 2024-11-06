@@ -1,10 +1,10 @@
 package io.github.vooft.pepper.reports.builder
 
-import io.github.vooft.pepper.reports.builder.Elements.PepperScenarioStatus.FAILED
-import io.github.vooft.pepper.reports.builder.Elements.PepperScenarioStatus.PASSED
+import io.github.vooft.pepper.reports.builder.BuilderElements.PepperScenarioStatus.FAILED
+import io.github.vooft.pepper.reports.builder.BuilderElements.PepperScenarioStatus.PASSED
 import java.time.Instant
 
-internal object Elements {
+internal object BuilderElements {
     data class PepperTestProject(
         val scenarios: MutableList<PepperTestScenario> = mutableListOf(),
         val startedAt: Instant = Instant.now(),
