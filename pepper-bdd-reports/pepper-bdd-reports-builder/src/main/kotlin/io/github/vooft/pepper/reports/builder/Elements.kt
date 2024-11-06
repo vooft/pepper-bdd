@@ -1,5 +1,7 @@
-package io.github.pepper.reports.builder
+package io.github.vooft.pepper.reports.builder
 
+import io.github.vooft.pepper.reports.builder.Elements.PepperScenarioStatus.FAILED
+import io.github.vooft.pepper.reports.builder.Elements.PepperScenarioStatus.PASSED
 import java.time.Instant
 
 internal object Elements {
@@ -21,9 +23,10 @@ internal object Elements {
         val startedAt: Instant = Instant.now(),
         var finishedAt: Instant? = null
     ) {
-        val status: PepperScenarioStatus get() = when (steps.all { it.error == null }) {
-            true -> PepperScenarioStatus.PASSED
-            false -> PepperScenarioStatus.FAILED
+        val status: PepperScenarioStatus
+            get() = when (steps.all { it.error == null }) {
+            true -> PASSED
+            false -> FAILED
         }
     }
 

@@ -1,6 +1,6 @@
 package io.github.vooft.pepper
 
-import io.github.pepper.reports.builder.PepperReportBuilder
+import io.github.vooft.pepper.reports.builder.PepperReportBuilder
 import io.kotest.common.KotestInternal
 import io.kotest.core.names.TestName
 import io.kotest.core.source.sourceRef

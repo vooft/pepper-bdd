@@ -1,25 +1,29 @@
-package io.github.pepper.reports.builder
+package io.github.vooft.pepper.reports.builder
 
+import io.github.vooft.pepper.reports.builder.Elements.PepperTestProject
+import io.github.vooft.pepper.reports.builder.Elements.PepperTestScenario
+import io.github.vooft.pepper.reports.builder.Elements.PepperTestStep
+import io.github.vooft.pepper.reports.builder.Elements.PepperTestStep.StepArgument
 import java.time.Instant
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
 class PepperReportBuilder {
-    private val project = Elements.PepperTestProject()
+    private val project = PepperTestProject()
 
     fun addScenario(className: String, name: String) {
-        val scenario = Elements.PepperTestScenario(className, name)
+        val scenario = PepperTestScenario(className, name)
         project.scenarios.add(scenario)
     }
 
     fun addStep(name: String) {
-        val step = Elements.PepperTestStep(name)
+        val step = PepperTestStep(name)
         project.scenarios.last().steps.add(step)
     }
 
     fun addArgument(name: String, typeName: String, value: String) {
-        val argument = Elements.PepperTestStep.StepArgument(name = name, typeName = typeName, value = value)
+        val argument = StepArgument(name = name, typeName = typeName, value = value)
         project.scenarios.last().steps.last().arguments.add(argument)
     }
 

@@ -1,4 +1,4 @@
-package io.github.pepper.reports.kotest
+package io.github.vooft.pepper.reports.kotest
 
 import io.kotest.core.config.AbstractProjectConfig
 
