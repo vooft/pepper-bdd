@@ -1,5 +1,6 @@
 package io.github.vooft.pepper
 
+import io.github.pepper.reports.builder.PepperReportBuilder
 import io.github.vooft.pepper.dsl.PepperSpecDsl
 import io.github.vooft.pepper.dsl.PepperSpecDslImpl
 import io.kotest.core.names.TestName
@@ -18,8 +19,14 @@ open class PepperSpec(scenarioBlock: PepperSpecDsl.() -> Unit) : FunSpec() {
             assert(scenario.hasSteps) { "No steps found for scenario ${scenario.key.scenarioTitle}" }
 
             addContainer(TestName("Scenario: ${scenario.key.title}"), false, null) {
-                withContext(CurrentTestScope(this)) {
-                    scenario.scenarioBody()
+                PepperReportBuilder.current().addScenario(this@PepperSpec::class.qualifiedName!!, scenario.key.title)
+
+                try {
+                    withContext(CurrentTestScope(this)) {
+                        scenario.scenarioBody()
+                    }
+                } finally {
+                    PepperReportBuilder.current().finishScenario()
                 }
             }
         }
