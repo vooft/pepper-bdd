@@ -25,9 +25,9 @@ internal object BuilderElements {
     ) {
         val status: PepperScenarioStatus
             get() = when (steps.all { it.error == null }) {
-            true -> PASSED
-            false -> FAILED
-        }
+                true -> PASSED
+                false -> FAILED
+            }
     }
 
     data class PepperTestStep(
