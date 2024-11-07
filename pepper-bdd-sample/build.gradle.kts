@@ -8,6 +8,7 @@ plugins {
 
 dependencies {
     testImplementation(project(":pepper-bdd-core"))
+    testImplementation(project(":pepper-bdd-reports:pepper-bdd-reports-builder"))
     testImplementation(libs.kotest.runner.jvm)
 }
 

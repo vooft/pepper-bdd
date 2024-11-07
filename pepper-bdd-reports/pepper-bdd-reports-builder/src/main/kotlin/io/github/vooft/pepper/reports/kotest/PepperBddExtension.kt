@@ -14,8 +14,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.toKotlinInstant
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import java.io.File
 
-class PepperProjectExtension : ProjectExtension {
+class PepperBddExtension : ProjectExtension {
     override suspend fun interceptProject(context: ProjectContext, callback: suspend (ProjectContext) -> Unit) {
         val builder = PepperReportBuilder()
         try {
@@ -27,6 +28,10 @@ class PepperProjectExtension : ProjectExtension {
             println("\n\n\n\n\n")
             println(Json.encodeToString(builder.toReport()))
             println("\n\n\n\n\n")
+            println(File("pepper-report.json").absolutePath)
+            System.getProperties().forEach { t, u ->
+                println("property: $t -> $u")
+            }
         }
     }
 }

@@ -24,10 +24,12 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
 
     val testName = step.toTestName(substitutions = arguments)
 
-    val reportBuilder = PepperReportBuilder.current()
-    reportBuilder.addStep(testName.testName)
-    arguments.forEach { (name, value) ->
-        reportBuilder.addArgument(name, "bla", value.toString())
+    PepperReportBuilder.ifPresent {
+        addStep(testName.testName)
+
+        arguments.forEach { (name, value) ->
+            addArgument(name, "bla", value.toString())
+        }
     }
 
     currentTestScope().registerTestCase(
@@ -41,14 +43,14 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
             withContext(CoroutineName("step: ${step.name}")) {
                 result = try {
                     val successResult = testBlock()
-                    reportBuilder.addResult(successResult)
+                    PepperReportBuilder.ifPresent { addResult(successResult) }
                     StepResult.Success(successResult)
                 } catch (t: Throwable) {
-                    reportBuilder.addError(t)
+                    PepperReportBuilder.ifPresent { addError(t) }
                     StepResult.Error(t)
                 }
 
-                reportBuilder.finishStep()
+                PepperReportBuilder.ifPresent { finishStep() }
                 result.value
             }
         }

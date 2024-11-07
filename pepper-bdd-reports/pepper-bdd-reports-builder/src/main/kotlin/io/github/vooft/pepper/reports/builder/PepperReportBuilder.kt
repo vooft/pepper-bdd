@@ -44,9 +44,9 @@ class PepperReportBuilder {
     }
 
     companion object {
-        suspend fun current() = requireNotNull(coroutineContext[PepperReportBuilderElement]) {
-            "PepperReportBuilderElement is missing in the context"
-        }.builder
+        suspend fun ifPresent(block: PepperReportBuilder.() -> Unit) {
+            coroutineContext[PepperReportBuilderElement]?.builder?.block()
+        }
     }
 }
 

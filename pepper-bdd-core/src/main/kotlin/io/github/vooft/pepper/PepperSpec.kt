@@ -20,14 +20,14 @@ open class PepperSpec(scenarioBlock: PepperSpecDsl.() -> Unit) : FunSpec() {
 
             addContainer(TestName("Scenario: ${scenario.key.title}"), false, null) {
                 val className = requireNotNull(this@PepperSpec::class.qualifiedName)
-                PepperReportBuilder.current().addScenario(className, scenario.key.title)
+                PepperReportBuilder.ifPresent { addScenario(className, scenario.key.title) }
 
                 try {
                     withContext(CurrentTestScope(this)) {
                         scenario.scenarioBody()
                     }
                 } finally {
-                    PepperReportBuilder.current().finishScenario()
+                    PepperReportBuilder.ifPresent { finishScenario() }
                 }
             }
         }
