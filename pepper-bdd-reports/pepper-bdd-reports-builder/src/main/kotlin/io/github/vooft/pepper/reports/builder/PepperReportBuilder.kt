@@ -1,8 +1,10 @@
 package io.github.vooft.pepper.reports.builder
 
-import io.github.pepper.reports.api.PepperProject
-import io.github.pepper.reports.api.PepperTestScenario
-import io.github.pepper.reports.api.PepperTestStep
+import io.github.vooft.pepper.reports.api.PepperProject
+import io.github.vooft.pepper.reports.api.PepperScenarioStatus
+import io.github.vooft.pepper.reports.api.PepperTestScenario
+import io.github.vooft.pepper.reports.api.PepperTestStep
+import io.github.vooft.pepper.reports.api.PepperTestStep.StepArgument
 import kotlinx.datetime.toKotlinInstant
 import java.time.Instant
 import kotlin.coroutines.AbstractCoroutineContextElement
@@ -57,7 +59,7 @@ class PepperReportBuilder {
                     PepperTestStep(
                         name = step.name,
                         arguments = step.arguments.map { argument ->
-                            PepperTestStep.StepArgument(
+                            StepArgument(
                                 name = argument.name,
                                 type = argument.typeName,
                                 value = argument.value
@@ -92,6 +94,6 @@ data class PepperReportBuilderElement(val builder: PepperReportBuilder) : Abstra
 }
 
 private fun BuilderElements.PepperScenarioStatus.toApi() = when (this) {
-    BuilderElements.PepperScenarioStatus.PASSED -> io.github.pepper.reports.api.PepperScenarioStatus.PASSED
-    BuilderElements.PepperScenarioStatus.FAILED -> io.github.pepper.reports.api.PepperScenarioStatus.FAILED
+    BuilderElements.PepperScenarioStatus.PASSED -> PepperScenarioStatus.PASSED
+    BuilderElements.PepperScenarioStatus.FAILED -> PepperScenarioStatus.FAILED
 }

@@ -1,10 +1,10 @@
 package api
 
-import io.github.pepper.reports.api.PepperProject
-import io.github.pepper.reports.api.PepperScenarioStatus.PASSED
-import io.github.pepper.reports.api.PepperTestScenario
-import io.github.pepper.reports.api.PepperTestStep
-import io.github.pepper.reports.api.PepperTestStep.StepArgument
+import io.github.vooft.pepper.reports.api.PepperProject
+import io.github.vooft.pepper.reports.api.PepperScenarioStatus.PASSED
+import io.github.vooft.pepper.reports.api.PepperTestScenario
+import io.github.vooft.pepper.reports.api.PepperTestStep
+import io.github.vooft.pepper.reports.api.PepperTestStep.StepArgument
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.core.spec.style.ShouldSpec
 import kotlinx.datetime.Instant

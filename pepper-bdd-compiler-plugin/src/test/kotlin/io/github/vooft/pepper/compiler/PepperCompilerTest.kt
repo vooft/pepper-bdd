@@ -65,7 +65,18 @@ private val sharedSourceFiles = listOf(
     ),
     SourceFile.fromPath(
         File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/helper/PluginHelpers.kt")
-    )
+    ),
+    SourceFile.fromPath(
+        File("../pepper-bdd-reports/pepper-bdd-reports-api/src/commonMain/kotlin/io/github/vooft/pepper/reports/api/PepperProject.kt")
+    ),
+    SourceFile.fromPath(
+        File("../pepper-bdd-reports/pepper-bdd-reports-builder/src/main/kotlin/io/github/vooft/pepper/reports/builder/BuilderElements.kt")
+    ),
+    SourceFile.fromPath(
+        File(
+            "../pepper-bdd-reports/pepper-bdd-reports-builder/src/main/kotlin/io/github/vooft/pepper/reports/builder/PepperReportBuilder.kt"
+        )
+    ),
 )
 
 fun compile(sourceFiles: List<SourceFile>, plugin: CompilerPluginRegistrar = PepperBddComponentRegistrar()): JvmCompilationResult =

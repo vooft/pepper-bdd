@@ -1,4 +1,4 @@
-package io.github.pepper.reports.api
+package io.github.vooft.pepper.reports.api
 
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
