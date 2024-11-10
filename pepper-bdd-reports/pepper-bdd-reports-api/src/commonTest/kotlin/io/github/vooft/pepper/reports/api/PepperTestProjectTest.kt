@@ -1,9 +1,6 @@
-package api
+package io.github.vooft.pepper.reports.api
 
-import io.github.vooft.pepper.reports.api.PepperProjectReport
 import io.github.vooft.pepper.reports.api.PepperScenarioStatus.PASSED
-import io.github.vooft.pepper.reports.api.PepperTestScenario
-import io.github.vooft.pepper.reports.api.PepperTestStep
 import io.github.vooft.pepper.reports.api.PepperTestStep.StepArgument
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.core.spec.style.ShouldSpec
