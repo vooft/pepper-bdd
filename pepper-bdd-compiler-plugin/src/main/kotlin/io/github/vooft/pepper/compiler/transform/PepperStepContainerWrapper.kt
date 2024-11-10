@@ -203,7 +203,9 @@ internal class PepperStepContainerWrapper(
                             valueArgumentsCount = 3,
                         ).apply {
                             putValueArgument(0, name.toIrConst(stringType))
-                            putValueArgument(1, "test".toIrConst(stringType))
+
+                            // TODO: improve generics type resolution
+                            putValueArgument(1, (expression.type.classFqName?.asString() ?: "null").toIrConst(stringType))
                             putValueArgument(
                                 2,
                                 IrGetValueImpl(
