@@ -1,6 +1,6 @@
 package api
 
-import io.github.vooft.pepper.reports.api.PepperProject
+import io.github.vooft.pepper.reports.api.PepperProjectReport
 import io.github.vooft.pepper.reports.api.PepperScenarioStatus.PASSED
 import io.github.vooft.pepper.reports.api.PepperTestScenario
 import io.github.vooft.pepper.reports.api.PepperTestStep
@@ -13,14 +13,16 @@ import kotlinx.serialization.json.Json
 
 class PepperTestProjectTest : ShouldSpec({
     should("serialize PepperTestProject") {
-        val project = PepperProject(
+        val project = PepperProjectReport(
             version = 1,
             scenarios = listOf(
                 PepperTestScenario(
+                    id = "scenario1",
                     className = "io.github.pepper.reports.api.PepperTestProjectTest",
                     name = "serialize PepperTestProject",
                     steps = listOf(
                         PepperTestStep(
+                            id = "step1",
                             name = "create PepperTestProject",
                             arguments = listOf(
                                 StepArgument(
@@ -35,6 +37,7 @@ class PepperTestProjectTest : ShouldSpec({
                             finishedAt = Instant.parse("2021-08-01T00:00:01Z"),
                         ),
                         PepperTestStep(
+                            id = "step2",
                             name = "serialize PepperTestProject",
                             arguments = listOf(
                                 StepArgument(
@@ -49,6 +52,7 @@ class PepperTestProjectTest : ShouldSpec({
                             finishedAt = Instant.parse("2021-09-01T00:00:01Z"),
                         ),
                         PepperTestStep(
+                            id = "step3",
                             name = "assert PepperTestProject",
                             arguments = listOf(),
                             error = """
@@ -77,10 +81,12 @@ class PepperTestProjectTest : ShouldSpec({
               "version": 1,
               "scenarios": [
                 {
+                  "id": "scenario1",
                   "className": "io.github.pepper.reports.api.PepperTestProjectTest",
                   "name": "serialize PepperTestProject",
                   "steps": [
                     {
+                      "id": "step1",
                       "name": "create PepperTestProject",
                       "arguments": [
                         {
@@ -95,6 +101,7 @@ class PepperTestProjectTest : ShouldSpec({
                       "finishedAt": "2021-08-01T00:00:01Z"
                     },
                     {
+                      "id": "step2",
                       "name": "serialize PepperTestProject",
                       "arguments": [
                         {
@@ -109,6 +116,7 @@ class PepperTestProjectTest : ShouldSpec({
                       "finishedAt": "2021-09-01T00:00:01Z"
                     },
                     {
+                      "id": "step3",
                       "name": "assert PepperTestProject",
                       "arguments": [],
                       "error": "java.lang.AssertionError: boohoo\n    at io.github.pepper.reports.api.PepperTestProjectTest.serialize PepperTestProject(PepperTestProjectTest.kt:42)",
