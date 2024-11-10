@@ -9,7 +9,7 @@ import kotlinx.serialization.json.Json
 import java.io.File
 import java.nio.file.Paths
 
-class WriteToFilesReportListener(private val parentPath: String) : PepperReportListener {
+internal class WriteToFilesReportListener(private val parentPath: String) : PepperReportListener {
 
     init {
         val file = Paths.get(parentPath, PEPPER_JSON_FILE).toFile()
