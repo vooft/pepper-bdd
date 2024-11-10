@@ -1,7 +1,7 @@
 package io.github.vooft.pepper
 
 import io.github.vooft.pepper.helper.StepArgument
-import io.github.vooft.pepper.reports.builder.PepperReportBuilder
+import io.github.vooft.pepper.reports.builder.LowLevelReportListener
 import io.kotest.common.KotestInternal
 import io.kotest.core.names.TestName
 import io.kotest.core.source.sourceRef
@@ -25,8 +25,8 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
 
     val testName = step.toTestName(substitutions = arguments)
 
-    PepperReportBuilder.ifPresent {
-        addStep(testName.testName)
+    LowLevelReportListener.ifPresent {
+        startStep(testName.testName)
 
         arguments.forEach { addArgument(it.name, it.type, it.value.toString()) }
     }
@@ -42,14 +42,14 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
             withContext(CoroutineName("step: ${step.name}")) {
                 result = try {
                     val successResult = testBlock()
-                    PepperReportBuilder.ifPresent { addResult(successResult) }
+                    LowLevelReportListener.ifPresent { addResult(successResult) }
                     StepResult.Success(successResult)
                 } catch (t: Throwable) {
-                    PepperReportBuilder.ifPresent { addError(t) }
+                    LowLevelReportListener.ifPresent { addError(t) }
                     StepResult.Error(t)
                 }
 
-                PepperReportBuilder.ifPresent { finishStep() }
+                LowLevelReportListener.ifPresent { finishStep() }
                 result.value
             }
         }

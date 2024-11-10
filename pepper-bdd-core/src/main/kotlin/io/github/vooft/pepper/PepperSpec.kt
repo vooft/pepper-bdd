@@ -2,7 +2,7 @@ package io.github.vooft.pepper
 
 import io.github.vooft.pepper.dsl.PepperSpecDsl
 import io.github.vooft.pepper.dsl.PepperSpecDslImpl
-import io.github.vooft.pepper.reports.builder.PepperReportBuilder
+import io.github.vooft.pepper.reports.builder.LowLevelReportListener
 import io.kotest.core.names.TestName
 import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.spec.style.scopes.addContainer
@@ -20,14 +20,14 @@ open class PepperSpec(scenarioBlock: PepperSpecDsl.() -> Unit) : FunSpec() {
 
             addContainer(TestName("Scenario: ${scenario.key.title}"), false, null) {
                 val className = requireNotNull(this@PepperSpec::class.qualifiedName)
-                PepperReportBuilder.ifPresent { addScenario(className, scenario.key.title) }
+                LowLevelReportListener.ifPresent { startScenario(className, scenario.key.title) }
 
                 try {
                     withContext(CurrentTestScope(this)) {
                         scenario.scenarioBody()
                     }
                 } finally {
-                    PepperReportBuilder.ifPresent { finishScenario() }
+                    LowLevelReportListener.ifPresent { finishScenario() }
                 }
             }
         }

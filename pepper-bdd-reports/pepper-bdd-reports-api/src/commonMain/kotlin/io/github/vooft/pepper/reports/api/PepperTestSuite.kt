@@ -4,16 +4,12 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PepperProjectReport(val version: Int, val scenarios: List<PepperTestScenario>, val startedAt: Instant, val finishedAt: Instant)
-
-enum class PepperScenarioStatus {
-    PASSED,
-    FAILED
-}
+data class PepperTestSuite(val version: Int, val scenarios: List<String>, val startedAt: Instant, val finishedAt: Instant)
 
 @Serializable
 data class PepperTestScenario(
     val id: String,
+    val version: Int,
     val className: String,
     val name: String,
     val steps: List<PepperTestStep>,
