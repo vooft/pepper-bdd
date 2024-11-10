@@ -8,44 +8,43 @@ import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
 import org.junit.jupiter.api.Assertions.assertEquals
 import java.io.File
 
-class PepperCompilerTest :
-    FunSpec({
-        test("single scenario") {
-            val result = compile(
-                sourceFiles = sharedSourceFiles + SourceFile.fromPath(
-                    File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/SimplePepperSpec.kt")
-                )
+class PepperCompilerTest : FunSpec({
+    test("single scenario") {
+        val result = compile(
+            sourceFiles = sharedSourceFiles + SourceFile.fromPath(
+                File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/SimplePepperSpec.kt")
             )
+        )
 
-            println(result.generatedFiles.joinToString("\n"))
+        println(result.generatedFiles.joinToString("\n"))
 
-            assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
-        }
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
 
-        test("two scenarios") {
-            val result = compile(
-                sourceFiles = sharedSourceFiles + SourceFile.fromPath(
-                    File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/TwoScenariosSpec.kt")
-                )
+    test("two scenarios") {
+        val result = compile(
+            sourceFiles = sharedSourceFiles + SourceFile.fromPath(
+                File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/TwoScenariosSpec.kt")
             )
+        )
 
-            println(result.generatedFiles.joinToString("\n"))
+        println(result.generatedFiles.joinToString("\n"))
 
-            assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
-        }
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
 
-        test("scenario with examples") {
-            val result = compile(
-                sourceFiles = sharedSourceFiles + SourceFile.fromPath(
-                    File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/ExamplesSpec.kt")
-                )
+    test("scenario with examples") {
+        val result = compile(
+            sourceFiles = sharedSourceFiles + SourceFile.fromPath(
+                File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/ExamplesSpec.kt")
             )
+        )
 
-            println(result.generatedFiles.joinToString("\n"))
+        println(result.generatedFiles.joinToString("\n"))
 
-            assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
-        }
-    })
+        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+    }
+})
 
 private val sharedSourceFiles = listOf(
     SourceFile.fromPath(
@@ -65,7 +64,15 @@ private val sharedSourceFiles = listOf(
     ),
     SourceFile.fromPath(
         File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/helper/PluginHelpers.kt")
-    )
+    ),
+    SourceFile.fromPath(
+        File("../pepper-bdd-reports/pepper-bdd-reports-builder/src/main/kotlin/io/github/vooft/pepper/reports/builder/BuilderElements.kt")
+    ),
+    SourceFile.fromPath(
+        File(
+            "../pepper-bdd-reports/pepper-bdd-reports-builder/src/main/kotlin/io/github/vooft/pepper/reports/builder/PepperReportBuilder.kt"
+        )
+    ),
 )
 
 fun compile(sourceFiles: List<SourceFile>, plugin: CompilerPluginRegistrar = PepperBddComponentRegistrar()): JvmCompilationResult =

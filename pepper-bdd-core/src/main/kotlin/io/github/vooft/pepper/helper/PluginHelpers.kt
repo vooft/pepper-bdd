@@ -6,9 +6,11 @@ import io.github.vooft.pepper.dsl.PepperSpecDslImpl
 import io.github.vooft.pepper.dsl.ScenarioDsl
 import io.github.vooft.pepper.testContainer
 
-internal suspend fun <R> ScenarioDsl.StepContainer(id: String, block: suspend () -> R, arguments: Map<String, Any?>): R =
+internal suspend fun <R> ScenarioDsl.StepContainer(id: String, block: suspend () -> R, arguments: List<StepArgument>): R =
     testContainer(id = id, testBlock = block, arguments = arguments)
 
 internal fun PepperSpecDsl.addStep(scenarioTitle: String, stepId: String, prefix: String, stepName: String) {
     (this as PepperSpecDslImpl).addStep(scenarioTitle, StepIdentifier(id = stepId, prefix = prefix, name = stepName))
 }
+
+internal data class StepArgument(val name: String, val type: String, val value: Any?)

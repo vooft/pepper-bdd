@@ -40,6 +40,13 @@ suspend fun <T> `compare result is '{expected}'`(compareResult: CompareResult<T>
     }
 }
 
+data class Holder<T>(val value: T)
+
+@Step
+suspend fun <T> `deep nested compare result is '{expected}'`(compareResult: Holder<Holder<CompareResult<T>>>, expected: Boolean) {
+    `compare result is '{expected}'`(compareResult.value.value, expected)
+}
+
 @Step
 suspend fun `multiply {number} by two`(number: Int): Int {
     delay(1)

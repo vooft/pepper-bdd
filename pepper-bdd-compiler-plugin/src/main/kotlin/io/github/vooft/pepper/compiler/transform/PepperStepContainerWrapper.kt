@@ -26,14 +26,15 @@ import org.jetbrains.kotlin.ir.expressions.impl.IrGetValueImpl
 import org.jetbrains.kotlin.ir.expressions.impl.IrVarargImpl
 import org.jetbrains.kotlin.ir.symbols.impl.IrVariableSymbolImpl
 import org.jetbrains.kotlin.ir.types.classFqName
+import org.jetbrains.kotlin.ir.types.defaultType
 import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.types.makeNullable
 import org.jetbrains.kotlin.ir.types.typeWith
+import org.jetbrains.kotlin.ir.util.constructors
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.isVararg
 import org.jetbrains.kotlin.ir.util.toIrConst
 import org.jetbrains.kotlin.name.CallableId
-import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 import java.util.concurrent.atomic.AtomicInteger
@@ -113,7 +114,7 @@ internal class PepperStepContainerWrapper(
 
                 putValueArgument(index = 0, valueArgument = irString(step.id))
                 putValueArgument(index = 1, valueArgument = lambda)
-                putValueArgument(index = 2, valueArgument = valueArgumentsToMap(variables))
+                putValueArgument(index = 2, valueArgument = valueArgumentsToStepArgumentsList(variables))
             }
         }
     }
@@ -158,20 +159,16 @@ internal class PepperStepContainerWrapper(
     }
 
     /**
-     * Convert value arguments to mapOf("arg1" to arg1, "arg2" to arg2)
+     * Convert value arguments to listOf(StepArgument("arg1", "myType", arg1), ...)
      */
-    private fun valueArgumentsToMap(arguments: Map<String, IrVariable>): IrCallImpl {
+    private fun valueArgumentsToStepArgumentsList(arguments: Map<String, IrVariable>): IrCallImpl {
         val irBuiltIns = pluginContext.irBuiltIns
         val nullableAnyType = irBuiltIns.anyType.makeNullable()
         val stringType = irBuiltIns.stringType
 
-        val pairClassId = ClassId(FqName("kotlin"), Name.identifier("Pair"))
-        val argumentPairType = pluginContext.referenceClass(pairClassId)?.typeWith(stringType, nullableAnyType) ?: nullableAnyType
-        val pairConstructorCall = pluginContext.referenceConstructors(pairClassId)
-            .first { it.owner.valueParameters.size == 2 }
+        val stepArgumentConstructorCall = references.stepArgumentClassSymbol.constructors.single()
 
-        val mapOfCallableId = CallableId(FqName("kotlin.collections"), Name.identifier("mapOf"))
-        val mapOfSymbol = pluginContext.referenceFunctions(mapOfCallableId)
+        val listOfSymbol = pluginContext.referenceFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("listOf")))
             .first { it.owner.valueParameters.size == 1 && it.owner.valueParameters.first().isVararg }
         val argumentsMapType = irBuiltIns.mapClass.typeWith(stringType, nullableAnyType)
 
@@ -179,7 +176,7 @@ internal class PepperStepContainerWrapper(
             startOffset = UNDEFINED_OFFSET,
             endOffset = UNDEFINED_OFFSET,
             type = argumentsMapType,
-            symbol = mapOfSymbol,
+            symbol = listOfSymbol,
             typeArgumentsCount = 2,
             valueArgumentsCount = 1,
             origin = null,
@@ -193,30 +190,28 @@ internal class PepperStepContainerWrapper(
                 valueArgument = IrVarargImpl(
                     startOffset = UNDEFINED_OFFSET,
                     endOffset = UNDEFINED_OFFSET,
-                    type = irBuiltIns.arrayClass.typeWith(argumentPairType),
-                    varargElementType = argumentPairType,
-//                    elements = listOf()
+                    type = irBuiltIns.arrayClass.typeWith(references.stepArgumentClassSymbol.defaultType),
+                    varargElementType = references.stepArgumentClassSymbol.defaultType,
                     elements = arguments.map { (name, expression) ->
                         IrConstructorCallImpl(
                             startOffset = UNDEFINED_OFFSET,
                             endOffset = UNDEFINED_OFFSET,
-                            type = argumentPairType,
-                            symbol = pairConstructorCall,
-                            typeArgumentsCount = 2,
+                            type = references.stepArgumentClassSymbol.defaultType,
+                            symbol = stepArgumentConstructorCall,
+                            typeArgumentsCount = 0,
                             constructorTypeArgumentsCount = 0,
-                            valueArgumentsCount = 2,
+                            valueArgumentsCount = 3,
                         ).apply {
-                            putTypeArgument(0, stringType)
-                            putTypeArgument(1, nullableAnyType)
-
-                            debugLogger.log("Adding argument: $name = $expression")
                             putValueArgument(0, name.toIrConst(stringType))
+
+                            // TODO: improve generics type resolution
+                            putValueArgument(1, (expression.type.classFqName?.asString() ?: "null").toIrConst(stringType))
                             putValueArgument(
-                                1,
+                                2,
                                 IrGetValueImpl(
                                     startOffset = expression.startOffset,
                                     endOffset = expression.endOffset,
-                                    type = expression.type,
+                                    type = nullableAnyType,
                                     symbol = expression.symbol,
                                 )
                             )

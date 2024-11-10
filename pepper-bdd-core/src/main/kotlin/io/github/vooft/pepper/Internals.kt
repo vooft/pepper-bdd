@@ -1,5 +1,7 @@
 package io.github.vooft.pepper
 
+import io.github.vooft.pepper.helper.StepArgument
+import io.github.vooft.pepper.reports.builder.PepperReportBuilder
 import io.kotest.common.KotestInternal
 import io.kotest.core.names.TestName
 import io.kotest.core.source.sourceRef
@@ -13,20 +15,25 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
 @OptIn(KotestInternal::class)
-internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, arguments: Map<String, Any?>): R {
-    val remainingSteps = requireNotNull(coroutineContext[PepperRemainingSteps]) { "Remaining steps are missing in the context" }.steps
-    while (remainingSteps.isNotEmpty() && remainingSteps.first().id != id) {
-        remainingSteps.removeFirst()
-    }
+internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, arguments: List<StepArgument>): R {
+    val step = retrieveRemainingSteps(id)
+        .takeIf { it.isNotEmpty() }
+        ?.removeFirst()
+        ?: error("Step $id not found in the remaining steps")
 
-    val step = remainingSteps.takeIf { it.isNotEmpty() }?.removeFirst() ?: error("Step $id not found in the remaining steps")
-
-    val currentScope = requireNotNull(coroutineContext[CurrentTestScope]) { "Test scope is missing in the context" }.scope
     lateinit var result: StepResult<R>
 
-    currentScope.registerTestCase(
+    val testName = step.toTestName(substitutions = arguments)
+
+    PepperReportBuilder.ifPresent {
+        addStep(testName.testName)
+
+        arguments.forEach { addArgument(it.name, it.type, it.value.toString()) }
+    }
+
+    currentTestScope().registerTestCase(
         NestedTest(
-            name = step.toTestName(substitutions = arguments),
+            name = testName,
             disabled = false,
             config = null,
             type = Test,
@@ -34,11 +41,15 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
         ) {
             withContext(CoroutineName("step: ${step.name}")) {
                 result = try {
-                    StepResult.Success(testBlock())
+                    val successResult = testBlock()
+                    PepperReportBuilder.ifPresent { addResult(successResult) }
+                    StepResult.Success(successResult)
                 } catch (t: Throwable) {
+                    PepperReportBuilder.ifPresent { addError(t) }
                     StepResult.Error(t)
                 }
 
+                PepperReportBuilder.ifPresent { finishStep() }
                 result.value
             }
         }
@@ -46,6 +57,17 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
 
     return result.value
 }
+
+private suspend fun retrieveRemainingSteps(currentStepId: String): MutableList<StepIdentifier> {
+    val remainingSteps = requireNotNull(coroutineContext[PepperRemainingSteps]) { "Remaining steps are missing in the context" }.steps
+    while (remainingSteps.isNotEmpty() && remainingSteps.first().id != currentStepId) {
+        remainingSteps.removeFirst()
+    }
+
+    return remainingSteps
+}
+
+private suspend fun currentTestScope() = requireNotNull(coroutineContext[CurrentTestScope]) { "Test scope is missing in the context" }.scope
 
 @OptIn(KotestInternal::class)
 internal suspend fun registerRemainingSteps() {
@@ -55,7 +77,7 @@ internal suspend fun registerRemainingSteps() {
     for (remainingStep in remainingSteps) {
         currentScope.registerTestCase(
             NestedTest(
-                name = remainingStep.toTestName(mapOf()),
+                name = remainingStep.toTestName(listOf()),
                 disabled = true,
                 config = null,
                 type = Test,
@@ -66,8 +88,8 @@ internal suspend fun registerRemainingSteps() {
 }
 
 internal data class StepIdentifier(val id: String, val prefix: String, val name: String) {
-    fun toTestName(substitutions: Map<String, Any?>): TestName {
-        val substituted = substitutions.entries.fold(name) { acc, (key, value) -> acc.replace("{$key}", value.toString()) }
+    fun toTestName(substitutions: List<StepArgument>): TestName {
+        val substituted = substitutions.fold(name) { acc, arg -> acc.replace("{${arg.name}}", arg.value.toString()) }
         return TestName("$prefix: $substituted")
     }
 }

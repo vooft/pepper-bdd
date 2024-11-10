@@ -10,13 +10,13 @@ repositories {
 
 dependencies {
     // kotlin
-    implementation("org.jetbrains.kotlin:kotlin-gradle-plugin:${libs.versions.kotlin.get()}")
+    implementation(libs.gradle.plugin.kotlin)
 
     // detekt / ktlint
-    implementation("io.gitlab.arturbosch.detekt:detekt-gradle-plugin:${libs.plugins.detekt.get().version}")
-    implementation("org.jmailen.gradle:kotlinter-gradle:${libs.plugins.ktlint.get().version}")
+    implementation(libs.gradle.plugin.detekt)
+    implementation(libs.gradle.plugin.ktlint)
 
     // publishing
-    implementation("org.jetbrains.dokka:dokka-gradle-plugin:${libs.plugins.dokka.get().version}")
-    implementation("com.vanniktech:gradle-maven-publish-plugin:${libs.plugins.maven.central.publish.get().version}")
+    implementation(libs.gradle.plugin.dokka)
+    implementation(libs.gradle.plugin.maven.central.publish)
 }
