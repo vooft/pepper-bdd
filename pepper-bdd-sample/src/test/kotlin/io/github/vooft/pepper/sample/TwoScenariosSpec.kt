@@ -5,29 +5,28 @@ import io.github.vooft.pepper.dsl.Given
 import io.github.vooft.pepper.dsl.Then
 import io.github.vooft.pepper.dsl.When
 
-class TwoScenariosSpec :
-    PepperSpec({
-        Scenario("first scenario") {
-            Given
-            val firstRandom = `generate random string`("first")
-            val secondRandom = `generate random string`("second")
+class TwoScenariosSpec : PepperSpec({
+    Scenario("first scenario") {
+        Given
+        val firstRandom = `generate random string`("first")
+        val secondRandom = `generate random string`("second")
 
-            When
-            val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        When
+        val compareResult = `two strings are compared`(firstRandom, secondRandom)
 
-            Then
-            `compare result is '{expected}'`(compareResult, false)
-        }
+        Then
+        `compare result is '{expected}'`(compareResult, false)
+    }
 
-        Scenario("second scenario") {
-            Given
-            val firstRandom = `generate random string`("first")
+    Scenario("second scenario") {
+        Given
+        val firstRandom = `generate random string`("first")
 
-            When
-            val secondRandom = `generate random string`("second")
-            val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        When
+        val secondRandom = `generate random string`("second")
+        val compareResult = `two strings are compared`(firstRandom, secondRandom)
 
-            Then
-            `compare result is '{expected}'`(compareResult, false)
-        }
-    })
+        Then
+        `compare result is '{expected}'`(compareResult, false)
+    }
+})
