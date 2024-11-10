@@ -70,7 +70,17 @@ private val sharedSourceFiles = listOf(
     ),
     SourceFile.fromPath(
         File(
-            "../pepper-bdd-reports/pepper-bdd-reports-builder/src/main/kotlin/io/github/vooft/pepper/reports/builder/PepperReportBuilder.kt"
+            "../pepper-bdd-reports/pepper-bdd-reports-api/src/commonMain/kotlin/io/github/vooft/pepper/reports/api/PepperScenarioStatus.kt"
+        )
+    ),
+    SourceFile.fromPath(
+        File(
+            "../pepper-bdd-reports/pepper-bdd-reports-builder/src/main/kotlin/io/github/vooft/pepper/reports/builder/PepperReportListenerElement.kt"
+        )
+    ),
+    SourceFile.fromPath(
+        File(
+            "../pepper-bdd-reports/pepper-bdd-reports-builder/src/main/kotlin/io/github/vooft/pepper/reports/builder/LowLevelReportListener.kt"
         )
     ),
 )
