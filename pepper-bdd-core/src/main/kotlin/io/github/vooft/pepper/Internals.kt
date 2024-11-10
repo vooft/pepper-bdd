@@ -1,5 +1,6 @@
 package io.github.vooft.pepper
 
+import io.github.vooft.pepper.helper.StepArgument
 import io.github.vooft.pepper.reports.builder.PepperReportBuilder
 import io.kotest.common.KotestInternal
 import io.kotest.core.names.TestName
@@ -14,7 +15,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
 @OptIn(KotestInternal::class)
-internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, arguments: Map<String, Any?>): R {
+internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, arguments: List<StepArgument>): R {
     val step = retrieveRemainingSteps(id)
         .takeIf { it.isNotEmpty() }
         ?.removeFirst()
@@ -27,9 +28,7 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
     PepperReportBuilder.ifPresent {
         addStep(testName.testName)
 
-        arguments.forEach { (name, value) ->
-            addArgument(name, "bla", value.toString())
-        }
+        arguments.forEach { addArgument(it.name, it.type, it.value.toString()) }
     }
 
     currentTestScope().registerTestCase(
@@ -78,7 +77,7 @@ internal suspend fun registerRemainingSteps() {
     for (remainingStep in remainingSteps) {
         currentScope.registerTestCase(
             NestedTest(
-                name = remainingStep.toTestName(mapOf()),
+                name = remainingStep.toTestName(listOf()),
                 disabled = true,
                 config = null,
                 type = Test,
@@ -89,8 +88,8 @@ internal suspend fun registerRemainingSteps() {
 }
 
 internal data class StepIdentifier(val id: String, val prefix: String, val name: String) {
-    fun toTestName(substitutions: Map<String, Any?>): TestName {
-        val substituted = substitutions.entries.fold(name) { acc, (key, value) -> acc.replace("{$key}", value.toString()) }
+    fun toTestName(substitutions: List<StepArgument>): TestName {
+        val substituted = substitutions.fold(name) { acc, arg -> acc.replace("{${arg.name}}", arg.value.toString()) }
         return TestName("$prefix: $substituted")
     }
 }

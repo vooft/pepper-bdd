@@ -50,6 +50,15 @@ class PepperReferences(pluginContext: IrPluginContext) {
         )
     ).single().owner
 
+    val stepArgumentClassSymbol = requireNotNull(
+        pluginContext.referenceClass(
+            ClassId(
+                packageFqName = FqName("io.github.vooft.pepper.helper"),
+                topLevelName = Name.identifier("StepArgument")
+            )
+        )
+    )
+
     val prefixGiven = pluginContext.findStep("Given")
     val prefixWhen = pluginContext.findStep("When")
     val prefixThen = pluginContext.findStep("Then")
