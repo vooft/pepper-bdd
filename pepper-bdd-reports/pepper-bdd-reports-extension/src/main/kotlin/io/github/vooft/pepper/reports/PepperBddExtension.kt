@@ -1,4 +1,4 @@
-package io.github.vooft.pepper.reports.kotest
+package io.github.vooft.pepper.reports
 
 import io.github.vooft.pepper.reports.api.PepperProject
 import io.github.vooft.pepper.reports.api.PepperScenarioStatus
@@ -12,11 +12,8 @@ import io.kotest.core.extensions.ProjectExtension
 import io.kotest.core.project.ProjectContext
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.toKotlinInstant
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-import java.io.File
 
-class PepperBddExtension : ProjectExtension {
+class PepperBddExtension(private val callback: suspend (PepperProject) -> Unit) : ProjectExtension {
     override suspend fun interceptProject(context: ProjectContext, callback: suspend (ProjectContext) -> Unit) {
         val builder = PepperReportBuilder()
         try {
@@ -25,13 +22,7 @@ class PepperBddExtension : ProjectExtension {
             }
         } finally {
             builder.finishProject()
-            println("\n\n\n\n\n")
-            println(Json.encodeToString(builder.toReport()))
-            println("\n\n\n\n\n")
-            println(File("pepper-report.json").absolutePath)
-            System.getProperties().forEach { t, u ->
-                println("property: $t -> $u")
-            }
+            callback(builder.toReport())
         }
     }
 }

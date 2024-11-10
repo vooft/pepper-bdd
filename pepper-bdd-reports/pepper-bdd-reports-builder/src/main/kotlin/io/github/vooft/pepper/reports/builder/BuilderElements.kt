@@ -4,7 +4,7 @@ import io.github.vooft.pepper.reports.builder.BuilderElements.PepperScenarioStat
 import io.github.vooft.pepper.reports.builder.BuilderElements.PepperScenarioStatus.PASSED
 import java.time.Instant
 
-internal object BuilderElements {
+object BuilderElements {
     data class PepperTestProject(
         val scenarios: MutableList<PepperTestScenario> = mutableListOf(),
         val startedAt: Instant = Instant.now(),

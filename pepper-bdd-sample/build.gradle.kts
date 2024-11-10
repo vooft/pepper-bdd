@@ -8,8 +8,9 @@ plugins {
 
 dependencies {
     testImplementation(project(":pepper-bdd-core"))
-    testImplementation(project(":pepper-bdd-reports:pepper-bdd-reports-builder"))
+    testImplementation(project(":pepper-bdd-reports:pepper-bdd-reports-extension"))
     testImplementation(libs.kotest.runner.jvm)
+    testImplementation(libs.kotlinx.serialization.json)
 }
 
 configurations.configureEach {

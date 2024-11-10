@@ -6,7 +6,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.coroutineContext
 
 class PepperReportBuilder {
-    internal val project = BuilderElements.PepperTestProject()
+    val project = BuilderElements.PepperTestProject()
 
     fun addScenario(className: String, name: String) {
         val scenario = BuilderElements.PepperTestScenario(className, name)
