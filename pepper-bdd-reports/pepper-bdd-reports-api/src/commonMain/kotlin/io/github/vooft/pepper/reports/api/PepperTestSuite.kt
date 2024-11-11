@@ -4,7 +4,9 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PepperTestSuite(val version: Int, val scenarios: List<String>, val startedAt: Instant, val finishedAt: Instant)
+data class PepperTestSuite(val version: Int, val scenarios: List<String>, val startedAt: Instant, val finishedAt: Instant) {
+    companion object
+}
 
 @Serializable
 data class PepperTestScenario(
@@ -16,7 +18,9 @@ data class PepperTestScenario(
     val status: PepperScenarioStatus,
     val startedAt: Instant,
     val finishedAt: Instant
-)
+) {
+    companion object
+}
 
 @Serializable
 data class PepperTestStep(
@@ -29,5 +33,9 @@ data class PepperTestStep(
     val finishedAt: Instant
 ) {
     @Serializable
-    data class StepArgument(val name: String, val type: String, val value: String)
+    data class StepArgument(val name: String, val type: String, val value: String) {
+        companion object
+    }
+
+    companion object
 }
