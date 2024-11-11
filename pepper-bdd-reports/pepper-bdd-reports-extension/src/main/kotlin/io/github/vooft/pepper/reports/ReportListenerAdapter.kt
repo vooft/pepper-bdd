@@ -43,7 +43,7 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
     }
 
     override suspend fun addError(error: Throwable) {
-        scenario.steps.last().error = error.message
+        scenario.steps.last().error = error.stackTraceToString()
     }
 
     override suspend fun addResult(result: Any?) {
