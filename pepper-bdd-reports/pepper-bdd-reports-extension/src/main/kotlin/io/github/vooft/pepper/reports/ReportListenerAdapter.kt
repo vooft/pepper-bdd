@@ -36,9 +36,10 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
         scenarioIdsMutex.withLock { scenarioIds.add(scenario.id) }
     }
 
-    override suspend fun startStep(prefix: String, name: String) {
+    override suspend fun startStep(index: Int, prefix: String, name: String) {
         scenario.steps.add(
             PepperStepBuilder(
+                index = index,
                 name = name,
                 prefix = when (prefix.uppercase()) {
                     "GIVEN" -> PepperStepPrefix.GIVEN
@@ -86,6 +87,7 @@ private fun PepperScenarioBuilder.toReport() = PepperTestScenario(
 
 private fun PepperStepBuilder.toReport() = PepperTestStep(
     id = id,
+    index = index,
     prefix = prefix,
     name = name,
     arguments = arguments.map { it.toReport() }.toMutableList(),

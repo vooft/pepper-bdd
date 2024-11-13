@@ -21,6 +21,7 @@ class PepperTestScenarioTest : ShouldSpec({
             steps = listOf(
                 PepperTestStep(
                     id = "step1",
+                    index = 0,
                     prefix = GIVEN,
                     name = "create PepperTestProject",
                     arguments = listOf(
@@ -37,6 +38,7 @@ class PepperTestScenarioTest : ShouldSpec({
                 ),
                 PepperTestStep(
                     id = "step2",
+                    index = 1,
                     prefix = WHEN,
                     name = "serialize PepperTestProject",
                     arguments = listOf(
@@ -53,6 +55,7 @@ class PepperTestScenarioTest : ShouldSpec({
                 ),
                 PepperTestStep(
                     id = "step3",
+                    index = 2,
                     prefix = THEN,
                     name = "assert PepperTestProject",
                     arguments = listOf(),
@@ -84,6 +87,7 @@ class PepperTestScenarioTest : ShouldSpec({
             "steps": [
               {
                 "id": "step1",
+                "index": 0,
                 "prefix": "GIVEN",
                 "name": "create PepperTestProject",
                 "arguments": [
@@ -100,6 +104,7 @@ class PepperTestScenarioTest : ShouldSpec({
               },
               {
                 "id": "step2",
+                "index": 1,
                 "prefix": "WHEN",
                 "name": "serialize PepperTestProject",
                 "arguments": [
@@ -116,6 +121,7 @@ class PepperTestScenarioTest : ShouldSpec({
               },
               {
                 "id": "step3",
+                "index": 2,
                 "prefix": "THEN",
                 "name": "assert PepperTestProject",
                 "arguments": [],

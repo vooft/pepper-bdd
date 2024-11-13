@@ -16,6 +16,7 @@ data class PepperScenarioBuilder(
 }
 
 data class PepperStepBuilder(
+    val index: Int,
     val prefix: PepperStepPrefix,
     val name: String,
     val arguments: MutableList<StepArgument> = mutableListOf(),

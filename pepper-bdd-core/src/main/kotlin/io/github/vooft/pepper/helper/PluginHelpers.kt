@@ -25,7 +25,7 @@ internal fun PepperSpecDsl.addStep(
             id = stepId,
             prefix = prefix,
             indexInGroup = indexInGroup,
-            indexInTest = indexInTest,
+            indexInScenario = indexInTest,
             totalStepsInTest = totalStepsInTest,
             name = stepName
         )

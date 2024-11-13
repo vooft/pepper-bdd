@@ -26,7 +26,7 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
     val substituted = step.substitute(arguments)
 
     LowLevelReportListener.ifPresent {
-        startStep(step.prefix, substituted)
+        startStep(step.indexInScenario, step.prefix, substituted)
 
         arguments.forEach { addArgument(it.name, it.type, it.value.toString()) }
     }
@@ -91,11 +91,11 @@ internal data class StepIdentifier(
     val id: String,
     val prefix: String,
     val indexInGroup: Int,
-    val indexInTest: Int,
+    val indexInScenario: Int,
     val totalStepsInTest: Int,
     val name: String
 ) {
-    fun toTestName(substituted: String): TestName = TestName("${indexInTest + 1}. ${replacedPrefix.capitalized}: $substituted")
+    fun toTestName(substituted: String): TestName = TestName("${indexInScenario + 1}. ${replacedPrefix.capitalized}: $substituted")
 
     private val replacedPrefix
         get() = when (indexInGroup) {
