@@ -13,8 +13,8 @@ internal class WriteToFilesReportListener(private val parentPath: String) : Pepp
 
     init {
         val file = Paths.get(parentPath, PEPPER_JSON_FILE).toFile()
-        require(!file.exists()) {
-            "File $parentPath/$PEPPER_JSON_FILE already exists"
+        if (file.parentFile.exists()) {
+            file.parentFile.deleteRecursively()
         }
     }
 

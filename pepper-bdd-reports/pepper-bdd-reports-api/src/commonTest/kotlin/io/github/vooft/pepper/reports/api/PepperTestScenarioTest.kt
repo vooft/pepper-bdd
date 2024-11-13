@@ -1,5 +1,8 @@
 package io.github.vooft.pepper.reports.api
 
+import io.github.vooft.pepper.reports.api.PepperStepPrefix.GIVEN
+import io.github.vooft.pepper.reports.api.PepperStepPrefix.THEN
+import io.github.vooft.pepper.reports.api.PepperStepPrefix.WHEN
 import io.github.vooft.pepper.reports.api.PepperTestStep.StepArgument
 import io.github.vooft.pepper.reports.api.PepperTestStep.StepError
 import io.kotest.assertions.json.shouldEqualJson
@@ -18,6 +21,7 @@ class PepperTestScenarioTest : ShouldSpec({
             steps = listOf(
                 PepperTestStep(
                     id = "step1",
+                    prefix = GIVEN,
                     name = "create PepperTestProject",
                     arguments = listOf(
                         StepArgument(
@@ -33,6 +37,7 @@ class PepperTestScenarioTest : ShouldSpec({
                 ),
                 PepperTestStep(
                     id = "step2",
+                    prefix = WHEN,
                     name = "serialize PepperTestProject",
                     arguments = listOf(
                         StepArgument(
@@ -48,6 +53,7 @@ class PepperTestScenarioTest : ShouldSpec({
                 ),
                 PepperTestStep(
                     id = "step3",
+                    prefix = THEN,
                     name = "assert PepperTestProject",
                     arguments = listOf(),
                     error = StepError(
@@ -78,6 +84,7 @@ class PepperTestScenarioTest : ShouldSpec({
             "steps": [
               {
                 "id": "step1",
+                "prefix": "GIVEN",
                 "name": "create PepperTestProject",
                 "arguments": [
                   {
@@ -93,6 +100,7 @@ class PepperTestScenarioTest : ShouldSpec({
               },
               {
                 "id": "step2",
+                "prefix": "WHEN",
                 "name": "serialize PepperTestProject",
                 "arguments": [
                   {
@@ -108,6 +116,7 @@ class PepperTestScenarioTest : ShouldSpec({
               },
               {
                 "id": "step3",
+                "prefix": "THEN",
                 "name": "assert PepperTestProject",
                 "arguments": [],
                 "error": {

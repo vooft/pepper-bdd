@@ -26,7 +26,7 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
     val testName = step.toTestName(substitutions = arguments)
 
     LowLevelReportListener.ifPresent {
-        startStep(testName.testName)
+        startStep(step.prefix, testName.testName)
 
         arguments.forEach { addArgument(it.name, it.type, it.value.toString()) }
     }
@@ -90,7 +90,7 @@ internal suspend fun registerRemainingSteps() {
 internal data class StepIdentifier(val id: String, val prefix: String, val name: String) {
     fun toTestName(substitutions: List<StepArgument>): TestName {
         val substituted = substitutions.fold(name) { acc, arg -> acc.replace("{${arg.name}}", arg.value.toString()) }
-        return TestName("$prefix: $substituted")
+        return TestName(prefix = prefix, name = substituted, defaultAffixes = false)
     }
 }
 

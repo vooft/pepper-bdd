@@ -4,7 +4,7 @@ import kotlin.coroutines.coroutineContext
 
 interface LowLevelReportListener {
     suspend fun startScenario(className: String, name: String)
-    suspend fun startStep(name: String)
+    suspend fun startStep(prefix: String, name: String)
     suspend fun addArgument(name: String, typeName: String, value: String)
     suspend fun addError(error: Throwable)
     suspend fun addResult(result: Any?)

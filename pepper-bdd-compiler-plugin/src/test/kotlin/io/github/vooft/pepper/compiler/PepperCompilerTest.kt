@@ -75,6 +75,11 @@ private val sharedSourceFiles = listOf(
     ),
     SourceFile.fromExisting(
         File(
+            "../pepper-bdd-reports/pepper-bdd-reports-api/src/commonMain/kotlin/io/github/vooft/pepper/reports/api/PepperStepPrefix.kt"
+        )
+    ),
+    SourceFile.fromExisting(
+        File(
             "../pepper-bdd-reports/pepper-bdd-reports-builder/src/main/kotlin/io/github/vooft/pepper/reports/builder/PepperReportListenerElement.kt"
         )
     ),
