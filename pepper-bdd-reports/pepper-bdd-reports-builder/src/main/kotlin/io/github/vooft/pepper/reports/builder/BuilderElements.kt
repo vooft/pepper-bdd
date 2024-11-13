@@ -1,5 +1,6 @@
 package io.github.vooft.pepper.reports.builder
 
+import io.github.vooft.pepper.reports.api.PepperStepPrefix
 import java.security.MessageDigest
 import java.time.Instant
 
@@ -15,6 +16,8 @@ data class PepperScenarioBuilder(
 }
 
 data class PepperStepBuilder(
+    val index: Int,
+    val prefix: PepperStepPrefix,
     val name: String,
     val arguments: MutableList<StepArgument> = mutableListOf(),
     var result: String? = null,

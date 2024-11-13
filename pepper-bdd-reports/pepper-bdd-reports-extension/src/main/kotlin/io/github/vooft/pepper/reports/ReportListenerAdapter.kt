@@ -1,5 +1,6 @@
 package io.github.vooft.pepper.reports
 
+import io.github.vooft.pepper.reports.api.PepperStepPrefix
 import io.github.vooft.pepper.reports.api.PepperTestScenario
 import io.github.vooft.pepper.reports.api.PepperTestStep
 import io.github.vooft.pepper.reports.api.PepperTestStep.StepArgument
@@ -35,8 +36,19 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
         scenarioIdsMutex.withLock { scenarioIds.add(scenario.id) }
     }
 
-    override suspend fun startStep(name: String) {
-        scenario.steps.add(PepperStepBuilder(name))
+    override suspend fun startStep(index: Int, prefix: String, name: String) {
+        scenario.steps.add(
+            PepperStepBuilder(
+                index = index,
+                name = name,
+                prefix = when (prefix.uppercase()) {
+                    "GIVEN" -> PepperStepPrefix.GIVEN
+                    "WHEN" -> PepperStepPrefix.WHEN
+                    "THEN" -> PepperStepPrefix.THEN
+                    else -> error("Unknown prefix $prefix")
+                }
+            )
+        )
     }
 
     override suspend fun addArgument(name: String, typeName: String, value: String) {
@@ -75,6 +87,8 @@ private fun PepperScenarioBuilder.toReport() = PepperTestScenario(
 
 private fun PepperStepBuilder.toReport() = PepperTestStep(
     id = id,
+    index = index,
+    prefix = prefix,
     name = name,
     arguments = arguments.map { it.toReport() }.toMutableList(),
     result = result,

@@ -23,17 +23,17 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
 
     lateinit var result: StepResult<R>
 
-    val testName = step.toTestName(substitutions = arguments)
+    val substituted = step.substitute(arguments)
 
     LowLevelReportListener.ifPresent {
-        startStep(testName.testName)
+        startStep(step.indexInScenario, step.prefix, substituted)
 
         arguments.forEach { addArgument(it.name, it.type, it.value.toString()) }
     }
 
     currentTestScope().registerTestCase(
         NestedTest(
-            name = testName,
+            name = step.toTestName(substituted),
             disabled = false,
             config = null,
             type = Test,
@@ -77,7 +77,7 @@ internal suspend fun registerRemainingSteps() {
     for (remainingStep in remainingSteps) {
         currentScope.registerTestCase(
             NestedTest(
-                name = remainingStep.toTestName(listOf()),
+                name = remainingStep.toTestName(remainingStep.name),
                 disabled = true,
                 config = null,
                 type = Test,
@@ -87,12 +87,25 @@ internal suspend fun registerRemainingSteps() {
     }
 }
 
-internal data class StepIdentifier(val id: String, val prefix: String, val name: String) {
-    fun toTestName(substitutions: List<StepArgument>): TestName {
-        val substituted = substitutions.fold(name) { acc, arg -> acc.replace("{${arg.name}}", arg.value.toString()) }
-        return TestName("$prefix: $substituted")
-    }
+internal data class StepIdentifier(
+    val id: String,
+    val prefix: String,
+    val indexInGroup: Int,
+    val indexInScenario: Int,
+    val totalStepsInTest: Int,
+    val name: String
+) {
+    fun toTestName(substituted: String): TestName = TestName("${indexInScenario + 1}. ${replacedPrefix.capitalized}: $substituted")
+
+    private val replacedPrefix
+        get() = when (indexInGroup) {
+            0 -> prefix
+            else -> "AND"
+        }
 }
+
+private fun StepIdentifier.substitute(substitutions: List<StepArgument>) =
+    substitutions.fold(name) { acc, arg -> acc.replace("{${arg.name}}", arg.value.toString()) }
 
 private sealed class StepResult<R> {
     abstract val value: R
@@ -115,3 +128,10 @@ internal data class PepperRemainingSteps(val steps: MutableList<StepIdentifier>)
 
     override fun toString(): String = "RemainingSteps($steps)"
 }
+
+private val String.capitalized: String
+    get() {
+        val first = first().uppercase()
+        val rest = drop(1).lowercase()
+        return first + rest
+    }

@@ -13,6 +13,5 @@ value class ClassName(val name: String)
 enum class StepPrefix {
     GIVEN,
     WHEN,
-    THEN,
-    AND
+    THEN
 }

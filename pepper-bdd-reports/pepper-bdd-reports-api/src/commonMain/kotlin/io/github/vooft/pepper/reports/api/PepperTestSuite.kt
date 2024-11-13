@@ -26,6 +26,8 @@ data class PepperTestScenario(
 @Serializable
 data class PepperTestStep(
     val id: String,
+    val prefix: PepperStepPrefix,
+    val index: Int,
     val name: String,
     val arguments: List<StepArgument>,
     val result: String?,
