@@ -1,7 +1,7 @@
 package io.github.vooft.pepper.reports.api
 
-import io.github.vooft.pepper.reports.api.PepperScenarioStatus.PASSED
 import io.github.vooft.pepper.reports.api.PepperTestStep.StepArgument
+import io.github.vooft.pepper.reports.api.PepperTestStep.StepError
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.core.spec.style.ShouldSpec
 import kotlinx.datetime.Instant
@@ -50,16 +50,18 @@ class PepperTestScenarioTest : ShouldSpec({
                     id = "step3",
                     name = "assert PepperTestProject",
                     arguments = listOf(),
-                    error = """
-                                java.lang.AssertionError: boohoo
-                                    at io.github.pepper.reports.api.PepperTestProjectTest.serialize PepperTestProject(PepperTestProjectTest.kt:42)
-                    """.trimIndent(),
+                    error = StepError(
+                        message = "boohoo",
+                        stacktrace = """
+                            java.lang.AssertionError: boohoo
+                                at io.github.pepper.reports.api.PepperTestProjectTest.serialize PepperTestProject(PepperTestProjectTest.kt:42)
+                        """.trimIndent()
+                    ),
                     result = null,
                     startedAt = Instant.parse("2021-10-01T00:00:00Z"),
                     finishedAt = Instant.parse("2021-10-01T00:00:01Z"),
                 )
             ),
-            status = PASSED,
             startedAt = Instant.parse("2021-08-01T00:00:00Z"),
             finishedAt = Instant.parse("2021-08-01T00:00:01Z"),
         )
@@ -108,13 +110,15 @@ class PepperTestScenarioTest : ShouldSpec({
                 "id": "step3",
                 "name": "assert PepperTestProject",
                 "arguments": [],
-                "error": "java.lang.AssertionError: boohoo\n    at io.github.pepper.reports.api.PepperTestProjectTest.serialize PepperTestProject(PepperTestProjectTest.kt:42)",
+                "error": {
+                  "message": "boohoo",
+                  "stacktrace": "java.lang.AssertionError: boohoo\n    at io.github.pepper.reports.api.PepperTestProjectTest.serialize PepperTestProject(PepperTestProjectTest.kt:42)"
+                },
                 "result": null,
                 "startedAt": "2021-10-01T00:00:00Z",
                 "finishedAt": "2021-10-01T00:00:01Z"
               }
             ],
-            "status": "PASSED",
             "startedAt": "2021-08-01T00:00:00Z",
             "finishedAt": "2021-08-01T00:00:01Z"
           }

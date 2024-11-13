@@ -7,6 +7,7 @@ import io.github.vooft.pepper.reports.api.PepperTestSuite
 import io.github.vooft.pepper.reports.builder.LowLevelReportListener
 import io.github.vooft.pepper.reports.builder.PepperScenarioBuilder
 import io.github.vooft.pepper.reports.builder.PepperStepBuilder
+import io.github.vooft.pepper.reports.builder.PepperStepBuilder.StepError
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.toKotlinInstant
@@ -43,7 +44,7 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
     }
 
     override suspend fun addError(error: Throwable) {
-        scenario.steps.last().error = error.stackTraceToString()
+        scenario.steps.last().error = StepError(error.message ?: "Unknown error", error.stackTraceToString())
     }
 
     override suspend fun addResult(result: Any?) {
@@ -68,7 +69,6 @@ private fun PepperScenarioBuilder.toReport() = PepperTestScenario(
     className = className,
     name = name,
     steps = steps.map { it.toReport() }.toMutableList(),
-    status = status,
     startedAt = startedAt.toKotlinInstant(),
     finishedAt = requireNotNull(finishedAt) { "Missing finishedAt at scenario $name" }.toKotlinInstant()
 )
@@ -78,7 +78,7 @@ private fun PepperStepBuilder.toReport() = PepperTestStep(
     name = name,
     arguments = arguments.map { it.toReport() }.toMutableList(),
     result = result,
-    error = error,
+    error = error?.let { PepperTestStep.StepError(it.message, it.stacktrace) },
     startedAt = startedAt.toKotlinInstant(),
     finishedAt = requireNotNull(finishedAt) { "Missing finishedAt at step $name" }.toKotlinInstant()
 )
