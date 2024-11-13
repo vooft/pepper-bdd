@@ -17,7 +17,7 @@ kotest-assertions-json = { module = "io.kotest:kotest-assertions-json", version.
 
 kotlin-gradle-plugin-api = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin-api", version.ref = "kotlin" }
 kotlin-compiler-embeddable = { module = "org.jetbrains.kotlin:kotlin-compiler-embeddable", version.ref = "kotlin" }
-kotlin-compile-testing = { module = "dev.zacsweers.kctfork:core", version = "0.5.1" }
+kotlin-compile-testing = { module = "dev.zacsweers.kctfork:core", version = "0.6.0" }
 
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.7.3" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version = "0.6.1" }

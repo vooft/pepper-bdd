@@ -11,7 +11,7 @@ import java.io.File
 class PepperCompilerTest : FunSpec({
     test("single scenario") {
         val result = compile(
-            sourceFiles = sharedSourceFiles + SourceFile.fromPath(
+            sourceFiles = sharedSourceFiles + SourceFile.fromExisting(
                 File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/SimplePepperSpec.kt")
             )
         )
@@ -23,7 +23,7 @@ class PepperCompilerTest : FunSpec({
 
     test("two scenarios") {
         val result = compile(
-            sourceFiles = sharedSourceFiles + SourceFile.fromPath(
+            sourceFiles = sharedSourceFiles + SourceFile.fromExisting(
                 File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/TwoScenariosSpec.kt")
             )
         )
@@ -35,7 +35,7 @@ class PepperCompilerTest : FunSpec({
 
     test("scenario with examples") {
         val result = compile(
-            sourceFiles = sharedSourceFiles + SourceFile.fromPath(
+            sourceFiles = sharedSourceFiles + SourceFile.fromExisting(
                 File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/ExamplesSpec.kt")
             )
         )
@@ -47,38 +47,38 @@ class PepperCompilerTest : FunSpec({
 })
 
 private val sharedSourceFiles = listOf(
-    SourceFile.fromPath(
+    SourceFile.fromExisting(
         File("../pepper-bdd-sample/src/test/kotlin/io/github/vooft/pepper/sample/Steps.kt")
     ),
-    SourceFile.fromPath(
+    SourceFile.fromExisting(
         File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/dsl/PepperSpecDsl.kt")
     ),
-    SourceFile.fromPath(
+    SourceFile.fromExisting(
         File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/dsl/PepperSpecDslImpl.kt")
     ),
-    SourceFile.fromPath(
+    SourceFile.fromExisting(
         File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/PepperSpec.kt")
     ),
-    SourceFile.fromPath(
+    SourceFile.fromExisting(
         File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/Internals.kt")
     ),
-    SourceFile.fromPath(
+    SourceFile.fromExisting(
         File("../pepper-bdd-core/src/main/kotlin/io/github/vooft/pepper/helper/PluginHelpers.kt")
     ),
-    SourceFile.fromPath(
+    SourceFile.fromExisting(
         File("../pepper-bdd-reports/pepper-bdd-reports-builder/src/main/kotlin/io/github/vooft/pepper/reports/builder/BuilderElements.kt")
     ),
-    SourceFile.fromPath(
+    SourceFile.fromExisting(
         File(
             "../pepper-bdd-reports/pepper-bdd-reports-api/src/commonMain/kotlin/io/github/vooft/pepper/reports/api/PepperScenarioStatus.kt"
         )
     ),
-    SourceFile.fromPath(
+    SourceFile.fromExisting(
         File(
             "../pepper-bdd-reports/pepper-bdd-reports-builder/src/main/kotlin/io/github/vooft/pepper/reports/builder/PepperReportListenerElement.kt"
         )
     ),
-    SourceFile.fromPath(
+    SourceFile.fromExisting(
         File(
             "../pepper-bdd-reports/pepper-bdd-reports-builder/src/main/kotlin/io/github/vooft/pepper/reports/builder/LowLevelReportListener.kt"
         )
@@ -92,5 +92,4 @@ fun compile(sourceFiles: List<SourceFile>, plugin: CompilerPluginRegistrar = Pep
         inheritClassPath = true
     }.compile()
 
-fun compile(sourceFile: SourceFile, plugin: CompilerPluginRegistrar = PepperBddComponentRegistrar()): JvmCompilationResult =
-    compile(listOf(sourceFile), plugin)
+private fun SourceFile.Companion.fromExisting(file: File): SourceFile = new(file.name, file.readText())
