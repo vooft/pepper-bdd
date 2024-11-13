@@ -87,11 +87,24 @@ internal suspend fun registerRemainingSteps() {
     }
 }
 
-internal data class StepIdentifier(val id: String, val prefix: String, val name: String) {
+internal data class StepIdentifier(
+    val id: String,
+    val prefix: String,
+    val indexInGroup: Int,
+    val indexInTest: Int,
+    val totalStepsInTest: Int,
+    val name: String
+) {
     fun toTestName(substitutions: List<StepArgument>): TestName {
         val substituted = substitutions.fold(name) { acc, arg -> acc.replace("{${arg.name}}", arg.value.toString()) }
-        return TestName(prefix = prefix, name = substituted, defaultAffixes = false)
+        return TestName("${indexInTest + 1}. ${replacedPrefix.capitalized}: $substituted")
     }
+
+    private val replacedPrefix
+        get() = when (indexInGroup) {
+            0 -> prefix
+            else -> "AND"
+        }
 }
 
 private sealed class StepResult<R> {
@@ -115,3 +128,10 @@ internal data class PepperRemainingSteps(val steps: MutableList<StepIdentifier>)
 
     override fun toString(): String = "RemainingSteps($steps)"
 }
+
+private val String.capitalized: String
+    get() {
+        val first = first().uppercase()
+        val rest = drop(1).lowercase()
+        return first + rest
+    }

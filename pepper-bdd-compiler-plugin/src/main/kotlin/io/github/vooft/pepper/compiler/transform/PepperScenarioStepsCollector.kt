@@ -1,7 +1,6 @@
 package io.github.vooft.pepper.compiler.transform
 
 import io.github.vooft.pepper.compiler.DebugLogger
-import io.github.vooft.pepper.compiler.transform.StepPrefix.AND
 import io.github.vooft.pepper.compiler.transform.StepPrefix.GIVEN
 import io.github.vooft.pepper.compiler.transform.StepPrefix.THEN
 import io.github.vooft.pepper.compiler.transform.StepPrefix.WHEN
@@ -78,15 +77,10 @@ internal class PepperScenarioStepsCollector(private val pluginContext: IrPluginC
             return
         }
 
-        val prefix = when (prefixStepIndex++) {
-            0 -> stepPrefix
-            else -> AND
-        }
-
         steps.add(
             StepIdentifier(
                 id = UUID.randomUUID().toString(),
-                prefix = prefix,
+                prefix = stepPrefix,
                 name = expression.symbol.owner.name.asString()
             )
         )

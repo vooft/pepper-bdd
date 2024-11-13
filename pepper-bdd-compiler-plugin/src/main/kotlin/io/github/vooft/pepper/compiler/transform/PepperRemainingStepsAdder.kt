@@ -8,6 +8,7 @@ import org.jetbrains.kotlin.ir.IrStatement
 import org.jetbrains.kotlin.ir.builders.irBlock
 import org.jetbrains.kotlin.ir.builders.irCall
 import org.jetbrains.kotlin.ir.builders.irGet
+import org.jetbrains.kotlin.ir.builders.irInt
 import org.jetbrains.kotlin.ir.builders.irString
 import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
@@ -61,21 +62,26 @@ internal class PepperRemainingStepsAdder(
         debugLogger.log("Adding steps to scenario inside $parentFunction")
 
         return DeclarationIrBuilder(pluginContext, expression.symbol).irBlock {
-            val stepIndexLength = currentScenarioSteps.size.toString().length
+            var previousPrefix: StepPrefix? = null
+            var indexInGroup = 0
             for ((index, step) in currentScenarioSteps.withIndex()) {
                 +irCall(references.addStep).apply {
                     this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
 
-                    val prefix = listOf(
-                        (index + 1).toString().padStart(stepIndexLength, '0'),
-                        ". ",
-                        step.prefix.capitalized
-                    ).joinToString("")
+                    if (previousPrefix == step.prefix) {
+                        indexInGroup++
+                    } else {
+                        previousPrefix = step.prefix
+                        indexInGroup = 0
+                    }
 
                     putValueArgument(0, irString(scenarioTitle))
                     putValueArgument(1, irString(step.id))
-                    putValueArgument(2, irString(prefix))
-                    putValueArgument(3, irString(step.name))
+                    putValueArgument(2, irString(step.prefix.name))
+                    putValueArgument(3, irInt(indexInGroup))
+                    putValueArgument(4, irInt(index))
+                    putValueArgument(5, irInt(currentScenarioSteps.size))
+                    putValueArgument(6, irString(step.name))
                 }
             }
 
@@ -83,10 +89,3 @@ internal class PepperRemainingStepsAdder(
         }
     }
 }
-
-private val StepPrefix.capitalized: String
-    get() {
-        val first = name.first().uppercase()
-        val rest = name.drop(1).lowercase()
-        return first + rest
-    }
