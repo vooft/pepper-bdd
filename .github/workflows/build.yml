@@ -31,6 +31,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Generate and submit dependency graph
+        if: ${{ github.ref == 'refs/heads/main' }}
         uses: gradle/actions/dependency-submission@v4
 
       - name: Build for ${{ github.ref }}
