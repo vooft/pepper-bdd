@@ -42,14 +42,13 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
             withContext(CoroutineName("step: ${step.name}")) {
                 result = try {
                     val successResult = testBlock()
-                    LowLevelReportListener.ifPresent { addResult(successResult) }
+                    LowLevelReportListener.ifPresent { finishStepWithSuccess(successResult) }
                     StepResult.Success(successResult)
                 } catch (t: Throwable) {
-                    LowLevelReportListener.ifPresent { addError(t) }
+                    LowLevelReportListener.ifPresent { finishStepWithError(t) }
                     StepResult.Error(t)
                 }
 
-                LowLevelReportListener.ifPresent { finishStep() }
                 result.value
             }
         }
@@ -75,6 +74,10 @@ internal suspend fun registerRemainingSteps() {
     val currentScope = requireNotNull(coroutineContext[CurrentTestScope]) { "Test scope is missing in the context" }.scope
 
     for (remainingStep in remainingSteps) {
+        LowLevelReportListener.ifPresent {
+            skipStep(index = remainingStep.indexInScenario, prefix = remainingStep.prefix, name = remainingStep.name)
+        }
+
         currentScope.registerTestCase(
             NestedTest(
                 name = remainingStep.toTestName(remainingStep.name),

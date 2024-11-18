@@ -70,7 +70,7 @@ private val sharedSourceFiles = listOf(
     ),
     SourceFile.fromExisting(
         File(
-            "../pepper-bdd-reports/pepper-bdd-reports-api/src/commonMain/kotlin/io/github/vooft/pepper/reports/api/PepperScenarioStatus.kt"
+            "../pepper-bdd-reports/pepper-bdd-reports-api/src/commonMain/kotlin/io/github/vooft/pepper/reports/api/PepperTestStatus.kt"
         )
     ),
     SourceFile.fromExisting(

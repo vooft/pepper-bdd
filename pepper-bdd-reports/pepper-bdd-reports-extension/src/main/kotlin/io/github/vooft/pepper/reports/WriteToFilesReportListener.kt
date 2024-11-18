@@ -1,7 +1,7 @@
 package io.github.vooft.pepper.reports
 
-import io.github.vooft.pepper.reports.api.PepperTestScenario
-import io.github.vooft.pepper.reports.api.PepperTestSuite
+import io.github.vooft.pepper.reports.api.PepperTestScenarioDto
+import io.github.vooft.pepper.reports.api.PepperTestSuiteDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
@@ -18,7 +18,7 @@ internal class WriteToFilesReportListener(private val parentPath: String) : Pepp
         }
     }
 
-    override suspend fun onScenarioFinished(scenario: PepperTestScenario) {
+    override suspend fun onScenarioFinished(scenario: PepperTestScenarioDto) {
         withContext(Dispatchers.IO) {
             File(parentPath).mkdirs()
             val json = Json.encodeToString(scenario)
@@ -26,7 +26,7 @@ internal class WriteToFilesReportListener(private val parentPath: String) : Pepp
         }
     }
 
-    override suspend fun onSuiteFinished(suite: PepperTestSuite) {
+    override suspend fun onSuiteFinished(suite: PepperTestSuiteDto) {
         withContext(Dispatchers.IO) {
             File(parentPath).mkdirs()
             val json = Json.encodeToString(suite)

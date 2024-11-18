@@ -3,8 +3,8 @@ package io.github.vooft.pepper.reports.api
 import io.github.vooft.pepper.reports.api.PepperStepPrefix.GIVEN
 import io.github.vooft.pepper.reports.api.PepperStepPrefix.THEN
 import io.github.vooft.pepper.reports.api.PepperStepPrefix.WHEN
-import io.github.vooft.pepper.reports.api.PepperTestStep.StepArgument
-import io.github.vooft.pepper.reports.api.PepperTestStep.StepError
+import io.github.vooft.pepper.reports.api.PepperTestStepDto.StepArgumentDto
+import io.github.vooft.pepper.reports.api.PepperTestStepDto.StepErrorDto
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.core.spec.style.ShouldSpec
 import kotlinx.datetime.Instant
@@ -13,19 +13,20 @@ import kotlinx.serialization.json.Json
 
 class PepperTestScenarioTest : ShouldSpec({
     should("serialize PepperTestScenario") {
-        val scenario = PepperTestScenario(
+        val scenario = PepperTestScenarioDto(
             version = 1,
             id = "scenario1",
             className = "io.github.pepper.reports.api.PepperTestProjectTest",
             name = "serialize PepperTestProject",
             steps = listOf(
-                PepperTestStep(
+                PepperTestStepDto(
                     id = "step1",
                     index = 0,
                     prefix = GIVEN,
+                    status = PepperTestStatus.PASSED,
                     name = "create PepperTestProject",
                     arguments = listOf(
-                        StepArgument(
+                        StepArgumentDto(
                             name = "number",
                             type = "kotlin.Int",
                             value = "1"
@@ -36,13 +37,14 @@ class PepperTestScenarioTest : ShouldSpec({
                     startedAt = Instant.parse("2021-08-01T00:00:00Z"),
                     finishedAt = Instant.parse("2021-08-01T00:00:01Z"),
                 ),
-                PepperTestStep(
+                PepperTestStepDto(
                     id = "step2",
                     index = 1,
                     prefix = WHEN,
+                    status = PepperTestStatus.PASSED,
                     name = "serialize PepperTestProject",
                     arguments = listOf(
-                        StepArgument(
+                        StepArgumentDto(
                             name = "project",
                             type = "io.github.pepper.reports.api.PepperTestProject",
                             value = "fancy to string implementation"
@@ -53,19 +55,32 @@ class PepperTestScenarioTest : ShouldSpec({
                     startedAt = Instant.parse("2021-09-01T00:00:00Z"),
                     finishedAt = Instant.parse("2021-09-01T00:00:01Z"),
                 ),
-                PepperTestStep(
+                PepperTestStepDto(
                     id = "step3",
                     index = 2,
                     prefix = THEN,
+                    status = PepperTestStatus.FAILED,
                     name = "assert PepperTestProject",
                     arguments = listOf(),
-                    error = StepError(
+                    error = StepErrorDto(
                         message = "boohoo",
                         stacktrace = """
                             java.lang.AssertionError: boohoo
                                 at io.github.pepper.reports.api.PepperTestProjectTest.serialize PepperTestProject(PepperTestProjectTest.kt:42)
                         """.trimIndent()
                     ),
+                    result = null,
+                    startedAt = Instant.parse("2021-10-01T00:00:00Z"),
+                    finishedAt = Instant.parse("2021-10-01T00:00:01Z"),
+                ),
+                PepperTestStepDto(
+                    id = "step4",
+                    index = 3,
+                    prefix = THEN,
+                    status = PepperTestStatus.SKIPPED,
+                    name = "assert PepperTestProject again",
+                    arguments = listOf(),
+                    error = null,
                     result = null,
                     startedAt = Instant.parse("2021-10-01T00:00:00Z"),
                     finishedAt = Instant.parse("2021-10-01T00:00:01Z"),
@@ -89,6 +104,7 @@ class PepperTestScenarioTest : ShouldSpec({
                 "id": "step1",
                 "index": 0,
                 "prefix": "GIVEN",
+                "status": "PASSED",
                 "name": "create PepperTestProject",
                 "arguments": [
                   {
@@ -106,6 +122,7 @@ class PepperTestScenarioTest : ShouldSpec({
                 "id": "step2",
                 "index": 1,
                 "prefix": "WHEN",
+                "status": "PASSED",
                 "name": "serialize PepperTestProject",
                 "arguments": [
                   {
@@ -123,12 +140,25 @@ class PepperTestScenarioTest : ShouldSpec({
                 "id": "step3",
                 "index": 2,
                 "prefix": "THEN",
+                "status": "FAILED",
                 "name": "assert PepperTestProject",
                 "arguments": [],
                 "error": {
                   "message": "boohoo",
                   "stacktrace": "java.lang.AssertionError: boohoo\n    at io.github.pepper.reports.api.PepperTestProjectTest.serialize PepperTestProject(PepperTestProjectTest.kt:42)"
                 },
+                "result": null,
+                "startedAt": "2021-10-01T00:00:00Z",
+                "finishedAt": "2021-10-01T00:00:01Z"
+              },
+              {
+                "id": "step4",
+                "index": 3,
+                "prefix": "THEN",
+                "status": "SKIPPED",
+                "name": "assert PepperTestProject again",
+                "arguments": [],
+                "error": null,
                 "result": null,
                 "startedAt": "2021-10-01T00:00:00Z",
                 "finishedAt": "2021-10-01T00:00:01Z"

@@ -1,6 +1,7 @@
 package io.github.vooft.pepper.reports.api
 
-enum class PepperScenarioStatus {
+enum class PepperTestStatus {
     PASSED,
-    FAILED
+    FAILED,
+    SKIPPED
 }

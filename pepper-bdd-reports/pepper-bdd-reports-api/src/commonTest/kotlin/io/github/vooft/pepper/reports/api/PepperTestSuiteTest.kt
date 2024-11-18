@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 
 class PepperTestSuiteTest : ShouldSpec({
     should("serialize PepperTestSuite") {
-        val project = PepperTestSuite(
+        val project = PepperTestSuiteDto(
             version = 1,
             scenarios = listOf("1", "2"),
             startedAt = Instant.parse("2021-08-01T00:00:00Z"),

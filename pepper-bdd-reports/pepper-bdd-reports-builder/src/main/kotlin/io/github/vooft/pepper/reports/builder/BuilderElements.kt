@@ -1,6 +1,7 @@
 package io.github.vooft.pepper.reports.builder
 
 import io.github.vooft.pepper.reports.api.PepperStepPrefix
+import io.github.vooft.pepper.reports.api.PepperTestStatus
 import java.security.MessageDigest
 import java.time.Instant
 
@@ -20,6 +21,7 @@ data class PepperStepBuilder(
     val prefix: PepperStepPrefix,
     val name: String,
     val arguments: MutableList<StepArgument> = mutableListOf(),
+    var status: PepperTestStatus? = null,
     var result: String? = null,
     var error: StepError? = null,
     val startedAt: Instant = Instant.now(),
