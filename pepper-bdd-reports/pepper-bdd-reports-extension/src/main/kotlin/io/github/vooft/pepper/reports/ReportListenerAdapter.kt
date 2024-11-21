@@ -3,9 +3,12 @@ package io.github.vooft.pepper.reports
 import io.github.vooft.pepper.reports.api.PepperStepPrefix
 import io.github.vooft.pepper.reports.api.PepperTestScenarioDto
 import io.github.vooft.pepper.reports.api.PepperTestStatus
+import io.github.vooft.pepper.reports.api.PepperTestStatus.FAILED
+import io.github.vooft.pepper.reports.api.PepperTestStatus.PASSED
 import io.github.vooft.pepper.reports.api.PepperTestStepDto
 import io.github.vooft.pepper.reports.api.PepperTestStepDto.StepArgumentDto
 import io.github.vooft.pepper.reports.api.PepperTestSuiteDto
+import io.github.vooft.pepper.reports.api.PepperTestSuiteDto.ScenarioSummaryDto
 import io.github.vooft.pepper.reports.builder.LowLevelReportListener
 import io.github.vooft.pepper.reports.builder.PepperScenarioBuilder
 import io.github.vooft.pepper.reports.builder.PepperStepBuilder
@@ -19,22 +22,22 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
 
     private val startedAt = Instant.now()
 
-    private val scenarioIdsMutex = Mutex()
-    private val scenarioIds = mutableListOf<String>()
+    private val scenarioSummariesMutex = Mutex()
+    private val scenarioSummaries = mutableListOf<ScenarioSummaryDto>()
 
     @Volatile
     private lateinit var scenario: PepperScenarioBuilder
 
-    val suite get() = PepperTestSuiteDto(
-        version = 1,
-        scenarios = scenarioIds,
-        startedAt = startedAt.toKotlinInstant(),
-        finishedAt = Instant.now().toKotlinInstant()
-    )
+    val suite
+        get() = PepperTestSuiteDto(
+            version = 1,
+            scenarios = scenarioSummaries,
+            startedAt = startedAt.toKotlinInstant(),
+            finishedAt = Instant.now().toKotlinInstant()
+        )
 
     override suspend fun startScenario(className: String, name: String) {
         scenario = PepperScenarioBuilder(className, name)
-        scenarioIdsMutex.withLock { scenarioIds.add(scenario.id) }
     }
 
     override suspend fun startStep(index: Int, prefix: String, name: String) {
@@ -76,7 +79,7 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
     override suspend fun finishStepWithError(error: Throwable) {
         scenario.steps.last().also {
             it.error = StepError(error.message ?: "Unknown error", error.stackTraceToString())
-            it.status = PepperTestStatus.FAILED
+            it.status = FAILED
             it.finishedAt = Instant.now()
         }
     }
@@ -91,6 +94,18 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
 
     override suspend fun finishScenario() {
         scenario.finishedAt = Instant.now()
+        scenarioSummariesMutex.withLock {
+            scenarioSummaries.add(
+                ScenarioSummaryDto(
+                    id = scenario.id,
+                    name = scenario.name,
+                    status = when (scenario.steps.all { it.status == PASSED }) {
+                        true -> PASSED
+                        false -> FAILED
+                    }
+                )
+            )
+        }
         listener.onScenarioFinished(scenario.toReport())
     }
 }

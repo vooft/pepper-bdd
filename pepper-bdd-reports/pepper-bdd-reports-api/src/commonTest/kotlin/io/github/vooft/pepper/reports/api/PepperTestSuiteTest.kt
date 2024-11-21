@@ -10,7 +10,10 @@ class PepperTestSuiteTest : ShouldSpec({
     should("serialize PepperTestSuite") {
         val project = PepperTestSuiteDto(
             version = 1,
-            scenarios = listOf("1", "2"),
+            scenarios = listOf(
+                PepperTestSuiteDto.ScenarioSummaryDto("1", "scenario1", PepperTestStatus.PASSED),
+                PepperTestSuiteDto.ScenarioSummaryDto("2", "scenario2", PepperTestStatus.FAILED),
+            ),
             startedAt = Instant.parse("2021-08-01T00:00:00Z"),
             finishedAt = Instant.parse("2021-08-01T00:00:01Z"),
         )
@@ -21,7 +24,18 @@ class PepperTestSuiteTest : ShouldSpec({
         json shouldEqualJson """
             {
               "version": 1,
-              "scenarios": ["1", "2"],
+              "scenarios": [
+                {
+                  "id": "1",
+                  "name": "scenario1",
+                  "status": "PASSED"
+                },
+                {
+                  "id": "2",
+                  "name": "scenario2",
+                  "status": "FAILED"
+                }
+              ],
               "startedAt": "2021-08-01T00:00:00Z",
               "finishedAt": "2021-08-01T00:00:01Z"
             }

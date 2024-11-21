@@ -6,7 +6,15 @@ import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class PepperTestSuiteDto(val version: Int, val scenarios: List<String>, val startedAt: Instant, val finishedAt: Instant) {
+data class PepperTestSuiteDto(
+    val version: Int,
+    val scenarios: List<ScenarioSummaryDto>,
+    val startedAt: Instant,
+    val finishedAt: Instant
+) {
+    @Serializable
+    data class ScenarioSummaryDto(val id: String, val name: String, val status: PepperTestStatus)
+
     companion object
 }
 
