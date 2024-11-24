@@ -1,39 +1,53 @@
 package io.github.vooft.pepper.reports.api
 
+import io.github.vooft.pepper.reports.api.PepperTestScenarioDto.ScenarioId
 import io.github.vooft.pepper.reports.api.PepperTestStatus.FAILED
 import io.github.vooft.pepper.reports.api.PepperTestStatus.PASSED
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
+import kotlin.jvm.JvmInline
 
 @Serializable
 data class PepperTestSuiteDto(
+    val id: SuiteId,
     val version: Int,
     val scenarios: List<ScenarioSummaryDto>,
     val startedAt: Instant,
     val finishedAt: Instant
 ) {
     @Serializable
-    data class ScenarioSummaryDto(val id: String, val name: String, val status: PepperTestStatus)
+    data class ScenarioSummaryDto(val id: ScenarioId, val name: String, val status: PepperTestStatus)
+
+    @Serializable
+    @JvmInline
+    value class SuiteId(val value: String) {
+        companion object
+    }
 
     companion object
 }
 
 @Serializable
 data class PepperTestScenarioDto(
-    val id: String,
-    val version: Int,
+    val id: ScenarioId,
     val className: String,
     val name: String,
     val steps: List<PepperTestStepDto>,
     val startedAt: Instant,
     val finishedAt: Instant
 ) {
+    @Serializable
+    @JvmInline
+    value class ScenarioId(val value: String) {
+        companion object
+    }
+
     companion object
 }
 
 @Serializable
 data class PepperTestStepDto(
-    val id: String,
+    val id: StepId,
     val prefix: PepperStepPrefix,
     val index: Int,
     val name: String,
@@ -54,7 +68,14 @@ data class PepperTestStepDto(
         companion object
     }
 
+    @Serializable
+    @JvmInline
+    value class StepId(val value: String) {
+        companion object
+    }
+
     companion object
 }
 
+@Suppress("unused")
 val PepperTestScenarioDto.status get() = steps.firstOrNull { it.status == FAILED }?.status ?: PASSED

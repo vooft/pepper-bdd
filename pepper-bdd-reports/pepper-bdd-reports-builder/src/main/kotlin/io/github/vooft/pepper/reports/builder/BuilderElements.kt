@@ -34,4 +34,4 @@ data class PepperStepBuilder(
     data class StepError(val message: String, val stacktrace: String)
 }
 
-private fun String.sha1() = MessageDigest.getInstance("SHA-1").digest(toByteArray()).joinToString("") { "%02x".format(it) }
+fun String.sha1() = MessageDigest.getInstance("SHA-1").digest(toByteArray()).joinToString("") { "%02x".format(it) }
