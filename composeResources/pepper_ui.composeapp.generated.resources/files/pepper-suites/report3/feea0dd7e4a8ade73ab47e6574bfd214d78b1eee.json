@@ -1,0 +1,95 @@
+{
+  "id": "feea0dd7e4a8ade73ab47e6574bfd214d78b1eee",
+  "version": 1,
+  "className": "io.github.vooft.pepper.sample.FailingPepperSpec",
+  "name": "failing scenario",
+  "steps": [
+    {
+      "id": "76d176eec509112bbf4826f64722a542a2b4eb92",
+      "prefix": "GIVEN",
+      "index": 0,
+      "name": "generate random string",
+      "status": "PASSED",
+      "arguments": [
+        {
+          "name": "prefix",
+          "type": "kotlin.String",
+          "value": "first"
+        }
+      ],
+      "result": "first -333863560",
+      "error": null,
+      "startedAt": "2024-11-21T19:51:24.695362Z",
+      "finishedAt": "2024-11-21T19:51:24.698974Z"
+    },
+    {
+      "id": "76d176eec509112bbf4826f64722a542a2b4eb92",
+      "prefix": "GIVEN",
+      "index": 1,
+      "name": "generate random string",
+      "status": "PASSED",
+      "arguments": [
+        {
+          "name": "prefix",
+          "type": "kotlin.String",
+          "value": "second"
+        }
+      ],
+      "result": "second -1611417849",
+      "error": null,
+      "startedAt": "2024-11-21T19:51:24.699369Z",
+      "finishedAt": "2024-11-21T19:51:24.702696Z"
+    },
+    {
+      "id": "944007ae5d56a056c754860f21efa03075ae0dab",
+      "prefix": "WHEN",
+      "index": 2,
+      "name": "two strings are compared",
+      "status": "PASSED",
+      "arguments": [
+        {
+          "name": "first",
+          "type": "kotlin.String",
+          "value": "first -333863560"
+        },
+        {
+          "name": "second",
+          "type": "kotlin.String",
+          "value": "second -1611417849"
+        }
+      ],
+      "result": "CompareResult(first=first -333863560, second=second -1611417849, result=false)",
+      "error": null,
+      "startedAt": "2024-11-21T19:51:24.703092Z",
+      "finishedAt": "2024-11-21T19:51:24.705567Z"
+    },
+    {
+      "id": "cad1741ef3a803f805e3be72a50621effb24d3d7",
+      "prefix": "THEN",
+      "index": 3,
+      "name": "compare result is 'true'",
+      "status": "FAILED",
+      "arguments": [
+        {
+          "name": "compareResult",
+          "type": "io.github.vooft.pepper.sample.CompareResult",
+          "value": "CompareResult(first=first -333863560, second=second -1611417849, result=false)"
+        },
+        {
+          "name": "expected",
+          "type": "kotlin.Boolean",
+          "value": "true"
+        }
+      ],
+      "result": null,
+      "error": {
+        "message": "Expected true, but got false",
+        "stacktrace": "java.lang.AssertionError: Expected true, but got false\n\tat io.github.vooft.pepper.sample.StepsKt.compare result is '{expected}'(Steps.kt:37)\n\tat io.github.vooft.pepper.sample.StepsKt$compare result is '{expected}'$1.invokeSuspend(Steps.kt)\n\tat kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)\n\tat kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:104)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)\n\tat java.base/java.lang.Thread.run(Thread.java:1583)\n"
+      },
+      "startedAt": "2024-11-21T19:51:24.705911Z",
+      "finishedAt": "2024-11-21T19:51:24.707992Z"
+    }
+  ],
+  "startedAt": "2024-11-21T19:51:24.695006Z",
+  "finishedAt": "2024-11-21T19:51:24.709940Z"
+}
