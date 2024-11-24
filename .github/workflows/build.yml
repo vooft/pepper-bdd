@@ -45,3 +45,25 @@ jobs:
           detailed_summary: true
           report_paths: '**/build/test-results/test/TEST-*.xml'
 
+      - name: Save environment variables
+        run: echo "NOW=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
+
+      - name: Publish Pepper BDD report
+        if: ${{ always() && github.ref == 'refs/heads/main' }}
+        run: | # language=shell script
+          git fetch --unshallow origin gh-pages
+          git checkout gh-pages
+          git pull
+          
+          mkdir -p pepper-reports/${{ github.run_id }}
+          cp -r pepper-bdd-sample/build/reports/pepper/* pepper-reports/${{ github.run_id }}
+
+          jq '.suites += [{"name": "${{ env.NOW }}", "path":"${{ github.run_id }}"}]' pepper-reports/pepper-root.json > pepper-root_new.json
+          cat pepper-root_new.json > pepper-reports/pepper-root.json
+
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+          git add pepper-reports/${{ github.run_id }} pepper-reports/pepper-root.json
+          git commit -m "Add Pepper BDD report for run ${{ github.run_id }}"
+          git push
