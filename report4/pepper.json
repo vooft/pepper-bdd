@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "scenarios": [
+    {
+      "id": "474d7e10d0a42644f083c7f9a7f17e8d279f903a",
+      "name": "multiply by two: example 1",
+      "status": "PASSED"
+    },
+    {
+      "id": "c7f71d55c7c9c54cef8cf89364b2133816480fee",
+      "name": "multiply by two: example 2",
+      "status": "PASSED"
+    },
+    {
+      "id": "09535247b28b579f3eaec92d384a1cade09f4c9d",
+      "name": "multiply by two: example 3",
+      "status": "PASSED"
+    },
+    {
+      "id": "9a2ce83979c7d67d7605a9501e751cd54692699c",
+      "name": "failing scenario",
+      "status": "FAILED"
+    },
+    {
+      "id": "feea0dd7e4a8ade73ab47e6574bfd214d78b1eee",
+      "name": "failing scenario",
+      "status": "FAILED"
+    },
+    {
+      "id": "a32b1bb0538485cb54e4a72724a3f28fefb7dd79",
+      "name": "flaky scenario 1",
+      "status": "FAILED"
+    },
+    {
+      "id": "a1f6b8e86a63d51872b2284c9e978cd19e141a84",
+      "name": "flaky scenario 2",
+      "status": "FAILED"
+    },
+    {
+      "id": "05c8902404f939d31151c625d342e339c591962d",
+      "name": "flaky scenario 3",
+      "status": "PASSED"
+    },
+    {
+      "id": "f2a6bf49c1ef342f484c1916e5be2606ec9079d5",
+      "name": "flaky scenario 4",
+      "status": "FAILED"
+    },
+    {
+      "id": "07850766159aac6036c8f5b4dc07e12385d185b6",
+      "name": "flaky scenario 5",
+      "status": "PASSED"
+    },
+    {
+      "id": "ceb9ce10fe2f0d474b2d166b028d4a3ecce1878a",
+      "name": "flaky scenario 6",
+      "status": "FAILED"
+    },
+    {
+      "id": "12be41e0149ab75be496f467b1c6b3670c0750f9",
+      "name": "flaky scenario 7",
+      "status": "PASSED"
+    },
+    {
+      "id": "ac44329f8b56a30215de0bc7ed23a5bfb4a57d2c",
+      "name": "flaky scenario 8",
+      "status": "PASSED"
+    },
+    {
+      "id": "40cae3403958ff89979a8f79add5976adcc024a4",
+      "name": "flaky scenario 9",
+      "status": "FAILED"
+    },
+    {
+      "id": "0439317a8151ab439a35092d2f50cfaa2506e332",
+      "name": "flaky scenario 10",
+      "status": "FAILED"
+    },
+    {
+      "id": "55c04a2d18a6c32cf5ca2e03942bb51d024ae49f",
+      "name": "my test scenario",
+      "status": "PASSED"
+    },
+    {
+      "id": "ea4254d458307cd43485dd08000884e5de73685d",
+      "name": "Nested steps",
+      "status": "PASSED"
+    },
+    {
+      "id": "c190875fe2dc3d983db588f1c7b2b82f4902efa8",
+      "name": "my test scenario",
+      "status": "PASSED"
+    },
+    {
+      "id": "800e34c9cd42e43ded777a6a38cf8c691ac63dd1",
+      "name": "first scenario",
+      "status": "PASSED"
+    },
+    {
+      "id": "8b1e55a93602871c4a26313a3027b5eacb145e1a",
+      "name": "second scenario",
+      "status": "PASSED"
+    }
+  ],
+  "startedAt": "2024-11-21T19:51:42.900552Z",
+  "finishedAt": "2024-11-21T19:51:43.272906Z"
+}
