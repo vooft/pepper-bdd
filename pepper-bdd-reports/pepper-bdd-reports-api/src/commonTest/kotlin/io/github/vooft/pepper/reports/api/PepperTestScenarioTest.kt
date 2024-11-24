@@ -14,13 +14,12 @@ import kotlinx.serialization.json.Json
 class PepperTestScenarioTest : ShouldSpec({
     should("serialize PepperTestScenario") {
         val scenario = PepperTestScenarioDto(
-            version = 1,
-            id = "scenario1",
+            id = PepperTestScenarioDto.ScenarioId("scenario1"),
             className = "io.github.pepper.reports.api.PepperTestProjectTest",
             name = "serialize PepperTestProject",
             steps = listOf(
                 PepperTestStepDto(
-                    id = "step1",
+                    id = PepperTestStepDto.StepId("step1"),
                     index = 0,
                     prefix = GIVEN,
                     status = PepperTestStatus.PASSED,
@@ -38,7 +37,7 @@ class PepperTestScenarioTest : ShouldSpec({
                     finishedAt = Instant.parse("2021-08-01T00:00:01Z"),
                 ),
                 PepperTestStepDto(
-                    id = "step2",
+                    id = PepperTestStepDto.StepId("step2"),
                     index = 1,
                     prefix = WHEN,
                     status = PepperTestStatus.PASSED,
@@ -56,7 +55,7 @@ class PepperTestScenarioTest : ShouldSpec({
                     finishedAt = Instant.parse("2021-09-01T00:00:01Z"),
                 ),
                 PepperTestStepDto(
-                    id = "step3",
+                    id = PepperTestStepDto.StepId("step3"),
                     index = 2,
                     prefix = THEN,
                     status = PepperTestStatus.FAILED,
@@ -74,7 +73,7 @@ class PepperTestScenarioTest : ShouldSpec({
                     finishedAt = Instant.parse("2021-10-01T00:00:01Z"),
                 ),
                 PepperTestStepDto(
-                    id = "step4",
+                    id = PepperTestStepDto.StepId("step4"),
                     index = 3,
                     prefix = THEN,
                     status = PepperTestStatus.SKIPPED,
@@ -95,7 +94,6 @@ class PepperTestScenarioTest : ShouldSpec({
         // language=JSON
         json shouldEqualJson """
           {
-            "version": 1,
             "id": "scenario1",
             "className": "io.github.pepper.reports.api.PepperTestProjectTest",
             "name": "serialize PepperTestProject",

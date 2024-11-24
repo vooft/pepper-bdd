@@ -13,6 +13,7 @@ import io.github.vooft.pepper.reports.builder.LowLevelReportListener
 import io.github.vooft.pepper.reports.builder.PepperScenarioBuilder
 import io.github.vooft.pepper.reports.builder.PepperStepBuilder
 import io.github.vooft.pepper.reports.builder.PepperStepBuilder.StepError
+import io.github.vooft.pepper.reports.builder.sha1
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.toKotlinInstant
@@ -30,6 +31,7 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
 
     val suite
         get() = PepperTestSuiteDto(
+            id = PepperTestSuiteDto.SuiteId(scenarioSummaries.joinToString { it.id.value }.sha1()),
             version = 1,
             scenarios = scenarioSummaries,
             startedAt = startedAt.toKotlinInstant(),
@@ -87,7 +89,7 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
     override suspend fun finishStepWithSuccess(result: Any?) {
         scenario.steps.last().let {
             it.result = result.toString()
-            it.status = PepperTestStatus.PASSED
+            it.status = PASSED
             it.finishedAt = Instant.now()
         }
     }
@@ -97,7 +99,7 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
         scenarioSummariesMutex.withLock {
             scenarioSummaries.add(
                 ScenarioSummaryDto(
-                    id = scenario.id,
+                    id = PepperTestScenarioDto.ScenarioId(scenario.id),
                     name = scenario.name,
                     status = when (scenario.steps.all { it.status == PASSED }) {
                         true -> PASSED
@@ -111,10 +113,7 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
 }
 
 private fun PepperScenarioBuilder.toReport() = PepperTestScenarioDto(
-
-    version = 1,
-
-    id = id,
+    id = PepperTestScenarioDto.ScenarioId(id),
     className = className,
     name = name,
     steps = steps.map { it.toReport() }.toMutableList(),
@@ -123,7 +122,7 @@ private fun PepperScenarioBuilder.toReport() = PepperTestScenarioDto(
 )
 
 private fun PepperStepBuilder.toReport() = PepperTestStepDto(
-    id = id,
+    id = PepperTestStepDto.StepId(id),
     index = index,
     prefix = prefix,
     name = name,

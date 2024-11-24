@@ -3,5 +3,7 @@ package io.github.vooft.pepper.reports.api
 enum class PepperTestStatus {
     PASSED,
     FAILED,
-    SKIPPED
+    SKIPPED;
+
+    companion object
 }

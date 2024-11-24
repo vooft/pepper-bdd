@@ -9,10 +9,11 @@ import kotlinx.serialization.json.Json
 class PepperTestSuiteTest : ShouldSpec({
     should("serialize PepperTestSuite") {
         val project = PepperTestSuiteDto(
+            id = PepperTestSuiteDto.SuiteId("1"),
             version = 1,
             scenarios = listOf(
-                PepperTestSuiteDto.ScenarioSummaryDto("1", "scenario1", PepperTestStatus.PASSED),
-                PepperTestSuiteDto.ScenarioSummaryDto("2", "scenario2", PepperTestStatus.FAILED),
+                PepperTestSuiteDto.ScenarioSummaryDto(PepperTestScenarioDto.ScenarioId("1"), "scenario1", PepperTestStatus.PASSED),
+                PepperTestSuiteDto.ScenarioSummaryDto(PepperTestScenarioDto.ScenarioId("2"), "scenario2", PepperTestStatus.FAILED),
             ),
             startedAt = Instant.parse("2021-08-01T00:00:00Z"),
             finishedAt = Instant.parse("2021-08-01T00:00:01Z"),
@@ -23,6 +24,7 @@ class PepperTestSuiteTest : ShouldSpec({
         // language=JSON
         json shouldEqualJson """
             {
+              "id": "1",
               "version": 1,
               "scenarios": [
                 {
