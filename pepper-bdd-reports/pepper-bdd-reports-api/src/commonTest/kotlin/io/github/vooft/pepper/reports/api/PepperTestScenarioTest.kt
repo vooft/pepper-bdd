@@ -15,6 +15,7 @@ class PepperTestScenarioTest : ShouldSpec({
     should("serialize PepperTestScenario") {
         val scenario = PepperTestScenarioDto(
             id = PepperTestScenarioDto.ScenarioId("scenario1"),
+            version = 1,
             className = "io.github.pepper.reports.api.PepperTestProjectTest",
             name = "serialize PepperTestProject",
             steps = listOf(
@@ -95,6 +96,7 @@ class PepperTestScenarioTest : ShouldSpec({
         json shouldEqualJson """
           {
             "id": "scenario1",
+            "version": 1,
             "className": "io.github.pepper.reports.api.PepperTestProjectTest",
             "name": "serialize PepperTestProject",
             "steps": [

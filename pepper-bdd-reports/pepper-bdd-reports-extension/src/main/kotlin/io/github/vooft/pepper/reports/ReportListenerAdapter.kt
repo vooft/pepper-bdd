@@ -19,6 +19,8 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.toKotlinInstant
 import java.time.Instant
 
+private const val VERSION = 1
+
 class ReportListenerAdapter(private val listener: PepperReportListener) : LowLevelReportListener {
 
     private val startedAt = Instant.now()
@@ -32,7 +34,7 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
     val suite
         get() = PepperTestSuiteDto(
             id = PepperTestSuiteDto.SuiteId(scenarioSummaries.joinToString { it.id.value }.sha1()),
-            version = 1,
+            version = VERSION,
             scenarios = scenarioSummaries,
             startedAt = startedAt.toKotlinInstant(),
             finishedAt = Instant.now().toKotlinInstant()
@@ -114,6 +116,7 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
 
 private fun PepperScenarioBuilder.toReport() = PepperTestScenarioDto(
     id = PepperTestScenarioDto.ScenarioId(id),
+    version = VERSION,
     className = className,
     name = name,
     steps = steps.map { it.toReport() }.toMutableList(),

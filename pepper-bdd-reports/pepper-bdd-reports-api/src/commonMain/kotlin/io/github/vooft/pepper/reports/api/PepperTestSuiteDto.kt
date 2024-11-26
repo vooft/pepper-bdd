@@ -30,6 +30,7 @@ data class PepperTestSuiteDto(
 @Serializable
 data class PepperTestScenarioDto(
     val id: ScenarioId,
+    val version: Int,
     val className: String,
     val name: String,
     val steps: List<PepperTestStepDto>,
