@@ -22,7 +22,7 @@ internal class WriteToFilesReportListener(private val parentPath: String) : Pepp
         withContext(Dispatchers.IO) {
             File(parentPath).mkdirs()
             val json = Json.encodeToString(scenario)
-            Paths.get(parentPath, "${scenario.id}.json").toFile().writeText(json)
+            Paths.get(parentPath, "${scenario.id.value}.json").toFile().writeText(json)
         }
     }
 
