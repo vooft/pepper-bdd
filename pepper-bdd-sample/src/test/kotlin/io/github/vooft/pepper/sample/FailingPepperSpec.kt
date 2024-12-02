@@ -8,7 +8,7 @@ import io.kotest.core.annotation.Ignored
 
 @Ignored
 class FailingPepperSpec : PepperSpec({
-    Scenario("failing scenario") {
+    Scenario("failing scenario", tags = listOf("Failing")) {
         Given
         val firstRandom = `generate random string`("first")
         val secondRandom = `generate random string`("second")

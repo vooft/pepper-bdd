@@ -6,7 +6,7 @@ import io.github.vooft.pepper.dsl.Then
 import io.github.vooft.pepper.dsl.When
 
 class TwoScenariosSpec : PepperSpec({
-    Scenario("first scenario") {
+    Scenario("first scenario", tags = listOf("Two scenarios")) {
         Given
         val firstRandom = `generate random string`("first")
         val secondRandom = `generate random string`("second")
@@ -18,7 +18,7 @@ class TwoScenariosSpec : PepperSpec({
         `compare result is '{expected}'`(compareResult, false)
     }
 
-    Scenario("second scenario") {
+    Scenario("second scenario", tags = listOf("Two scenarios")) {
         Given
         val firstRandom = `generate random string`("first")
 

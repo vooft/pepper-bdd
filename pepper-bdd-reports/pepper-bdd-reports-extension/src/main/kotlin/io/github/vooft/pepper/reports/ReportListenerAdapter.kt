@@ -40,8 +40,8 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
             finishedAt = Instant.now().toKotlinInstant()
         )
 
-    override suspend fun startScenario(className: String, name: String) {
-        scenario = PepperScenarioBuilder(className, name)
+    override suspend fun startScenario(className: String, name: String, tags: List<String>) {
+        scenario = PepperScenarioBuilder(className = className, name = name, tags = tags)
     }
 
     override suspend fun startStep(index: Int, prefix: String, name: String) {
@@ -119,6 +119,7 @@ private fun PepperScenarioBuilder.toReport() = PepperTestScenarioDto(
     version = VERSION,
     className = className,
     name = name,
+    tags = tags.map { PepperTestScenarioDto.ScenarioTag(it) },
     steps = steps.map { it.toReport() }.toMutableList(),
     startedAt = startedAt.toKotlinInstant(),
     finishedAt = requireNotNull(finishedAt) { "Missing finishedAt at scenario $name" }.toKotlinInstant()

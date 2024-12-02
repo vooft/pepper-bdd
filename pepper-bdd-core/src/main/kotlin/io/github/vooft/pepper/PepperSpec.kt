@@ -20,7 +20,7 @@ open class PepperSpec(scenarioBlock: PepperSpecDsl.() -> Unit) : FunSpec() {
 
             addContainer(TestName("Scenario: ${scenario.key.title}"), false, null) {
                 val className = requireNotNull(this@PepperSpec::class.qualifiedName)
-                LowLevelReportListener.ifPresent { startScenario(className, scenario.key.title) }
+                LowLevelReportListener.ifPresent { startScenario(className = className, name = scenario.key.title, tags = scenario.tags) }
 
                 try {
                     withContext(CurrentTestScope(this)) {
