@@ -17,6 +17,10 @@ class PepperTestScenarioTest : ShouldSpec({
             id = PepperTestScenarioDto.ScenarioId("scenario1"),
             version = 1,
             className = "io.github.pepper.reports.api.PepperTestProjectTest",
+            tags = listOf(
+                PepperTestScenarioDto.ScenarioTag("tag1"),
+                PepperTestScenarioDto.ScenarioTag("tag2"),
+            ),
             name = "serialize PepperTestProject",
             steps = listOf(
                 PepperTestStepDto(
@@ -99,6 +103,7 @@ class PepperTestScenarioTest : ShouldSpec({
             "version": 1,
             "className": "io.github.pepper.reports.api.PepperTestProjectTest",
             "name": "serialize PepperTestProject",
+            "tags": ["tag1", "tag2"],
             "steps": [
               {
                 "id": "step1",

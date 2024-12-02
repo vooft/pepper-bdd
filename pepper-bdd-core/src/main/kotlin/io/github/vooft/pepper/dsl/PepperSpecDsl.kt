@@ -1,11 +1,17 @@
 package io.github.vooft.pepper.dsl
 
 interface PepperSpecDsl {
-    fun Scenario(scenarioTitle: String, scenarioBody: suspend ScenarioDsl.() -> Unit)
-    fun <T> ScenarioExamples(scenarioTitle: String, examplesBody: ExamplesDsl<T>.() -> Unit): ExamplesDslTerminal<T>
+    fun Scenario(scenarioTitle: String, tags: List<String> = emptyList(), scenarioBody: suspend ScenarioDsl.() -> Unit)
+    fun <T : PepperExample> ScenarioExamples(scenarioTitle: String, examplesBody: ExamplesDsl<T>.() -> Unit): ExamplesDslTerminal<T>
 }
 
 interface ScenarioDsl
+
+interface PepperExample : TagsHolder
+
+interface TagsHolder {
+    val tags: List<String> get() = emptyList()
+}
 
 interface ScenarioWithExampleDsl<T> : ScenarioDsl {
     val example: T
@@ -22,6 +28,7 @@ fun interface ExamplesDslTerminal<T> {
 interface Scenario {
     val key: ScenarioKey
     val hasSteps: Boolean
+    val tags: List<String>
     val scenarioBody: suspend () -> Unit
 
     sealed interface ScenarioKey {
@@ -29,19 +36,19 @@ interface Scenario {
         val title: String
     }
 
-    data class Simple(override val scenarioTitle: String) : ScenarioKey {
+    data class SimpleScenario(override val scenarioTitle: String) : ScenarioKey {
         override val title: String get() = scenarioTitle
     }
 
-    data class Example(override val scenarioTitle: String, val example: String) : ScenarioKey {
+    data class ExampleScenario(override val scenarioTitle: String, val example: String) : ScenarioKey {
         override val title: String get() = "$scenarioTitle: $example"
     }
 }
 
-val ScenarioDsl.Given: PepperPrefix get() = pepperFail()
-val ScenarioDsl.When: PepperPrefix get() = pepperFail()
-val ScenarioDsl.Then: PepperPrefix get() = pepperFail()
+val ScenarioDsl.Given: PepperPrefix get() = prefixFail()
+val ScenarioDsl.When: PepperPrefix get() = prefixFail()
+val ScenarioDsl.Then: PepperPrefix get() = prefixFail()
 
 interface PepperPrefix
 
-private fun pepperFail(): Nothing = error("This function should be replaced by a compiler plugin, please check your Gradle configuration")
+private fun prefixFail(): Nothing = error("This function should be replaced by a compiler plugin, please check your Gradle configuration")

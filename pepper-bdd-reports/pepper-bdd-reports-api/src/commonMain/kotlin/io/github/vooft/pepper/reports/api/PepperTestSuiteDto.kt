@@ -33,6 +33,7 @@ data class PepperTestScenarioDto(
     val version: Int,
     val className: String,
     val name: String,
+    val tags: List<ScenarioTag>,
     val steps: List<PepperTestStepDto>,
     val startedAt: Instant,
     val finishedAt: Instant
@@ -40,6 +41,12 @@ data class PepperTestScenarioDto(
     @Serializable
     @JvmInline
     value class ScenarioId(val value: String) {
+        companion object
+    }
+
+    @Serializable
+    @JvmInline
+    value class ScenarioTag(val value: String) {
         companion object
     }
 

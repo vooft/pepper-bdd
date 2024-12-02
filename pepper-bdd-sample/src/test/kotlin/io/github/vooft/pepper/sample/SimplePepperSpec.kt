@@ -6,7 +6,7 @@ import io.github.vooft.pepper.dsl.Then
 import io.github.vooft.pepper.dsl.When
 
 class SimplePepperSpec : PepperSpec({
-    Scenario("my test scenario") {
+    Scenario("my test scenario", tags = listOf("Simple")) {
         Given
         val firstRandom = `generate random string`("first")
         val secondRandom = `generate random string`("second")

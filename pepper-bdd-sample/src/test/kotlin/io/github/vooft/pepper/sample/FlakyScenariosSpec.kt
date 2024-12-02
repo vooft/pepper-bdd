@@ -9,7 +9,7 @@ import kotlin.random.Random
 
 @Ignored
 class FlakyScenariosSpec : PepperSpec({
-    Scenario("flaky scenario 1") {
+    Scenario("flaky scenario 1", tags = listOf("Flaky")) {
         Given
         val firstRandom = `generate random string`("first")
         val secondRandom = `generate random string`("second")
@@ -21,7 +21,7 @@ class FlakyScenariosSpec : PepperSpec({
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
     }
 
-    Scenario("flaky scenario 2") {
+    Scenario("flaky scenario 2", tags = listOf("Flaky")) {
         Given
         val firstRandom = `generate random string`("first")
         val secondRandom = `generate random string`("second")
@@ -33,7 +33,7 @@ class FlakyScenariosSpec : PepperSpec({
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
     }
 
-    Scenario("flaky scenario 3") {
+    Scenario("flaky scenario 3", tags = listOf("Flaky")) {
         Given
         val firstRandom = `generate random string`("first")
         val secondRandom = `generate random string`("second")
@@ -45,7 +45,7 @@ class FlakyScenariosSpec : PepperSpec({
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
     }
 
-    Scenario("flaky scenario 4") {
+    Scenario("flaky scenario 4", tags = listOf("Flaky")) {
         Given
         val firstRandom = `generate random string`("first")
         val secondRandom = `generate random string`("second")
@@ -57,7 +57,7 @@ class FlakyScenariosSpec : PepperSpec({
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
     }
 
-    Scenario("flaky scenario 5") {
+    Scenario("flaky scenario 5", tags = listOf("Flaky")) {
         Given
         val firstRandom = `generate random string`("first")
         val secondRandom = `generate random string`("second")
@@ -69,7 +69,7 @@ class FlakyScenariosSpec : PepperSpec({
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
     }
 
-    Scenario("flaky scenario 6") {
+    Scenario("flaky scenario 6", tags = listOf("Flaky")) {
         Given
         val firstRandom = `generate random string`("first")
         val secondRandom = `generate random string`("second")
@@ -81,7 +81,7 @@ class FlakyScenariosSpec : PepperSpec({
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
     }
 
-    Scenario("flaky scenario 7") {
+    Scenario("flaky scenario 7", tags = listOf("Flaky")) {
         Given
         val firstRandom = `generate random string`("first")
         val secondRandom = `generate random string`("second")
@@ -93,7 +93,7 @@ class FlakyScenariosSpec : PepperSpec({
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
     }
 
-    Scenario("flaky scenario 8") {
+    Scenario("flaky scenario 8", tags = listOf("Flaky")) {
         Given
         val firstRandom = `generate random string`("first")
         val secondRandom = `generate random string`("second")
@@ -105,7 +105,7 @@ class FlakyScenariosSpec : PepperSpec({
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
     }
 
-    Scenario("flaky scenario 9") {
+    Scenario("flaky scenario 9", tags = listOf("Flaky")) {
         Given
         val firstRandom = `generate random string`("first")
         val secondRandom = `generate random string`("second")
@@ -117,7 +117,7 @@ class FlakyScenariosSpec : PepperSpec({
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
     }
 
-    Scenario("flaky scenario 10") {
+    Scenario("flaky scenario 10", tags = listOf("Flaky")) {
         Given
         val firstRandom = `generate random string`("first")
         val secondRandom = `generate random string`("second")

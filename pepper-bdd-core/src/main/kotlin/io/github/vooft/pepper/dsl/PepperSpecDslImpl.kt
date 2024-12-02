@@ -2,9 +2,9 @@ package io.github.vooft.pepper.dsl
 
 import io.github.vooft.pepper.PepperRemainingSteps
 import io.github.vooft.pepper.StepIdentifier
-import io.github.vooft.pepper.dsl.Scenario.Example
+import io.github.vooft.pepper.dsl.Scenario.ExampleScenario
 import io.github.vooft.pepper.dsl.Scenario.ScenarioKey
-import io.github.vooft.pepper.dsl.Scenario.Simple
+import io.github.vooft.pepper.dsl.Scenario.SimpleScenario
 import io.github.vooft.pepper.registerRemainingSteps
 import kotlinx.coroutines.withContext
 
@@ -15,16 +15,19 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
 
     private val stepsPerScenario = mutableMapOf<String, List<StepIdentifier>>()
 
-    override fun Scenario(scenarioTitle: String, scenarioBody: suspend ScenarioDsl.() -> Unit) {
-        val key = Simple(scenarioTitle)
+    override fun Scenario(scenarioTitle: String, tags: List<String>, scenarioBody: suspend ScenarioDsl.() -> Unit) {
+        val key = SimpleScenario(scenarioTitle)
 
         assert(!lazyScenarios.containsKey(key)) { "Scenario with description $scenarioTitle already exists" }
 
         val dsl = object : ScenarioDsl {}
-        lazyScenarios[key] = LazyScenario(key) { dsl.scenarioBody() }
+        lazyScenarios[key] = LazyScenario(key, tags) { dsl.scenarioBody() }
     }
 
-    override fun <T> ScenarioExamples(scenarioTitle: String, examplesBody: ExamplesDsl<T>.() -> Unit): ExamplesDslTerminal<T> {
+    override fun <T : PepperExample> ScenarioExamples(
+        scenarioTitle: String,
+        examplesBody: ExamplesDsl<T>.() -> Unit
+    ): ExamplesDslTerminal<T> {
         val examples = mutableMapOf<String, T>()
         val examplesDsl = ExamplesDsl { examplesBlock ->
             val previousExample = examples.put(this, examplesBlock())
@@ -36,14 +39,14 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
 
         return ExamplesDslTerminal { scenarioBody ->
             for ((exampleTitle, example) in examples) {
-                val key = Example(scenarioTitle, exampleTitle)
+                val key = ExampleScenario(scenarioTitle, exampleTitle)
                 val titleWithExample = "$scenarioTitle: $exampleTitle"
                 assert(!lazyScenarios.containsKey(key)) { "Scenario with description $titleWithExample already exists" }
 
                 val dsl = object : ScenarioWithExampleDsl<T> {
                     override val example = example
                 }
-                val scenario = LazyScenario(key) { dsl.scenarioBody() }
+                val scenario = LazyScenario(key, example.tags) { dsl.scenarioBody() }
                 lazyScenarios[key] = scenario
             }
         }
@@ -53,7 +56,11 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
         stepsPerScenario[scenarioTitle] = stepsPerScenario[scenarioTitle].orEmpty() + stepIdentifier
     }
 
-    private inner class LazyScenario(override val key: ScenarioKey, private val rawScenarioBody: suspend () -> Unit) : Scenario {
+    private inner class LazyScenario(
+        override val key: ScenarioKey,
+        override val tags: List<String>,
+        private val rawScenarioBody: suspend () -> Unit
+    ) : Scenario {
 
         override val hasSteps get() = stepsPerScenario.containsKey(key.scenarioTitle)
 

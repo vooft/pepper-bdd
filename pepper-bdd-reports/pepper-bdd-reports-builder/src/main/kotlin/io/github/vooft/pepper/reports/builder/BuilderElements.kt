@@ -8,6 +8,7 @@ import java.time.Instant
 data class PepperScenarioBuilder(
     val className: String,
     val name: String,
+    val tags: List<String>,
     val steps: MutableList<PepperStepBuilder> = mutableListOf(),
     val startedAt: Instant = Instant.now(),
     var finishedAt: Instant? = null
