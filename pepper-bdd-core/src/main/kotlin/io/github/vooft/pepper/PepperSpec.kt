@@ -8,7 +8,10 @@ import io.kotest.core.spec.style.FunSpec
 import io.kotest.core.spec.style.scopes.addContainer
 import kotlinx.coroutines.withContext
 
-open class PepperSpec(scenarioBlock: PepperSpecDsl.() -> Unit) : FunSpec() {
+open class PepperSpec(tags: List<String>, scenarioBlock: PepperSpecDsl.() -> Unit) : FunSpec() {
+
+    constructor(scenarioBlock: PepperSpecDsl.() -> Unit) : this(emptyList(), scenarioBlock)
+
     init {
         val dsl = PepperSpecDslImpl()
         dsl.scenarioBlock()
@@ -20,7 +23,14 @@ open class PepperSpec(scenarioBlock: PepperSpecDsl.() -> Unit) : FunSpec() {
 
             addContainer(TestName("Scenario: ${scenario.key.title}"), false, null) {
                 val className = requireNotNull(this@PepperSpec::class.qualifiedName)
-                LowLevelReportListener.ifPresent { startScenario(className = className, name = scenario.key.title, tags = scenario.tags) }
+                LowLevelReportListener.ifPresent {
+                    startScenario(
+                        className = className,
+                        name = scenario.key.title,
+                        tags =
+                        tags + scenario.tags
+                    )
+                }
 
                 try {
                     withContext(CurrentTestScope(this)) {

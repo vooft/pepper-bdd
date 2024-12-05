@@ -26,6 +26,7 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
 
     override fun <T : PepperExample> ScenarioExamples(
         scenarioTitle: String,
+        tags: List<String>,
         examplesBody: ExamplesDsl<T>.() -> Unit
     ): ExamplesDslTerminal<T> {
         val examples = mutableMapOf<String, T>()
@@ -46,7 +47,7 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
                 val dsl = object : ScenarioWithExampleDsl<T> {
                     override val example = example
                 }
-                val scenario = LazyScenario(key, example.tags) { dsl.scenarioBody() }
+                val scenario = LazyScenario(key, tags + example.tags) { dsl.scenarioBody() }
                 lazyScenarios[key] = scenario
             }
         }

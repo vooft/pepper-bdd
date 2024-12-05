@@ -54,6 +54,12 @@ suspend fun `multiply {number} by two`(number: Int): Int {
 }
 
 @Step
+suspend fun `multiply {number} by three`(number: Int): Int {
+    delay(1)
+    return number * 3
+}
+
+@Step
 suspend fun `two ints are compared`(first: Int, second: Int): CompareResult<Int> {
     withContext(Dispatchers.IO) { printlnWithThread("comparing two ints, first=$first, second=$second") }
     delay(1)

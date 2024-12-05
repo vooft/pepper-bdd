@@ -2,7 +2,11 @@ package io.github.vooft.pepper.dsl
 
 interface PepperSpecDsl {
     fun Scenario(scenarioTitle: String, tags: List<String> = emptyList(), scenarioBody: suspend ScenarioDsl.() -> Unit)
-    fun <T : PepperExample> ScenarioExamples(scenarioTitle: String, examplesBody: ExamplesDsl<T>.() -> Unit): ExamplesDslTerminal<T>
+    fun <T : PepperExample> ScenarioExamples(
+        scenarioTitle: String,
+        tags: List<String> = emptyList(),
+        examplesBody: ExamplesDsl<T>.() -> Unit
+    ): ExamplesDslTerminal<T>
 }
 
 interface ScenarioDsl
