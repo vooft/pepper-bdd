@@ -1,0 +1,95 @@
+{
+  "id": "40cae3403958ff89979a8f79add5976adcc024a4",
+  "version": 1,
+  "className": "io.github.vooft.pepper.sample.FlakyScenariosSpec",
+  "name": "flaky scenario 9",
+  "tags": [
+    "Flaky"
+  ],
+  "steps": [
+    {
+      "id": "76d176eec509112bbf4826f64722a542a2b4eb92",
+      "prefix": "GIVEN",
+      "index": 0,
+      "name": "generate random string",
+      "status": "PASSED",
+      "arguments": [
+        {
+          "name": "prefix",
+          "type": "kotlin.String",
+          "value": "first"
+        }
+      ],
+      "result": "first 856797579",
+      "error": null,
+      "startedAt": "2024-12-05T17:33:38.011043Z",
+      "finishedAt": "2024-12-05T17:33:38.014024Z"
+    },
+    {
+      "id": "76d176eec509112bbf4826f64722a542a2b4eb92",
+      "prefix": "GIVEN",
+      "index": 1,
+      "name": "generate random string",
+      "status": "PASSED",
+      "arguments": [
+        {
+          "name": "prefix",
+          "type": "kotlin.String",
+          "value": "second"
+        }
+      ],
+      "result": "second 53633493",
+      "error": null,
+      "startedAt": "2024-12-05T17:33:38.014227Z",
+      "finishedAt": "2024-12-05T17:33:38.017164Z"
+    },
+    {
+      "id": "944007ae5d56a056c754860f21efa03075ae0dab",
+      "prefix": "WHEN",
+      "index": 2,
+      "name": "two strings are compared",
+      "status": "PASSED",
+      "arguments": [
+        {
+          "name": "first",
+          "type": "kotlin.String",
+          "value": "first 856797579"
+        },
+        {
+          "name": "second",
+          "type": "kotlin.String",
+          "value": "second 53633493"
+        }
+      ],
+      "result": "CompareResult(first=first 856797579, second=second 53633493, result=false)",
+      "error": null,
+      "startedAt": "2024-12-05T17:33:38.017373Z",
+      "finishedAt": "2024-12-05T17:33:38.019091Z"
+    },
+    {
+      "id": "f3b27ba8355644ef329dbd7d879320f54d3441c2",
+      "prefix": "THEN",
+      "index": 3,
+      "name": "compare result is 'false'",
+      "status": "PASSED",
+      "arguments": [
+        {
+          "name": "compareResult",
+          "type": "io.github.vooft.pepper.sample.CompareResult",
+          "value": "CompareResult(first=first 856797579, second=second 53633493, result=false)"
+        },
+        {
+          "name": "expected",
+          "type": "kotlin.Boolean",
+          "value": "false"
+        }
+      ],
+      "result": "kotlin.Unit",
+      "error": null,
+      "startedAt": "2024-12-05T17:33:38.019377Z",
+      "finishedAt": "2024-12-05T17:33:38.021246Z"
+    }
+  ],
+  "startedAt": "2024-12-05T17:33:38.010843Z",
+  "finishedAt": "2024-12-05T17:33:38.021384Z"
+}

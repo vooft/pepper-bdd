@@ -3,6 +3,9 @@
   "version": 1,
   "className": "io.github.vooft.pepper.sample.FlakyScenariosSpec",
   "name": "flaky scenario 6",
+  "tags": [
+    "Flaky"
+  ],
   "steps": [
     {
       "id": "76d176eec509112bbf4826f64722a542a2b4eb92",
@@ -17,10 +20,10 @@
           "value": "first"
         }
       ],
-      "result": "first 1908908283",
+      "result": "first 1102672496",
       "error": null,
-      "startedAt": "2024-11-21T19:51:02.442655Z",
-      "finishedAt": "2024-11-21T19:51:02.445654Z"
+      "startedAt": "2024-12-02T16:51:09.906648Z",
+      "finishedAt": "2024-12-02T16:51:09.909677Z"
     },
     {
       "id": "76d176eec509112bbf4826f64722a542a2b4eb92",
@@ -35,10 +38,10 @@
           "value": "second"
         }
       ],
-      "result": "second 1105986063",
+      "result": "second -1881495681",
       "error": null,
-      "startedAt": "2024-11-21T19:51:02.445884Z",
-      "finishedAt": "2024-11-21T19:51:02.448877Z"
+      "startedAt": "2024-12-02T16:51:09.909895Z",
+      "finishedAt": "2024-12-02T16:51:09.912867Z"
     },
     {
       "id": "944007ae5d56a056c754860f21efa03075ae0dab",
@@ -50,43 +53,46 @@
         {
           "name": "first",
           "type": "kotlin.String",
-          "value": "first 1908908283"
+          "value": "first 1102672496"
         },
         {
           "name": "second",
           "type": "kotlin.String",
-          "value": "second 1105986063"
+          "value": "second -1881495681"
         }
       ],
-      "result": "CompareResult(first=first 1908908283, second=second 1105986063, result=false)",
+      "result": "CompareResult(first=first 1102672496, second=second -1881495681, result=false)",
       "error": null,
-      "startedAt": "2024-11-21T19:51:02.449133Z",
-      "finishedAt": "2024-11-21T19:51:02.450953Z"
+      "startedAt": "2024-12-02T16:51:09.913061Z",
+      "finishedAt": "2024-12-02T16:51:09.914798Z"
     },
     {
-      "id": "f3b27ba8355644ef329dbd7d879320f54d3441c2",
+      "id": "cad1741ef3a803f805e3be72a50621effb24d3d7",
       "prefix": "THEN",
       "index": 3,
-      "name": "compare result is 'false'",
-      "status": "PASSED",
+      "name": "compare result is 'true'",
+      "status": "FAILED",
       "arguments": [
         {
           "name": "compareResult",
           "type": "io.github.vooft.pepper.sample.CompareResult",
-          "value": "CompareResult(first=first 1908908283, second=second 1105986063, result=false)"
+          "value": "CompareResult(first=first 1102672496, second=second -1881495681, result=false)"
         },
         {
           "name": "expected",
           "type": "kotlin.Boolean",
-          "value": "false"
+          "value": "true"
         }
       ],
-      "result": "kotlin.Unit",
-      "error": null,
-      "startedAt": "2024-11-21T19:51:02.451242Z",
-      "finishedAt": "2024-11-21T19:51:02.453080Z"
+      "result": null,
+      "error": {
+        "message": "Expected true, but got false",
+        "stacktrace": "java.lang.AssertionError: Expected true, but got false\n\tat io.github.vooft.pepper.sample.StepsKt.compare result is '{expected}'(Steps.kt:37)\n\tat io.github.vooft.pepper.sample.StepsKt$compare result is '{expected}'$1.invokeSuspend(Steps.kt)\n\tat kotlin.coroutines.jvm.internal.BaseContinuationImpl.resumeWith(ContinuationImpl.kt:33)\n\tat kotlinx.coroutines.DispatchedTask.run(DispatchedTask.kt:104)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)\n\tat java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)\n\tat java.base/java.lang.Thread.run(Thread.java:1583)\n"
+      },
+      "startedAt": "2024-12-02T16:51:09.915011Z",
+      "finishedAt": "2024-12-02T16:51:09.916778Z"
     }
   ],
-  "startedAt": "2024-11-21T19:51:02.442479Z",
-  "finishedAt": "2024-11-21T19:51:02.453228Z"
+  "startedAt": "2024-12-02T16:51:09.906459Z",
+  "finishedAt": "2024-12-02T16:51:09.918070Z"
 }

@@ -3,6 +3,7 @@
   "version": 1,
   "className": "io.github.vooft.pepper.sample.NestedStepsPepperSpec",
   "name": "Nested steps",
+  "tags": [],
   "steps": [
     {
       "id": "c79ea6f72cc94728dc7fb43c47e8764766148c27",
@@ -17,12 +18,12 @@
           "value": "both"
         }
       ],
-      "result": "(both -1794510189, both -929786581)",
+      "result": "(both 1705551575, both 1850899926)",
       "error": null,
-      "startedAt": "2024-11-21T19:50:43.048275Z",
-      "finishedAt": "2024-11-21T19:50:43.053867Z"
+      "startedAt": "2024-12-02T16:51:10.010429Z",
+      "finishedAt": "2024-12-02T16:51:10.016084Z"
     }
   ],
-  "startedAt": "2024-11-21T19:50:43.048103Z",
-  "finishedAt": "2024-11-21T19:50:43.054019Z"
+  "startedAt": "2024-12-02T16:51:10.010269Z",
+  "finishedAt": "2024-12-02T16:51:10.016253Z"
 }

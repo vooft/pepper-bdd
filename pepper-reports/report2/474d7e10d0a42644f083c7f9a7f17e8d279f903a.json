@@ -3,6 +3,10 @@
   "version": 1,
   "className": "io.github.vooft.pepper.sample.ExamplesSpec",
   "name": "multiply by two: example 1",
+  "tags": [
+    "Examples",
+    "1"
+  ],
   "steps": [
     {
       "id": "17cfb7ebe29e085fc0fa8a19fe6b6a600a8e2a3e",
@@ -19,8 +23,8 @@
       ],
       "result": "2",
       "error": null,
-      "startedAt": "2024-11-21T19:51:02.258524Z",
-      "finishedAt": "2024-11-21T19:51:02.275267Z"
+      "startedAt": "2024-12-02T16:51:09.716916Z",
+      "finishedAt": "2024-12-02T16:51:09.734025Z"
     },
     {
       "id": "2bd00bbc5fbde7cd2318212f33b33d8f3c24e6c5",
@@ -42,8 +46,8 @@
       ],
       "result": "CompareResult(first=2, second=2, result=true)",
       "error": null,
-      "startedAt": "2024-11-21T19:51:02.278693Z",
-      "finishedAt": "2024-11-21T19:51:02.284728Z"
+      "startedAt": "2024-12-02T16:51:09.737627Z",
+      "finishedAt": "2024-12-02T16:51:09.743676Z"
     },
     {
       "id": "cad1741ef3a803f805e3be72a50621effb24d3d7",
@@ -65,10 +69,10 @@
       ],
       "result": "kotlin.Unit",
       "error": null,
-      "startedAt": "2024-11-21T19:51:02.285178Z",
-      "finishedAt": "2024-11-21T19:51:02.288373Z"
+      "startedAt": "2024-12-02T16:51:09.744288Z",
+      "finishedAt": "2024-12-02T16:51:09.747476Z"
     }
   ],
-  "startedAt": "2024-11-21T19:51:02.255833Z",
-  "finishedAt": "2024-11-21T19:51:02.288864Z"
+  "startedAt": "2024-12-02T16:51:09.709416Z",
+  "finishedAt": "2024-12-02T16:51:09.748023Z"
 }

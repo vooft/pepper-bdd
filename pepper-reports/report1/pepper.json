@@ -1,4 +1,5 @@
 {
+  "id": "450f4e23cb463ae58e47367e613db2dc7616b872",
   "version": 1,
   "scenarios": [
     {
@@ -29,12 +30,12 @@
     {
       "id": "a32b1bb0538485cb54e4a72724a3f28fefb7dd79",
       "name": "flaky scenario 1",
-      "status": "FAILED"
+      "status": "PASSED"
     },
     {
       "id": "a1f6b8e86a63d51872b2284c9e978cd19e141a84",
       "name": "flaky scenario 2",
-      "status": "FAILED"
+      "status": "PASSED"
     },
     {
       "id": "05c8902404f939d31151c625d342e339c591962d",
@@ -49,12 +50,12 @@
     {
       "id": "07850766159aac6036c8f5b4dc07e12385d185b6",
       "name": "flaky scenario 5",
-      "status": "FAILED"
+      "status": "PASSED"
     },
     {
       "id": "ceb9ce10fe2f0d474b2d166b028d4a3ecce1878a",
       "name": "flaky scenario 6",
-      "status": "PASSED"
+      "status": "FAILED"
     },
     {
       "id": "12be41e0149ab75be496f467b1c6b3670c0750f9",
@@ -64,7 +65,7 @@
     {
       "id": "ac44329f8b56a30215de0bc7ed23a5bfb4a57d2c",
       "name": "flaky scenario 8",
-      "status": "PASSED"
+      "status": "FAILED"
     },
     {
       "id": "40cae3403958ff89979a8f79add5976adcc024a4",
@@ -102,6 +103,6 @@
       "status": "PASSED"
     }
   ],
-  "startedAt": "2024-11-21T19:50:42.717089Z",
-  "finishedAt": "2024-11-21T19:50:43.090061Z"
+  "startedAt": "2024-12-02T16:51:09.661560Z",
+  "finishedAt": "2024-12-02T16:51:10.053954Z"
 }
