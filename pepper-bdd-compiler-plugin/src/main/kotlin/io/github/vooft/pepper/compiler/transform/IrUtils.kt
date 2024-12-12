@@ -35,7 +35,7 @@ fun IrCall.findScenarioTitle(): String? {
     if (symbol.owner.name.asString() in listOf("Scenario", "ScenarioExamples") &&
         dispatchReceiver?.type?.classFqName == PepperReferences.pepperSpecDslFqName
     ) {
-        val titleConst = getValueArgument(0) as? IrConst<*> ?: return null
+        val titleConst = getValueArgument(0) as? IrConst ?: return null
         return titleConst.value as? String
     }
 
