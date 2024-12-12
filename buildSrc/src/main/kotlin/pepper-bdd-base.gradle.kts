@@ -1,5 +1,4 @@
 
-import gradle.kotlin.dsl.accessors._8366d5ee69aa579ad2a32fcdee94f415.detekt
 import io.gitlab.arturbosch.detekt.Detekt
 import org.jmailen.gradle.kotlinter.tasks.FormatTask
 import org.jmailen.gradle.kotlinter.tasks.LintTask

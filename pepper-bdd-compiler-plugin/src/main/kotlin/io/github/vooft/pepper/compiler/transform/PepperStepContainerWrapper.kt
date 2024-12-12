@@ -178,7 +178,6 @@ internal class PepperStepContainerWrapper(
             type = argumentsMapType,
             symbol = listOfSymbol,
             typeArgumentsCount = 2,
-            valueArgumentsCount = 1,
             origin = null,
             superQualifierSymbol = null
         ).apply {
@@ -200,7 +199,6 @@ internal class PepperStepContainerWrapper(
                             symbol = stepArgumentConstructorCall,
                             typeArgumentsCount = 0,
                             constructorTypeArgumentsCount = 0,
-                            valueArgumentsCount = 3,
                         ).apply {
                             putValueArgument(0, name.toIrConst(stringType))
 
