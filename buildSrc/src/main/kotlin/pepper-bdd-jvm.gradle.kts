@@ -29,7 +29,7 @@ tasks.withType<Test> {
 
 tasks.withType<KotlinCompile> {
     compilerOptions {
-        freeCompilerArgs.addAll("-Xjsr305=strict", "-Xcontext-receivers")
+        freeCompilerArgs.addAll("-Xjsr305=strict", "-Xcontext-parameters")
         allWarningsAsErrors = true
         jvmTarget.set(JvmTarget.JVM_11)
     }

@@ -103,8 +103,8 @@ internal class PepperStepContainerWrapper(
 
             // StepContainer("stepId", { originalCall(arg1, arg2) }, mapOf("arg1" to arg1, "arg2" to arg2))
             +irCall(references.stepContainerSymbol).apply {
-                this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
-                putTypeArgument(0, originalReturnType)
+                this.pepperExtensionReceiver = irGet(requireNotNull(parentFunction.pepperExtensionReceiverParameter))
+                typeArguments[0] = originalReturnType
 
                 val currentCall = originalCall.symbol.owner.name.asString()
 
@@ -112,9 +112,9 @@ internal class PepperStepContainerWrapper(
                 val step = currentScenario.remainingSteps.removeFirst()
                 require(step.name == currentCall) { "Step name mismatch: ${step.name} != $currentCall" }
 
-                putValueArgument(index = 0, valueArgument = irString(step.id))
-                putValueArgument(index = 1, valueArgument = lambda)
-                putValueArgument(index = 2, valueArgument = valueArgumentsToStepArgumentsList(variables))
+                arguments[0] = irString(step.id)
+                arguments[1] = lambda
+                arguments[2] = valueArgumentsToStepArgumentsList(variables)
             }
         }
     }
@@ -125,9 +125,10 @@ internal class PepperStepContainerWrapper(
     private fun IrCall.replaceValueArgumentsWithVariables(outerFunction: IrFunction): Map<String, IrVariable> {
         val result = mutableMapOf<String, IrVariable>()
 
-        for (index in 0..<valueArgumentsCount) {
-            val parameter = symbol.owner.valueParameters[index]
-            val expression = getValueArgument(index) ?: continue
+        // TODO: improve
+        for (index in 0..<symbol.owner.pepperValueParameters.size) {
+            val parameter = symbol.owner.pepperValueParameters[index]
+            val expression = arguments[index] ?: continue
 
             val variable = IrVariableImpl(
                 startOffset = UNDEFINED_OFFSET,
@@ -142,14 +143,11 @@ internal class PepperStepContainerWrapper(
             )
             variable.parent = outerFunction
             variable.initializer = expression
-            putValueArgument(
-                index = index,
-                valueArgument = IrGetValueImpl(
-                    startOffset = expression.startOffset,
-                    endOffset = expression.endOffset,
-                    type = expression.type,
-                    symbol = variable.symbol,
-                )
+            arguments[index] = IrGetValueImpl(
+                startOffset = expression.startOffset,
+                endOffset = expression.endOffset,
+                type = expression.type,
+                symbol = variable.symbol,
             )
 
             result[parameter.name.asString()] = variable
@@ -169,7 +167,7 @@ internal class PepperStepContainerWrapper(
         val stepArgumentConstructorCall = references.stepArgumentClassSymbol.constructors.single()
 
         val listOfSymbol = pluginContext.referenceFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("listOf")))
-            .first { it.owner.valueParameters.size == 1 && it.owner.valueParameters.first().isVararg }
+            .first { it.owner.pepperValueParameters.size == 1 && it.owner.pepperValueParameters.first().isVararg }
         val argumentsMapType = irBuiltIns.mapClass.typeWith(stringType, nullableAnyType)
 
         return IrCallImpl(
@@ -181,41 +179,35 @@ internal class PepperStepContainerWrapper(
             origin = null,
             superQualifierSymbol = null
         ).apply {
-            putTypeArgument(0, stringType)
-            putTypeArgument(1, nullableAnyType)
+            typeArguments[0] = stringType
+            typeArguments[1] = nullableAnyType
 
-            putValueArgument(
-                index = 0,
-                valueArgument = IrVarargImpl(
-                    startOffset = UNDEFINED_OFFSET,
-                    endOffset = UNDEFINED_OFFSET,
-                    type = irBuiltIns.arrayClass.typeWith(references.stepArgumentClassSymbol.defaultType),
-                    varargElementType = references.stepArgumentClassSymbol.defaultType,
-                    elements = arguments.map { (name, expression) ->
-                        IrConstructorCallImpl(
-                            startOffset = UNDEFINED_OFFSET,
-                            endOffset = UNDEFINED_OFFSET,
-                            type = references.stepArgumentClassSymbol.defaultType,
-                            symbol = stepArgumentConstructorCall,
-                            typeArgumentsCount = 0,
-                            constructorTypeArgumentsCount = 0,
-                        ).apply {
-                            putValueArgument(0, name.toIrConst(stringType))
+            this.arguments[0] = IrVarargImpl(
+                startOffset = UNDEFINED_OFFSET,
+                endOffset = UNDEFINED_OFFSET,
+                type = irBuiltIns.arrayClass.typeWith(references.stepArgumentClassSymbol.defaultType),
+                varargElementType = references.stepArgumentClassSymbol.defaultType,
+                elements = arguments.map { (name, expression) ->
+                    IrConstructorCallImpl(
+                        startOffset = UNDEFINED_OFFSET,
+                        endOffset = UNDEFINED_OFFSET,
+                        type = references.stepArgumentClassSymbol.defaultType,
+                        symbol = stepArgumentConstructorCall,
+                        typeArgumentsCount = 0,
+                        constructorTypeArgumentsCount = 0,
+                    ).apply {
+                        this.arguments[0] = name.toIrConst(stringType)
 
-                            // TODO: improve generics type resolution
-                            putValueArgument(1, (expression.type.classFqName?.asString() ?: "null").toIrConst(stringType))
-                            putValueArgument(
-                                2,
-                                IrGetValueImpl(
-                                    startOffset = expression.startOffset,
-                                    endOffset = expression.endOffset,
-                                    type = nullableAnyType,
-                                    symbol = expression.symbol,
-                                )
-                            )
-                        }
+                        // TODO: improve generics type resolution
+                        this.arguments[1] = (expression.type.classFqName?.asString() ?: "null").toIrConst(stringType)
+                        this.arguments[2] = IrGetValueImpl(
+                            startOffset = expression.startOffset,
+                            endOffset = expression.endOffset,
+                            type = nullableAnyType,
+                            symbol = expression.symbol,
+                        )
                     }
-                )
+                }
             )
         }
     }
