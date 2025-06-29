@@ -55,7 +55,7 @@ internal class PepperRemainingStepsAdder(
 
         val parentFunction = allScopes.reversed().firstOrNull {
             val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
-            val extension = element.extensionReceiverParameter ?: return@firstOrNull false
+            val extension = element.pepperExtensionReceiverParameter ?: return@firstOrNull false
             element.name.asString() == "<anonymous>" && extension.type.classOrFail == references.pepperSpecDslSymbol
         }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with ${references.pepperSpecDslSymbol} receiver")
 
@@ -66,7 +66,7 @@ internal class PepperRemainingStepsAdder(
             var indexInGroup = 0
             for ((index, step) in currentScenarioSteps.withIndex()) {
                 +irCall(references.addStep).apply {
-                    this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
+                    this.pepperExtensionReceiver = irGet(requireNotNull(parentFunction.pepperExtensionReceiverParameter))
 
                     if (previousPrefix == step.prefix) {
                         indexInGroup++
@@ -75,13 +75,13 @@ internal class PepperRemainingStepsAdder(
                         indexInGroup = 0
                     }
 
-                    putValueArgument(0, irString(scenarioTitle))
-                    putValueArgument(1, irString(step.id))
-                    putValueArgument(2, irString(step.prefix.name))
-                    putValueArgument(3, irInt(indexInGroup))
-                    putValueArgument(4, irInt(index))
-                    putValueArgument(5, irInt(currentScenarioSteps.size))
-                    putValueArgument(6, irString(step.name))
+                    arguments[0] = irString(scenarioTitle)
+                    arguments[1] = irString(step.id)
+                    arguments[2] = irString(step.prefix.name)
+                    arguments[3] = irInt(indexInGroup)
+                    arguments[4] = irInt(index)
+                    arguments[5] = irInt(currentScenarioSteps.size)
+                    arguments[6] = irString(step.name)
                 }
             }
 
