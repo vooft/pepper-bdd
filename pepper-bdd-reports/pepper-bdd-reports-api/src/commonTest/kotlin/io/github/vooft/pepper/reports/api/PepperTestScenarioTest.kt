@@ -7,10 +7,11 @@ import io.github.vooft.pepper.reports.api.PepperTestStepDto.StepArgumentDto
 import io.github.vooft.pepper.reports.api.PepperTestStepDto.StepErrorDto
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.core.spec.style.ShouldSpec
-import kotlinx.datetime.Instant
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
 class PepperTestScenarioTest : ShouldSpec({
     should("serialize PepperTestScenario") {
         val scenario = PepperTestScenarioDto(

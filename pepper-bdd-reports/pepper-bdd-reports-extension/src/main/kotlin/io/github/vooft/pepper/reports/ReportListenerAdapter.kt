@@ -16,11 +16,13 @@ import io.github.vooft.pepper.reports.builder.PepperStepBuilder.StepError
 import io.github.vooft.pepper.reports.builder.sha1
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.datetime.toKotlinInstant
 import java.time.Instant
+import kotlin.time.ExperimentalTime
+import kotlin.time.toKotlinInstant
 
 private const val VERSION = 1
 
+@OptIn(ExperimentalTime::class)
 class ReportListenerAdapter(private val listener: PepperReportListener) : LowLevelReportListener {
 
     private val startedAt = Instant.now()
@@ -114,6 +116,7 @@ class ReportListenerAdapter(private val listener: PepperReportListener) : LowLev
     }
 }
 
+@OptIn(ExperimentalTime::class)
 private fun PepperScenarioBuilder.toReport() = PepperTestScenarioDto(
     id = PepperTestScenarioDto.ScenarioId(id),
     version = VERSION,
@@ -125,6 +128,7 @@ private fun PepperScenarioBuilder.toReport() = PepperTestScenarioDto(
     finishedAt = requireNotNull(finishedAt) { "Missing finishedAt at scenario $name" }.toKotlinInstant()
 )
 
+@OptIn(ExperimentalTime::class)
 private fun PepperStepBuilder.toReport() = PepperTestStepDto(
     id = PepperTestStepDto.StepId(id),
     index = index,

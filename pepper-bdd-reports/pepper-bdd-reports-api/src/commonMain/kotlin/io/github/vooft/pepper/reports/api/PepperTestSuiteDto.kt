@@ -1,11 +1,14 @@
+@file:OptIn(ExperimentalTime::class)
+
 package io.github.vooft.pepper.reports.api
 
 import io.github.vooft.pepper.reports.api.PepperTestScenarioDto.ScenarioId
 import io.github.vooft.pepper.reports.api.PepperTestStatus.FAILED
 import io.github.vooft.pepper.reports.api.PepperTestStatus.PASSED
-import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlin.jvm.JvmInline
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 @Serializable
 data class PepperTestSuiteDto(

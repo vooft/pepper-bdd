@@ -2,10 +2,11 @@ package io.github.vooft.pepper.reports.api
 
 import io.kotest.assertions.json.shouldEqualJson
 import io.kotest.core.spec.style.ShouldSpec
-import kotlinx.datetime.Instant
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
 class PepperTestSuiteTest : ShouldSpec({
     should("serialize PepperTestSuite") {
         val project = PepperTestSuiteDto(
