@@ -13,8 +13,8 @@ import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.classFqName
-import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.util.isSubtypeOfClass
 import java.util.UUID
 
 internal class PepperScenarioStepsCollector(private val pluginContext: IrPluginContext, private val debugLogger: DebugLogger) :
@@ -51,6 +51,7 @@ internal class PepperScenarioStepsCollector(private val pluginContext: IrPluginC
 
         val scenarioTitle = expression.findScenarioTitle()
         if (scenarioTitle != null) {
+            debugLogger.log("Found scenario title: $scenarioTitle")
             currentScenario.scenarioIdentifier?.let { visitedScenarios[it] = currentScenario.steps.toList() }
 
             currentScenario = CurrentScenarioStorage(currentScenario.className)
@@ -73,7 +74,10 @@ internal class PepperScenarioStepsCollector(private val pluginContext: IrPluginC
     }
 
     private fun CurrentScenarioStorage.collectStep(expression: IrCall) {
+        debugLogger.log("Collecting a step for scenario `$scenarionTitle` from $expression")
+
         if (!expression.symbol.owner.hasAnnotation(references.stepAnnotationSymbol)) {
+            debugLogger.log("Skipping: no @Step annotation")
             return
         }
 
@@ -82,7 +86,7 @@ internal class PepperScenarioStepsCollector(private val pluginContext: IrPluginC
                 id = UUID.randomUUID().toString(),
                 prefix = stepPrefix,
                 name = expression.symbol.owner.name.asString()
-            )
+            ).also { debugLogger.log("Collected step: ${it.name}") }
         )
     }
 

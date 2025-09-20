@@ -16,7 +16,7 @@ import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrFail
-import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
+import org.jetbrains.kotlin.ir.util.isSubtypeOfClass
 
 internal class PepperRemainingStepsAdder(
     private val steps: Map<ScenarioIdentifier, List<StepIdentifier>>,
@@ -55,7 +55,7 @@ internal class PepperRemainingStepsAdder(
 
         val parentFunction = allScopes.reversed().firstOrNull {
             val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
-            val extension = element.extensionReceiverParameter ?: return@firstOrNull false
+            val extension = element.pepperExtensionReceiverParameter ?: return@firstOrNull false
             element.name.asString() == "<anonymous>" && extension.type.classOrFail == references.pepperSpecDslSymbol
         }?.irElement as? IrSimpleFunction ?: error("Cannot find lambda function with ${references.pepperSpecDslSymbol} receiver")
 
@@ -66,8 +66,6 @@ internal class PepperRemainingStepsAdder(
             var indexInGroup = 0
             for ((index, step) in currentScenarioSteps.withIndex()) {
                 +irCall(references.addStep).apply {
-                    this.extensionReceiver = irGet(requireNotNull(parentFunction.extensionReceiverParameter))
-
                     if (previousPrefix == step.prefix) {
                         indexInGroup++
                     } else {
@@ -75,13 +73,15 @@ internal class PepperRemainingStepsAdder(
                         indexInGroup = 0
                     }
 
-                    putValueArgument(0, irString(scenarioTitle))
-                    putValueArgument(1, irString(step.id))
-                    putValueArgument(2, irString(step.prefix.name))
-                    putValueArgument(3, irInt(indexInGroup))
-                    putValueArgument(4, irInt(index))
-                    putValueArgument(5, irInt(currentScenarioSteps.size))
-                    putValueArgument(6, irString(step.name))
+                    var argIndex = 0
+                    arguments[argIndex++] = irGet(requireNotNull(parentFunction.pepperExtensionReceiverParameter))
+                    arguments[argIndex++] = irString(scenarioTitle)
+                    arguments[argIndex++] = irString(step.id)
+                    arguments[argIndex++] = irString(step.prefix.name)
+                    arguments[argIndex++] = irInt(indexInGroup)
+                    arguments[argIndex++] = irInt(index)
+                    arguments[argIndex++] = irInt(currentScenarioSteps.size)
+                    arguments[argIndex++] = irString(step.name)
                 }
             }
 

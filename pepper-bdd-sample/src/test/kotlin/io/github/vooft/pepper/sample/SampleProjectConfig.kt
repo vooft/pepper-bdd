@@ -4,7 +4,7 @@ import io.github.vooft.pepper.reports.PepperBddExtension
 import io.kotest.core.config.AbstractProjectConfig
 
 object SampleProjectConfig : AbstractProjectConfig() {
-    override fun extensions() = listOf(
+    override val extensions = listOf(
         PepperBddExtension.writeToFiles("build/reports/pepper")
     )
 }

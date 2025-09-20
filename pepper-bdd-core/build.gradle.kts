@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
-    api(libs.kotest.framework.api)
+    api(libs.kotest.framework.engine)
+    api(libs.kotlin.reflect)
     implementation(project(":pepper-bdd-reports:pepper-bdd-reports-builder"))
 }

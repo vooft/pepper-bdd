@@ -10,7 +10,10 @@ import org.jetbrains.kotlin.ir.builders.declarations.buildFun
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationOrigin
 import org.jetbrains.kotlin.ir.declarations.IrDeclarationParent
+import org.jetbrains.kotlin.ir.declarations.IrFunction
+import org.jetbrains.kotlin.ir.declarations.IrParameterKind
 import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
+import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrConst
 import org.jetbrains.kotlin.ir.expressions.IrFunctionExpression
@@ -18,16 +21,17 @@ import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.expressions.impl.IrFunctionExpressionImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
-import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.types.typeWith
+import org.jetbrains.kotlin.ir.util.isSubtypeOfClass
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstanceOrNull
 
 fun List<ScopeWithIr>.findScenarioDslBlock(references: PepperReferences) = reversed().firstOrNull {
     val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
-    val extension = element.extensionReceiverParameter ?: return@firstOrNull false
+    val extension = element.pepperExtensionReceiverParameter ?: return@firstOrNull false
     element.name.asString() == "<anonymous>" && extension.type.isSubtypeOfClass(references.scenarioDslSymbol)
 }?.irElement as? IrSimpleFunction
 
@@ -35,7 +39,7 @@ fun IrCall.findScenarioTitle(): String? {
     if (symbol.owner.name.asString() in listOf("Scenario", "ScenarioExamples") &&
         dispatchReceiver?.type?.classFqName == PepperReferences.pepperSpecDslFqName
     ) {
-        val titleConst = getValueArgument(0) as? IrConst ?: return null
+        val titleConst = arguments.firstIsInstanceOrNull<IrConst>() ?: return null
         return titleConst.value as? String
     }
 
@@ -103,4 +107,13 @@ fun IrBuilderWithScope.irLambda(
         parent = lambdaParent
     }
     return IrFunctionExpressionImpl(startOffset, endOffset, lambdaType, lambda, IrStatementOrigin.LAMBDA)
+}
+
+val IrFunction.pepperExtensionReceiverParameter: IrValueParameter? get() = parameters.firstOrNull {
+    it.kind == IrParameterKind.ExtensionReceiver
+}
+
+val IrFunction.pepperValueParameters: List<IrValueParameter> get() = parameters.filter {
+    it.kind == IrParameterKind.Regular ||
+        it.kind == IrParameterKind.Context
 }
