@@ -64,6 +64,7 @@ private suspend fun retrieveRemainingSteps(currentStepId: String): MutableList<S
     val remainingSteps = requireNotNull(currentCoroutineContext()[PepperRemainingSteps]) {
         "Remaining steps are missing in the context"
     }.steps
+
     while (remainingSteps.isNotEmpty() && remainingSteps.first().id != currentStepId) {
         remainingSteps.removeFirst()
     }

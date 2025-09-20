@@ -103,7 +103,6 @@ internal class PepperStepContainerWrapper(
 
             // StepContainer("stepId", { originalCall(arg1, arg2) }, mapOf("arg1" to arg1, "arg2" to arg2))
             +irCall(references.stepContainerSymbol).apply {
-                this.pepperExtensionReceiver = irGet(requireNotNull(parentFunction.pepperExtensionReceiverParameter))
                 typeArguments[0] = originalReturnType
 
                 val currentCall = originalCall.symbol.owner.name.asString()
@@ -112,9 +111,12 @@ internal class PepperStepContainerWrapper(
                 val step = currentScenario.remainingSteps.removeFirst()
                 require(step.name == currentCall) { "Step name mismatch: ${step.name} != $currentCall" }
 
-                arguments[0] = irString(step.id)
-                arguments[1] = lambda
-                arguments[2] = valueArgumentsToStepArgumentsList(variables)
+                var argIndex = 0
+
+                arguments[argIndex++] = irGet(requireNotNull(parentFunction.pepperExtensionReceiverParameter))
+                arguments[argIndex++] = irString(step.id)
+                arguments[argIndex++] = lambda
+                arguments[argIndex++] = valueArgumentsToStepArgumentsList(variables)
             }
         }
     }

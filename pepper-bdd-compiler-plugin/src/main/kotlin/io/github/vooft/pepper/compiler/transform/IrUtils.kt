@@ -16,8 +16,6 @@ import org.jetbrains.kotlin.ir.declarations.IrSimpleFunction
 import org.jetbrains.kotlin.ir.declarations.IrValueParameter
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrConst
-import org.jetbrains.kotlin.ir.expressions.IrExpression
-import org.jetbrains.kotlin.ir.expressions.IrFunctionAccessExpression
 import org.jetbrains.kotlin.ir.expressions.IrFunctionExpression
 import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.expressions.impl.IrFunctionExpressionImpl
@@ -29,6 +27,7 @@ import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
+import org.jetbrains.kotlin.utils.addToStdlib.firstIsInstanceOrNull
 
 fun List<ScopeWithIr>.findScenarioDslBlock(references: PepperReferences) = reversed().firstOrNull {
     val element = it.irElement as? IrSimpleFunction ?: return@firstOrNull false
@@ -40,7 +39,7 @@ fun IrCall.findScenarioTitle(): String? {
     if (symbol.owner.name.asString() in listOf("Scenario", "ScenarioExamples") &&
         dispatchReceiver?.type?.classFqName == PepperReferences.pepperSpecDslFqName
     ) {
-        val titleConst = arguments[0] as? IrConst ?: return null
+        val titleConst = arguments.firstIsInstanceOrNull<IrConst>() ?: return null
         return titleConst.value as? String
     }
 
@@ -111,14 +110,9 @@ fun IrBuilderWithScope.irLambda(
 }
 
 val IrFunction.pepperExtensionReceiverParameter: IrValueParameter? get() = parameters.firstOrNull {
-    it.kind ==
-        IrParameterKind.ExtensionReceiver
+    it.kind == IrParameterKind.ExtensionReceiver
 }
-var IrFunctionAccessExpression.pepperExtensionReceiver: IrExpression?
-    get() = arguments[symbol.owner.parameters.indexOfFirst { it.kind == IrParameterKind.ExtensionReceiver }]
-    set(value) {
-        arguments[symbol.owner.parameters.indexOfFirst { it.kind == IrParameterKind.ExtensionReceiver }] = value
-    }
+
 val IrFunction.pepperValueParameters: List<IrValueParameter> get() = parameters.filter {
     it.kind == IrParameterKind.Regular ||
         it.kind == IrParameterKind.Context

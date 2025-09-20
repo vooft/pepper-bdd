@@ -66,8 +66,6 @@ internal class PepperRemainingStepsAdder(
             var indexInGroup = 0
             for ((index, step) in currentScenarioSteps.withIndex()) {
                 +irCall(references.addStep).apply {
-                    this.pepperExtensionReceiver = irGet(requireNotNull(parentFunction.pepperExtensionReceiverParameter))
-
                     if (previousPrefix == step.prefix) {
                         indexInGroup++
                     } else {
@@ -75,13 +73,15 @@ internal class PepperRemainingStepsAdder(
                         indexInGroup = 0
                     }
 
-                    arguments[0] = irString(scenarioTitle)
-                    arguments[1] = irString(step.id)
-                    arguments[2] = irString(step.prefix.name)
-                    arguments[3] = irInt(indexInGroup)
-                    arguments[4] = irInt(index)
-                    arguments[5] = irInt(currentScenarioSteps.size)
-                    arguments[6] = irString(step.name)
+                    var argIndex = 0
+                    arguments[argIndex++] = irGet(requireNotNull(parentFunction.pepperExtensionReceiverParameter))
+                    arguments[argIndex++] = irString(scenarioTitle)
+                    arguments[argIndex++] = irString(step.id)
+                    arguments[argIndex++] = irString(step.prefix.name)
+                    arguments[argIndex++] = irInt(indexInGroup)
+                    arguments[argIndex++] = irInt(index)
+                    arguments[argIndex++] = irInt(currentScenarioSteps.size)
+                    arguments[argIndex++] = irString(step.name)
                 }
             }
 
