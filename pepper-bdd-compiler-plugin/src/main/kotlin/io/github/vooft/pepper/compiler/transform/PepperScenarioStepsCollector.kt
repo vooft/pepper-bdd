@@ -13,8 +13,8 @@ import org.jetbrains.kotlin.ir.declarations.IrConstructor
 import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.classFqName
-import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.util.hasAnnotation
+import org.jetbrains.kotlin.ir.util.isSubtypeOfClass
 import java.util.UUID
 
 internal class PepperScenarioStepsCollector(private val pluginContext: IrPluginContext, private val debugLogger: DebugLogger) :

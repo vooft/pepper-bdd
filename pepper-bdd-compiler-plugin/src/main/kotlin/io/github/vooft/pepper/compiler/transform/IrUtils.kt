@@ -23,8 +23,8 @@ import org.jetbrains.kotlin.ir.expressions.IrStatementOrigin
 import org.jetbrains.kotlin.ir.expressions.impl.IrFunctionExpressionImpl
 import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.classFqName
-import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
 import org.jetbrains.kotlin.ir.types.typeWith
+import org.jetbrains.kotlin.ir.util.isSubtypeOfClass
 import org.jetbrains.kotlin.name.CallableId
 import org.jetbrains.kotlin.name.ClassId
 import org.jetbrains.kotlin.name.FqName
@@ -110,10 +110,16 @@ fun IrBuilderWithScope.irLambda(
     return IrFunctionExpressionImpl(startOffset, endOffset, lambdaType, lambda, IrStatementOrigin.LAMBDA)
 }
 
-val IrFunction.pepperExtensionReceiverParameter: IrValueParameter? get() = parameters.firstOrNull { it.kind == IrParameterKind.ExtensionReceiver }
+val IrFunction.pepperExtensionReceiverParameter: IrValueParameter? get() = parameters.firstOrNull {
+    it.kind ==
+        IrParameterKind.ExtensionReceiver
+}
 var IrFunctionAccessExpression.pepperExtensionReceiver: IrExpression?
     get() = arguments[symbol.owner.parameters.indexOfFirst { it.kind == IrParameterKind.ExtensionReceiver }]
     set(value) {
         arguments[symbol.owner.parameters.indexOfFirst { it.kind == IrParameterKind.ExtensionReceiver }] = value
     }
-val IrFunction.pepperValueParameters: List<IrValueParameter> get() = parameters.filter { it.kind == IrParameterKind.Regular || it.kind == IrParameterKind.Context }
+val IrFunction.pepperValueParameters: List<IrValueParameter> get() = parameters.filter {
+    it.kind == IrParameterKind.Regular ||
+        it.kind == IrParameterKind.Context
+}

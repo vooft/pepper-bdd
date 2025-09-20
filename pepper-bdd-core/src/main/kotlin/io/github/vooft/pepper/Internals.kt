@@ -4,15 +4,18 @@ import io.github.vooft.pepper.helper.StepArgument
 import io.github.vooft.pepper.reports.builder.LowLevelReportListener
 import io.kotest.common.KotestInternal
 import io.kotest.core.names.TestName
-import io.kotest.core.source.sourceRef
+import io.kotest.core.source.SourceRef
+import io.kotest.core.spec.Spec
 import io.kotest.core.test.NestedTest
 import io.kotest.core.test.TestScope
 import io.kotest.core.test.TestType.Test
 import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.AbstractCoroutineContextElement
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.coroutineContext
+import kotlin.reflect.KClass
+import kotlin.reflect.full.isSubclassOf
 
 @OptIn(KotestInternal::class)
 internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, arguments: List<StepArgument>): R {
@@ -58,7 +61,9 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
 }
 
 private suspend fun retrieveRemainingSteps(currentStepId: String): MutableList<StepIdentifier> {
-    val remainingSteps = requireNotNull(coroutineContext[PepperRemainingSteps]) { "Remaining steps are missing in the context" }.steps
+    val remainingSteps = requireNotNull(currentCoroutineContext()[PepperRemainingSteps]) {
+        "Remaining steps are missing in the context"
+    }.steps
     while (remainingSteps.isNotEmpty() && remainingSteps.first().id != currentStepId) {
         remainingSteps.removeFirst()
     }
@@ -66,12 +71,16 @@ private suspend fun retrieveRemainingSteps(currentStepId: String): MutableList<S
     return remainingSteps
 }
 
-private suspend fun currentTestScope() = requireNotNull(coroutineContext[CurrentTestScope]) { "Test scope is missing in the context" }.scope
+private suspend fun currentTestScope() = requireNotNull(currentCoroutineContext()[CurrentTestScope]) {
+    "Test scope is missing in the context"
+}.scope
 
 @OptIn(KotestInternal::class)
 internal suspend fun registerRemainingSteps() {
-    val remainingSteps = requireNotNull(coroutineContext[PepperRemainingSteps]) { "Remaining steps are missing in the context" }.steps
-    val currentScope = requireNotNull(coroutineContext[CurrentTestScope]) { "Test scope is missing in the context" }.scope
+    val remainingSteps = requireNotNull(currentCoroutineContext()[PepperRemainingSteps]) {
+        "Remaining steps are missing in the context"
+    }.steps
+    val currentScope = requireNotNull(currentCoroutineContext()[CurrentTestScope]) { "Test scope is missing in the context" }.scope
 
     for (remainingStep in remainingSteps) {
         LowLevelReportListener.ifPresent {
@@ -98,7 +107,14 @@ internal data class StepIdentifier(
     val totalStepsInTest: Int,
     val name: String
 ) {
-    fun toTestName(substituted: String): TestName = TestName("${indexInScenario + 1}. ${replacedPrefix.capitalized}: $substituted")
+    fun toTestName(substituted: String): TestName = TestName(
+        name = "${indexInScenario + 1}. ${replacedPrefix.capitalized}: $substituted",
+        focus = false,
+        bang = false,
+        prefix = null,
+        suffix = null,
+        defaultAffixes = false
+    )
 
     private val replacedPrefix
         get() = when (indexInGroup) {
@@ -138,3 +154,40 @@ private val String.capitalized: String
         val rest = drop(1).lowercase()
         return first + rest
     }
+
+// this method is internal in kotest from kotest-6.x
+@Suppress("detekt:CyclomaticComplexMethod")
+private fun sourceRef(): SourceRef {
+    val stack = Thread.currentThread().stackTrace
+    if (stack.isEmpty()) return SourceRef.None
+
+    val frame = stack.dropWhile {
+        it.className.startsWith("java.") ||
+            it.className.startsWith("javax.") ||
+            it.className.startsWith("jdk.internal.") ||
+            it.className.startsWith("com.sun") ||
+            it.className.startsWith("kotlin.") ||
+            it.className.startsWith("kotlinx.") ||
+            it.className.startsWith("io.kotest.core.") ||
+            it.className.startsWith("io.kotest.engine.")
+    }.firstOrNull()
+
+    // preference is given to the class name but we must try to find the enclosing spec
+    val kclass = frame?.className?.let { fqn ->
+        runCatching {
+            var temp: KClass<*>? = Class.forName(fqn).kotlin
+            while (temp != null && !temp.isSubclassOf(Spec::class)) {
+                temp = temp.java.enclosingClass?.kotlin
+            }
+            temp
+        }.getOrNull()
+    }
+
+    val lineNumber = frame?.lineNumber?.takeIf { it > 0 }
+
+    return when {
+        kclass == null -> SourceRef.None
+        lineNumber == null -> SourceRef.ClassSource(kclass.java.name)
+        else -> SourceRef.ClassLineSource(kclass.java.name, lineNumber)
+    }
+}

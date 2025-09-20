@@ -21,7 +21,18 @@ open class PepperSpec(tags: List<String>, scenarioBlock: PepperSpecDsl.() -> Uni
         for (scenario in dsl.scenarios) {
             assert(scenario.hasSteps) { "No steps found for scenario ${scenario.key.scenarioTitle}" }
 
-            addContainer(TestName("Scenario: ${scenario.key.title}"), false, null) {
+            addContainer(
+                testName = TestName(
+                    name = "Scenario: ${scenario.key.title}",
+                    focus = false,
+                    bang = false,
+                    prefix = null,
+                    suffix = null,
+                    defaultAffixes = false
+                ),
+                disabled = false,
+                config = null
+            ) {
                 val className = requireNotNull(this@PepperSpec::class.qualifiedName)
                 LowLevelReportListener.ifPresent {
                     startScenario(

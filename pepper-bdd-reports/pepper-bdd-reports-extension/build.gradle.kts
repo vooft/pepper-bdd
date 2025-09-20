@@ -6,5 +6,5 @@ plugins {
 dependencies {
     api(project(":pepper-bdd-reports:pepper-bdd-reports-api"))
     implementation(project(":pepper-bdd-reports:pepper-bdd-reports-builder"))
-    implementation(libs.kotest.framework.api)
+    implementation(libs.kotest.framework.engine)
 }

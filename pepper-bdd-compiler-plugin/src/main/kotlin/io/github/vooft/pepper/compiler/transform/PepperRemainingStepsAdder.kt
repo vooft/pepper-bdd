@@ -16,7 +16,7 @@ import org.jetbrains.kotlin.ir.expressions.IrCall
 import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.types.classOrFail
-import org.jetbrains.kotlin.ir.types.isSubtypeOfClass
+import org.jetbrains.kotlin.ir.util.isSubtypeOfClass
 
 internal class PepperRemainingStepsAdder(
     private val steps: Map<ScenarioIdentifier, List<StepIdentifier>>,

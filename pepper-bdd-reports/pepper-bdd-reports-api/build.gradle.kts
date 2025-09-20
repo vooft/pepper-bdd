@@ -4,7 +4,8 @@ import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 
 plugins {
     kotlin("multiplatform")
-    alias(libs.plugins.kotest.multiplatform)
+    alias(libs.plugins.kotest)
+    alias(libs.plugins.ksp)
     alias(libs.plugins.kotlinx.serialization)
     `pepper-bdd-base`
     `pepper-bdd-publish`
