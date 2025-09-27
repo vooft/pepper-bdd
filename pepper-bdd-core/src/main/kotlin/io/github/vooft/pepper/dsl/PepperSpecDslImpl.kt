@@ -68,8 +68,8 @@ internal class PepperSpecDslImpl : PepperSpecDsl {
         override val scenarioBody: suspend () -> Unit = {
             withContext(PepperRemainingSteps(stepsPerScenario.getValue(key.scenarioTitle).toMutableList())) {
                 runCatching { rawScenarioBody() }
-                    .onFailure { it.printStackTrace() }
                     .onFailure { registerRemainingSteps() }
+                    .onFailure { throw it }
             }
         }
     }
