@@ -26,7 +26,7 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version 
 
 plugin-publish = { id = "com.gradle.plugin-publish", version = "2.0.0" }
 
-buildconfig = { id = "com.github.gmazzo.buildconfig", version = "5.7.0" }
+buildconfig = { id = "com.github.gmazzo.buildconfig", version = "5.7.1" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotest = { id = "io.kotest", version.ref = "kotest" }
 ksp = { id = "com.google.devtools.ksp", version = "2.3.2" }
