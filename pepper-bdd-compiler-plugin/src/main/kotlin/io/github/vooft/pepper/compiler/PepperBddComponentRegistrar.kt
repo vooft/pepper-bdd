@@ -8,8 +8,9 @@ import org.jetbrains.kotlin.config.CompilerConfiguration
 
 class PepperBddComponentRegistrar : CompilerPluginRegistrar() {
 
-    override val supportsK2: Boolean
-        get() = true
+    override val pluginId: String = "io.github.vooft.pepper-bdd-compiler"
+
+    override val supportsK2 = true
 
     override fun ExtensionStorage.registerExtensions(configuration: CompilerConfiguration) {
         if (configuration[KEY_ENABLED] == false) {
