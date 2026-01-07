@@ -4,18 +4,19 @@ import org.jmailen.gradle.kotlinter.tasks.FormatTask
 import org.jmailen.gradle.kotlinter.tasks.LintTask
 
 plugins {
-    id("io.gitlab.arturbosch.detekt")
+    // detekt is not compatible with kotlin-2.3.0, disabling until fixed
+//    id("io.gitlab.arturbosch.detekt")
     id("org.jmailen.kotlinter")
 }
 
 group = "io.github.vooft"
 version = System.getenv("TAG") ?: "1.0-SNAPSHOT"
 
-detekt {
-    buildUponDefaultConfig = true
-    config.from(files("${rootDir.absolutePath}/detekt.yaml"))
-    basePath = rootDir.absolutePath
-}
+//detekt {
+//    buildUponDefaultConfig = true
+//    config.from(files("${rootDir.absolutePath}/detekt.yaml"))
+//    basePath = rootDir.absolutePath
+//}
 
 tasks.withType<Detekt> {
     tasks.getByName("check").dependsOn(this)
