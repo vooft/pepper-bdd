@@ -5,6 +5,7 @@ import io.github.vooft.pepper.dsl.PepperSpecDslImpl
 import io.github.vooft.pepper.reports.builder.LowLevelReportListener
 import io.kotest.core.names.TestName
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.core.spec.style.TestXMethod
 import io.kotest.core.spec.style.scopes.addContainer
 import kotlinx.coroutines.withContext
 
@@ -30,7 +31,7 @@ open class PepperSpec(tags: List<String>, scenarioBlock: PepperSpecDsl.() -> Uni
                     suffix = null,
                     defaultAffixes = false
                 ),
-                disabled = false,
+                xmethod = TestXMethod.NONE,
                 config = null
             ) {
                 val className = requireNotNull(this@PepperSpec::class.qualifiedName)

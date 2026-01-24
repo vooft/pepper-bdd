@@ -6,6 +6,7 @@ import io.kotest.common.KotestInternal
 import io.kotest.core.names.TestName
 import io.kotest.core.source.SourceRef
 import io.kotest.core.spec.Spec
+import io.kotest.core.spec.style.TestXMethod
 import io.kotest.core.test.NestedTest
 import io.kotest.core.test.TestScope
 import io.kotest.core.test.TestType.Test
@@ -37,7 +38,7 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
     currentTestScope().registerTestCase(
         NestedTest(
             name = step.toTestName(substituted),
-            disabled = false,
+            xmethod = TestXMethod.NONE,
             config = null,
             type = Test,
             source = sourceRef()
@@ -91,7 +92,7 @@ internal suspend fun registerRemainingSteps() {
         currentScope.registerTestCase(
             NestedTest(
                 name = remainingStep.toTestName(remainingStep.name),
-                disabled = true,
+                xmethod = TestXMethod.DISABLED,
                 config = null,
                 type = Test,
                 source = sourceRef()

@@ -4,8 +4,8 @@ import com.tschuchort.compiletesting.JvmCompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import io.kotest.core.spec.style.FunSpec
+import io.kotest.matchers.shouldBe
 import org.jetbrains.kotlin.compiler.plugin.CompilerPluginRegistrar
-import org.junit.jupiter.api.Assertions.assertEquals
 import java.io.File
 
 class PepperCompilerTest : FunSpec({
@@ -18,7 +18,7 @@ class PepperCompilerTest : FunSpec({
 
         println(result.generatedFiles.joinToString("\n"))
 
-        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
     }
 
     test("two scenarios") {
@@ -30,7 +30,7 @@ class PepperCompilerTest : FunSpec({
 
         println(result.generatedFiles.joinToString("\n"))
 
-        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
     }
 
     test("scenario with examples") {
@@ -42,7 +42,7 @@ class PepperCompilerTest : FunSpec({
 
         println(result.generatedFiles.joinToString("\n"))
 
-        assertEquals(KotlinCompilation.ExitCode.OK, result.exitCode)
+        result.exitCode shouldBe KotlinCompilation.ExitCode.OK
     }
 })
 
