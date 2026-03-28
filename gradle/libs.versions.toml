@@ -24,7 +24,7 @@ kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version 
 
 [plugins]
 
-plugin-publish = { id = "com.gradle.plugin-publish", version = "2.1.0" }
+plugin-publish = { id = "com.gradle.plugin-publish", version = "2.1.1" }
 
 buildconfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.9" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
