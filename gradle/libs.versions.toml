@@ -29,6 +29,6 @@ plugin-publish = { id = "com.gradle.plugin-publish", version = "2.1.1" }
 buildconfig = { id = "com.github.gmazzo.buildconfig", version = "6.0.9" }
 kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 kotest = { id = "io.kotest", version.ref = "kotest" }
-ksp = { id = "com.google.devtools.ksp", version = "2.3.6" }
+ksp = { id = "com.google.devtools.ksp", version = "2.3.7" }
 
 [bundles]
