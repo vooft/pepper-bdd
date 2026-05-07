@@ -47,7 +47,7 @@ fun IrCall.findScenarioTitle(): String? {
 }
 
 fun IrPluginContext.findPepperSpec() = requireNotNull(
-    referenceClass(
+    finderForBuiltins().findClass(
         ClassId(
             packageFqName = FqName("io.github.vooft.pepper"),
             topLevelName = Name.identifier("PepperSpec")
@@ -56,7 +56,7 @@ fun IrPluginContext.findPepperSpec() = requireNotNull(
 )
 
 fun IrPluginContext.findPepperSpecDsl() = requireNotNull(
-    referenceClass(
+    finderForBuiltins().findClass(
         ClassId(
             packageFqName = FqName("io.github.vooft.pepper.dsl"),
             topLevelName = Name.identifier("PepperSpecDsl")
@@ -65,7 +65,7 @@ fun IrPluginContext.findPepperSpecDsl() = requireNotNull(
 )
 
 fun IrPluginContext.findStepAnnotation() = requireNotNull(
-    referenceClass(
+    finderForBuiltins().findClass(
         ClassId(
             packageFqName = FqName("io.github.vooft.pepper"),
             topLevelName = Name.identifier("Step")
@@ -74,7 +74,7 @@ fun IrPluginContext.findStepAnnotation() = requireNotNull(
 )
 
 fun IrPluginContext.findHelper(name: String) = run {
-    referenceFunctions(
+    finderForBuiltins().findFunctions(
         callableId = CallableId(
             packageName = FqName("io.github.vooft.pepper.helper"),
             callableName = Name.identifier(name)
