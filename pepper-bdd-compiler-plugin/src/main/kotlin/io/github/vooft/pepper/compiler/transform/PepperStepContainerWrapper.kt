@@ -168,7 +168,9 @@ internal class PepperStepContainerWrapper(
 
         val stepArgumentConstructorCall = references.stepArgumentClassSymbol.constructors.single()
 
-        val listOfSymbol = pluginContext.referenceFunctions(CallableId(FqName("kotlin.collections"), Name.identifier("listOf")))
+        val listOfSymbol = pluginContext.finderForBuiltins().findFunctions(
+            CallableId(FqName("kotlin.collections"), Name.identifier("listOf"))
+        )
             .first { it.owner.pepperValueParameters.size == 1 && it.owner.pepperValueParameters.first().isVararg }
         val argumentsMapType = irBuiltIns.mapClass.typeWith(stringType, nullableAnyType)
 

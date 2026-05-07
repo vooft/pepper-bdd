@@ -14,7 +14,7 @@ internal class PepperBddIrGenerationExtension(private val debugLogger: DebugLogg
     override fun generate(moduleFragment: IrModuleFragment, pluginContext: IrPluginContext) {
 //        debugLogger.log("generate() before: ${moduleFragment.dump()}")
 
-        if (pluginContext.referenceClass(ClassId(FqName("io.github.vooft.pepper"), Name.identifier("PepperSpec"))) == null) {
+        if (pluginContext.finderForBuiltins().findClass(ClassId(FqName("io.github.vooft.pepper"), Name.identifier("PepperSpec"))) == null) {
             debugLogger.log("PepperSpec not found")
             return
         }

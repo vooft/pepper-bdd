@@ -7,8 +7,10 @@ import org.jetbrains.kotlin.name.FqName
 import org.jetbrains.kotlin.name.Name
 
 class PepperReferences(pluginContext: IrPluginContext) {
+    private val finder = pluginContext.finderForBuiltins()
+
     val pepperSpecSymbol = requireNotNull(
-        pluginContext.referenceClass(
+        finder.findClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper"),
                 topLevelName = Name.identifier("PepperSpec")
@@ -17,7 +19,7 @@ class PepperReferences(pluginContext: IrPluginContext) {
     )
 
     val pepperSpecDslSymbol = requireNotNull(
-        pluginContext.referenceClass(
+        finder.findClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper.dsl"),
                 topLevelName = Name.identifier("PepperSpecDsl")
@@ -26,7 +28,7 @@ class PepperReferences(pluginContext: IrPluginContext) {
     )
 
     val scenarioDslSymbol = requireNotNull(
-        pluginContext.referenceClass(
+        finder.findClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper.dsl"),
                 topLevelName = Name.identifier("ScenarioDsl")
@@ -35,7 +37,7 @@ class PepperReferences(pluginContext: IrPluginContext) {
     )
 
     val stepAnnotationSymbol = requireNotNull(
-        pluginContext.referenceClass(
+        finder.findClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper"),
                 topLevelName = Name.identifier("Step")
@@ -43,7 +45,7 @@ class PepperReferences(pluginContext: IrPluginContext) {
         )
     )
 
-    val stepContainerSymbol = pluginContext.referenceFunctions(
+    val stepContainerSymbol = finder.findFunctions(
         callableId = CallableId(
             packageName = FqName("io.github.vooft.pepper.helper"),
             callableName = Name.identifier("StepContainer")
@@ -51,7 +53,7 @@ class PepperReferences(pluginContext: IrPluginContext) {
     ).single().owner
 
     val stepArgumentClassSymbol = requireNotNull(
-        pluginContext.referenceClass(
+        finder.findClass(
             ClassId(
                 packageFqName = FqName("io.github.vooft.pepper.helper"),
                 topLevelName = Name.identifier("StepArgument")
@@ -72,7 +74,7 @@ class PepperReferences(pluginContext: IrPluginContext) {
 }
 
 private fun IrPluginContext.findStep(name: String) = requireNotNull(
-    referenceProperties(
+    finderForBuiltins().findProperties(
         callableId = CallableId(
             packageName = FqName("io.github.vooft.pepper.dsl"),
             callableName = Name.identifier(name)
