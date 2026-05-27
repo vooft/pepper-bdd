@@ -11,7 +11,7 @@ gradle-plugin-dokka = { module = "org.jetbrains.dokka:dokka-gradle-plugin", vers
 gradle-plugin-maven-central-publish = { module = "com.vanniktech:gradle-maven-publish-plugin", version = "0.36.0" }
 
 kotest-framework-engine = { module = "io.kotest:kotest-framework-engine", version.ref = "kotest" }
-kotest-runner-jvm = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
+kotest-runner-jvm = { module = "io.kotest:kotest-runner-junit6", version.ref = "kotest" }
 kotest-assertions-json = { module = "io.kotest:kotest-assertions-json", version.ref = "kotest" }
 
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin" }
