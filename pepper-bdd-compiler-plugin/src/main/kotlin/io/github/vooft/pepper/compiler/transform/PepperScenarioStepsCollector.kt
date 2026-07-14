@@ -15,7 +15,7 @@ import org.jetbrains.kotlin.ir.expressions.IrExpression
 import org.jetbrains.kotlin.ir.types.classFqName
 import org.jetbrains.kotlin.ir.util.hasAnnotation
 import org.jetbrains.kotlin.ir.util.isSubtypeOfClass
-import java.util.UUID
+import java.security.MessageDigest
 
 internal class PepperScenarioStepsCollector(private val pluginContext: IrPluginContext, private val debugLogger: DebugLogger) :
     IrElementTransformerVoidWithContext() {
@@ -81,12 +81,18 @@ internal class PepperScenarioStepsCollector(private val pluginContext: IrPluginC
             return
         }
 
+        val stepName = expression.symbol.owner.name.asString()
         steps.add(
             StepIdentifier(
-                id = UUID.randomUUID().toString(),
+                // Deterministic step id, stable across compilations.
+                // Previously every compile and broke Gradle build-cache reuse for downstream tests.
+                // The tuple below is already unique per step within a spec.
+                id = "${className?.name}|${scenarionTitle?.title}|$stepPrefix|$stepName|${steps.size}".sha1(),
                 prefix = stepPrefix,
-                name = expression.symbol.owner.name.asString()
-            ).also { debugLogger.log("Collected step: ${it.name}") }
+                name = stepName
+            ).also {
+                debugLogger.log("Collected step: ${it.name}")
+            }
         )
     }
 
@@ -121,3 +127,5 @@ internal class PepperScenarioStepsCollector(private val pluginContext: IrPluginC
             return ScenarioIdentifier(className, scenarioTitle)
         }
 }
+
+private fun String.sha1() = MessageDigest.getInstance("SHA-1").digest(toByteArray()).joinToString("") { "%02x".format(it) }
