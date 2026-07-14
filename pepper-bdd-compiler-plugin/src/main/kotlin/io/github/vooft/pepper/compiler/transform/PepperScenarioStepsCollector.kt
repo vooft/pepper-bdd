@@ -90,7 +90,9 @@ internal class PepperScenarioStepsCollector(private val pluginContext: IrPluginC
                 id = "${className?.name}|${scenarionTitle?.title}|$stepPrefix|$stepName|${steps.size}".sha1(),
                 prefix = stepPrefix,
                 name = stepName
-            ).also { debugLogger.log("Collected step: ${it.name}") }
+            ).also {
+                debugLogger.log("Collected step: ${it.name}")
+            }
         )
     }
 
