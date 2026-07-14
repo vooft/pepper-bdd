@@ -4,9 +4,9 @@ import io.github.vooft.pepper.dsl.PepperSpecDsl
 import io.github.vooft.pepper.dsl.PepperSpecDslImpl
 import io.github.vooft.pepper.reports.builder.LowLevelReportListener
 import io.kotest.core.names.TestName
+import io.kotest.core.spec.TestDefinitionBuilder
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.core.spec.style.TestXMethod
-import io.kotest.core.spec.style.scopes.addContainer
+import io.kotest.core.test.TestType
 import kotlinx.coroutines.withContext
 
 open class PepperSpec(tags: List<String>, scenarioBlock: PepperSpecDsl.() -> Unit) : FunSpec() {
@@ -22,36 +22,37 @@ open class PepperSpec(tags: List<String>, scenarioBlock: PepperSpecDsl.() -> Uni
         for (scenario in dsl.scenarios) {
             assert(scenario.hasSteps) { "No steps found for scenario ${scenario.key.scenarioTitle}" }
 
-            addContainer(
-                testName = TestName(
-                    name = "Scenario: ${scenario.key.title}",
-                    focus = false,
-                    bang = false,
-                    prefix = null,
-                    suffix = null,
-                    defaultAffixes = false
-                ),
-                xmethod = TestXMethod.NONE,
-                config = null
-            ) {
-                val className = requireNotNull(this@PepperSpec::class.qualifiedName)
-                LowLevelReportListener.ifPresent {
-                    startScenario(
-                        className = className,
-                        name = scenario.key.title,
-                        tags =
-                        tags + scenario.tags
-                    )
-                }
-
-                try {
-                    withContext(CurrentTestScope(this)) {
-                        scenario.scenarioBody()
+            add(
+                TestDefinitionBuilder.builder(
+                    name = TestName(
+                        name = "Scenario: ${scenario.key.title}",
+                        focus = false,
+                        bang = false,
+                        prefix = null,
+                        suffix = null,
+                        defaultAffixes = false
+                    ),
+                    type = TestType.Container
+                ).build {
+                    val className = requireNotNull(this@PepperSpec::class.qualifiedName)
+                    LowLevelReportListener.ifPresent {
+                        startScenario(
+                            className = className,
+                            name = scenario.key.title,
+                            tags =
+                            tags + scenario.tags
+                        )
                     }
-                } finally {
-                    LowLevelReportListener.ifPresent { finishScenario() }
+
+                    try {
+                        withContext(CurrentTestScope(this)) {
+                            scenario.scenarioBody()
+                        }
+                    } finally {
+                        LowLevelReportListener.ifPresent { finishScenario() }
+                    }
                 }
-            }
+            )
         }
     }
 }

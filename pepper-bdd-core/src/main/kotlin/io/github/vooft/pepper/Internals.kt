@@ -6,8 +6,8 @@ import io.kotest.common.KotestInternal
 import io.kotest.core.names.TestName
 import io.kotest.core.source.SourceRef
 import io.kotest.core.spec.Spec
+import io.kotest.core.spec.TestDefinition
 import io.kotest.core.spec.style.TestXMethod
-import io.kotest.core.test.NestedTest
 import io.kotest.core.test.TestScope
 import io.kotest.core.test.TestType.Test
 import kotlinx.coroutines.CoroutineName
@@ -35,27 +35,29 @@ internal suspend fun <R> testContainer(id: String, testBlock: suspend () -> R, a
         arguments.forEach { addArgument(it.name, it.type, it.value.toString()) }
     }
 
-    currentTestScope().registerTestCase(
-        NestedTest(
+    currentTestScope().registerTest(
+        TestDefinition(
             name = step.toTestName(substituted),
             xmethod = TestXMethod.NONE,
             config = null,
             type = Test,
-            source = sourceRef()
-        ) {
-            withContext(CoroutineName("step: ${step.name}")) {
-                result = try {
-                    val successResult = testBlock()
-                    LowLevelReportListener.ifPresent { finishStepWithSuccess(successResult) }
-                    StepResult.Success(successResult)
-                } catch (t: Throwable) {
-                    LowLevelReportListener.ifPresent { finishStepWithError(t) }
-                    StepResult.Error(t)
-                }
+            source = sourceRef(),
+            factoryId = null,
+            test = {
+                withContext(CoroutineName("step: ${step.name}")) {
+                    result = try {
+                        val successResult = testBlock()
+                        LowLevelReportListener.ifPresent { finishStepWithSuccess(successResult) }
+                        StepResult.Success(successResult)
+                    } catch (t: Throwable) {
+                        LowLevelReportListener.ifPresent { finishStepWithError(t) }
+                        StepResult.Error(t)
+                    }
 
-                result.value
+                    result.value
+                }
             }
-        }
+        )
     )
 
     return result.value
@@ -89,14 +91,16 @@ internal suspend fun registerRemainingSteps() {
             skipStep(index = remainingStep.indexInScenario, prefix = remainingStep.prefix, name = remainingStep.name)
         }
 
-        currentScope.registerTestCase(
-            NestedTest(
+        currentScope.registerTest(
+            TestDefinition(
                 name = remainingStep.toTestName(remainingStep.name),
                 xmethod = TestXMethod.DISABLED,
                 config = null,
                 type = Test,
-                source = sourceRef()
-            ) { }
+                source = sourceRef(),
+                factoryId = null,
+                test = { }
+            )
         )
     }
 }
