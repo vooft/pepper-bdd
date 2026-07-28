@@ -84,7 +84,7 @@ fun IrPluginContext.findHelper(name: String) = run {
 
 fun IrBuilderWithScope.irLambda(
     returnType: IrType,
-    lambdaType: IrType = context.irBuiltIns.functionN(0).typeWith(returnType),
+    lambdaType: IrType = context.irBuiltIns.suspendFunctionN(0).typeWith(returnType),
     lambdaParent: IrDeclarationParent,
     startOffset: Int = this.startOffset,
     endOffset: Int = this.endOffset,
@@ -98,7 +98,6 @@ fun IrBuilderWithScope.irLambda(
         visibility = DescriptorVisibilities.LOCAL
         origin = IrDeclarationOrigin.LOCAL_FUNCTION_FOR_LAMBDA
         isSuspend = true
-        isInline = true
     }.apply {
         val bodyBuilder = DeclarationIrBuilder(context, symbol, startOffset, endOffset)
         body = bodyBuilder.irBlockBody {
