@@ -15,7 +15,7 @@ class FlakyScenariosSpec : PepperSpec(tags = listOf("Flaky"), {
         val secondRandom = `generate random string`("second")
 
         When
-        val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        val compareResult = `two strings are compared`(firstRandom.value, secondRandom.value)
 
         Then
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
@@ -27,7 +27,7 @@ class FlakyScenariosSpec : PepperSpec(tags = listOf("Flaky"), {
         val secondRandom = `generate random string`("second")
 
         When
-        val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        val compareResult = `two strings are compared`(firstRandom.value, secondRandom.value)
 
         Then
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
@@ -39,7 +39,7 @@ class FlakyScenariosSpec : PepperSpec(tags = listOf("Flaky"), {
         val secondRandom = `generate random string`("second")
 
         When
-        val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        val compareResult = `two strings are compared`(firstRandom.value, secondRandom.value)
 
         Then
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
@@ -51,7 +51,7 @@ class FlakyScenariosSpec : PepperSpec(tags = listOf("Flaky"), {
         val secondRandom = `generate random string`("second")
 
         When
-        val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        val compareResult = `two strings are compared`(firstRandom.value, secondRandom.value)
 
         Then
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
@@ -63,7 +63,7 @@ class FlakyScenariosSpec : PepperSpec(tags = listOf("Flaky"), {
         val secondRandom = `generate random string`("second")
 
         When
-        val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        val compareResult = `two strings are compared`(firstRandom.value, secondRandom.value)
 
         Then
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
@@ -75,7 +75,7 @@ class FlakyScenariosSpec : PepperSpec(tags = listOf("Flaky"), {
         val secondRandom = `generate random string`("second")
 
         When
-        val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        val compareResult = `two strings are compared`(firstRandom.value, secondRandom.value)
 
         Then
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
@@ -87,7 +87,7 @@ class FlakyScenariosSpec : PepperSpec(tags = listOf("Flaky"), {
         val secondRandom = `generate random string`("second")
 
         When
-        val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        val compareResult = `two strings are compared`(firstRandom.value, secondRandom.value)
 
         Then
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
@@ -99,7 +99,7 @@ class FlakyScenariosSpec : PepperSpec(tags = listOf("Flaky"), {
         val secondRandom = `generate random string`("second")
 
         When
-        val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        val compareResult = `two strings are compared`(firstRandom.value, secondRandom.value)
 
         Then
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
@@ -111,7 +111,7 @@ class FlakyScenariosSpec : PepperSpec(tags = listOf("Flaky"), {
         val secondRandom = `generate random string`("second")
 
         When
-        val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        val compareResult = `two strings are compared`(firstRandom.value, secondRandom.value)
 
         Then
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())
@@ -123,7 +123,7 @@ class FlakyScenariosSpec : PepperSpec(tags = listOf("Flaky"), {
         val secondRandom = `generate random string`("second")
 
         When
-        val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        val compareResult = `two strings are compared`(firstRandom.value, secondRandom.value)
 
         Then
         `compare result is '{expected}'`(compareResult, Random.nextBoolean())

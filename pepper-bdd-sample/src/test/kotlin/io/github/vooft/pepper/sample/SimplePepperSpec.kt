@@ -12,7 +12,7 @@ class SimplePepperSpec : PepperSpec({
         val secondRandom = `generate random string`("second")
 
         When
-        val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        val compareResult = `two strings are compared`(firstRandom.value, secondRandom.value)
 
         Then
         `deep nested compare result is '{expected}'`(Holder(Holder(compareResult)), false)

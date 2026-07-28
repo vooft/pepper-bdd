@@ -8,18 +8,21 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.ForkJoinPool
 import kotlin.random.Random
 
+@JvmInline
+value class StringWrapper(val value: String)
+
 @Step
-suspend fun `generate random string`(prefix: String): String {
+suspend fun `generate random string`(prefix: String, suffix: String = ""): StringWrapper {
     val random = Random.nextInt()
     delay(1)
     printlnWithThread("generating random number, random=$random")
     delay(1)
-    return "$prefix $random"
+    return StringWrapper("$prefix $random $suffix")
 }
 
 @Step
 suspend fun `generate two random strings`(prefix: String): Pair<String, String> =
-    `generate random string`(prefix) to `generate random string`(prefix)
+    `generate random string`(prefix).value to `generate random string`(prefix).value
 
 data class CompareResult<T>(val first: T, val second: T, val result: Boolean)
 

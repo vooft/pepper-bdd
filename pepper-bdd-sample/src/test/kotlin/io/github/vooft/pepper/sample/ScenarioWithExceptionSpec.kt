@@ -13,7 +13,7 @@ class ScenarioWithExceptionSpec : PepperSpec({
         val firstRandom = `generate random string`("first")
         val secondRandom = `generate random string`("second")
         When
-        val compareResult = `two strings are compared`(firstRandom, secondRandom)
+        val compareResult = `two strings are compared`(firstRandom.value, secondRandom.value)
         error("YOU SHALL NOT PASS!!")
         Then
         `deep nested compare result is '{expected}'`(Holder(Holder(compareResult)), false)
