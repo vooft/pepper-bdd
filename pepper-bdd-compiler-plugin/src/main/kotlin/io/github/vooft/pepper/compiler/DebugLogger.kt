@@ -1,10 +1,10 @@
 package io.github.vooft.pepper.compiler
 
-import org.jetbrains.kotlin.cli.common.messages.CompilerMessageSeverity
-import org.jetbrains.kotlin.cli.common.messages.MessageCollector
+import org.jetbrains.kotlin.cli.reportLog
+import org.jetbrains.kotlin.config.CompilerConfiguration
 
-internal data class DebugLogger(val debug: Boolean, val messageCollector: MessageCollector) {
+internal data class DebugLogger(val debug: Boolean, val configuration: CompilerConfiguration) {
     fun log(message: String) {
-        messageCollector.report(CompilerMessageSeverity.LOGGING, message)
+        configuration.reportLog(message)
     }
 }

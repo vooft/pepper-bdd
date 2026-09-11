@@ -34,5 +34,4 @@ class PepperBddGradleSubPlugin : KotlinCompilerPluginSupportPlugin {
         artifactId = "pepper-bdd-compiler-plugin",
         version = BuildConfig.VERSION,
     )
-
 }
